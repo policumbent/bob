@@ -1,0 +1,26 @@
+version: '3'
+
+services:
+  mqtt-broker:
+    image: eclipse-mosquitto:latest
+    container_name: mqtt-broker
+    environment:
+      - TZ=Europe/Rome
+    ports:
+      - 1883:1883
+    restart: unless-stopped
+  gps:
+    build: ./gps
+    container_name: gps
+    restart: unless-stopped
+    devices:
+      - "/dev/ttyAMA1:/dev/ttyAMA1"
+    networks:
+      - poli
+    privileged: true
+    depends_on:
+      - "mqtt-broker"
+
+networks:
+  poli:
+    external: false
