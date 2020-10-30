@@ -37,7 +37,8 @@ class Mqtt:
         # reconnect then subscriptions will be renewed.
         client.subscribe('new_settings/{}'.format(self.name))
         self.subscribe(client)
-        self.publish(json.dumps({"connected": True}))
+        status_topic = 'state/{}'.format(self.name)
+        self.mqtt_client.publish(status_topic, json.dumps({"connected": True}), retain=True)
 
     def on_message(self, client, userdata, msg: mqtt.MQTTMessage) -> None:
         """The callback for when a PUBLISH message is received."""

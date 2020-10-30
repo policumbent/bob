@@ -17,7 +17,6 @@ services:
       - "/dev/ttyAMA1:/dev/ttyAMA1"
     networks:
       - poli
-    privileged: true
     depends_on:
       - "mqtt-broker"
 
