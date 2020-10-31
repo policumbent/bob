@@ -1,4 +1,4 @@
-from ...common_files.settings import CommonSettings
+from .common_files.common_settings import CommonSettings
 
 
 class Settings(CommonSettings):
