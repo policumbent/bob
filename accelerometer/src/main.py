@@ -1,9 +1,9 @@
-from src.accelerometer import Accelerometer
+from .accelerometer import Accelerometer
 import time
 import json
 
 from .settings import Settings
-from ...common_files.mqtt import MqttSensor
+from .mqtt import MqttSensor
 
 
 def signal(s):
