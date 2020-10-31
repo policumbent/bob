@@ -19,9 +19,9 @@ class Message:
         self.time_RIGA2 = 0
 
         self.priority = PriorityQueue()
-
-        self.__worker = Thread(target=self.__run, daemon=True)
-        self.__worker.start()
+        self.__run()
+        # self.__worker = Thread(target=self.__run, daemon=True)
+        # self.__worker.start()
 
     def __len__(self):
         return len(self.encode())
@@ -73,11 +73,11 @@ class Message:
         self.__settings = s
 
     # DEFINIZIONI DI PRIORITA'
-    # 1 -> Massima -> Solo per eventi di supergravità (Per il momento la lasciamo inutilizzata)
-    # 2 -> Molto alta -> Messaggi da remoto di alta priorità
+    # 5 -> Massima -> Solo per eventi di supergravità (Per il momento la lasciamo inutilizzata)
+    # 4 -> Molto alta -> Messaggi da remoto di alta priorità
     # 3 -> Alta -> Messaggi di sistema che richiedono un intervento urgente
-    # 4 -> Media -> Messaggi di sistema che non richiedono l'intervento, ma sono utili da sapere
-    # 5 -> Bassa -> Messaggi di bassa priorità es. Host non connesso -> ELIMINARLI ALLE ALTE VELOCITA'
+    # 2 -> Media -> Messaggi di sistema che non richiedono l'intervento, ma sono utili da sapere
+    # 1 -> Bassa -> Messaggi di bassa priorità es. Host non connesso -> ELIMINARLI ALLE ALTE VELOCITA'
     def set(self, mex: str, priority: int = 4, time_m: int = 5, timeout: int = -1):
         item = MexItem(mex, time_m, priority, timeout)
         # if riga == 1:
@@ -97,11 +97,11 @@ class Message:
         else:
             return self.RIGA2, self.time_RIGA2
 
-    def stop(self):
-        if self._running:
-            print("Stoping mex refresh")
-            self._running = False
-            self.__worker.join()
+    # def stop(self):
+    #     if self._running:
+    #         print("Stoping mex refresh")
+    #         self._running = False
+    #         self.__worker.join()
 
     def to_str(self):
         mex1 = "Mex1: " + self.RIGA1 + \
