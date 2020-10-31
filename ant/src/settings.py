@@ -23,6 +23,13 @@ class Settings(CommonSettings):
             else False
 
     @property
+    def hour_record(self) -> bool:
+        return self._values['hour_record'] \
+            if self._values.__contains__('hour_record') \
+               and isinstance(self._values['hour_record'], bool) \
+            else False
+
+    @property
     def run_length(self) -> int:
         return self._values['run_length'] \
             if self._values.__contains__('run_length') \
@@ -63,3 +70,10 @@ class Settings(CommonSettings):
             if self._values.__contains__('circumference') \
                and isinstance(self._values['circumference'], int) \
             else 1450
+
+    @property
+    def average_power_time(self) -> int:
+        return self._values['average_power_time'] \
+            if self._values.__contains__('average_power_time') \
+               and isinstance(self._values['average_power_time'], int) \
+            else 3

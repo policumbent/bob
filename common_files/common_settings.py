@@ -25,16 +25,3 @@ class CommonSettings:
         except Exception as e:
             print(e)
             self._values = {}
-
-
-class MexPriority:
-    very_low = 1
-    low = 2
-    medium = 3
-    high = 4
-    very_high = 5
-
-
-class MexType:
-    default = 0
-    trap = 1

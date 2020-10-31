@@ -36,7 +36,7 @@
 - subscribe
   - `sensors/{name}` => I consumatori effettuano la subscription ad una lista di sensori
 
-### Comunicazione (MqttCommunication => Estende MqttConsumer)
+### Comunicazione (MqttRemote => Estende MqttConsumer)
 
 - publish
   - `signals` => Manda dei segnali che saranno letti da tutti i sensori `{"action": "reset"}`

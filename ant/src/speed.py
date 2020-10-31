@@ -24,7 +24,7 @@ class Speed(Sensor):
     def export(self):
         return {
             'speed': self.value,
-            'distance': self.distance,
+            'distance': self.distance
         }
 
     def __init__(self, send_message, settings: Settings, timer: Timer):
@@ -72,7 +72,7 @@ class Speed(Sensor):
                     self.settings.trap_length - self.distance
                 if self.distance > self.settings.run_length and self.distance_trap >= 0:
                     self.average_array.append(self._speed)
-                self._send_message(self.trap_info, 3)
+                # self._send_message(self.trap_info, 3)
             time.sleep(0.1)
 
     @property
@@ -171,7 +171,7 @@ class Speed(Sensor):
     @property
     def trap_info(self):
         # per il record dell'ora
-        if self.settings.bike == "0":
+        if self.settings.hour_record:
             if self._timer.time == 0:
                 return ""
             return "V_med: " + str(3.6*self.distance/self._timer.time)
