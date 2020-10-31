@@ -2,6 +2,8 @@
 
 ## Componenti
 
+*Work in progress*
+
 - sensori
   - ant
   - accelerometer
@@ -11,7 +13,6 @@
   - video
 - comunicazione
   - communication => collegamento con il server http
-*Work in progress*
 
 ## Protocollo
 
