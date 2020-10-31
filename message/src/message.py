@@ -4,11 +4,6 @@ import time
 from queue import PriorityQueue
 
 
-class MexType:
-    default = 0
-    trap = 1
-
-
 class Message:
     def __init__(self, settings):
         self.trap_info = ""
@@ -179,10 +174,3 @@ class MexItem:
             self.timeout -= 1
         return
 
-
-class MexPriority:
-    verylow = 5
-    low = 4
-    medium = 3
-    high = 2
-    veryhigh = 1

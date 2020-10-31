@@ -5,7 +5,7 @@ import json
 from .heartrate import HeartRate
 from .powermeter import Powermeter
 from .settings import Settings
-from .mqtt import MqttSensor
+from ...common_files.mqtt import MqttSensor
 from .speed import Speed
 from .timer import Timer
 

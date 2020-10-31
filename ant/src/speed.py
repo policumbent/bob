@@ -4,7 +4,7 @@ import time
 from collections import deque
 from threading import Thread
 
-from .sensor import Sensor
+from common_files.sensor import Sensor
 
 from .timer import Timer
 from .ant.easy.channel import Channel

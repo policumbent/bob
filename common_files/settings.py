@@ -1,13 +1,13 @@
 import json
 
 
-class Settings:
+class CommonSettings:
     def __init__(self, values):
-        assert isinstance(values, dict) or isinstance(values, Settings)
+        assert isinstance(values, dict) or isinstance(values, CommonSettings)
 
         if isinstance(values, dict):
             self._values = values
-        elif isinstance(values, Settings):
+        elif isinstance(values, CommonSettings):
             self._values = values.values
 
     @property
@@ -25,13 +25,6 @@ class Settings:
         except Exception as e:
             print(e)
             self._values = {}
-
-    @property
-    def accelerometer_samples(self) -> int:
-        return self._values['accelerometer_samples'] \
-            if self._values.__contains__('accelerometer_samples') \
-               and isinstance(self._values['accelerometer_samples'], int) \
-            else 1000
 
 
 class MexPriority:

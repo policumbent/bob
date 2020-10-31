@@ -1,8 +1,8 @@
-from src.gpsinterface import GpsInterface
+from .gpsinterface import GpsInterface
 import time
 import json
-from src.settings import Settings
-from src.mqtt import MqttSensor
+from .settings import Settings
+from ...common_files.mqtt import MqttSensor
 
 
 def signal(s):

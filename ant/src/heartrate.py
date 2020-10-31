@@ -1,7 +1,7 @@
 from .ant.easy.channel import Channel
 import time
 
-from .sensor import Sensor
+from common_files.sensor import Sensor
 from .settings import Settings
 
 

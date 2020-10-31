@@ -19,6 +19,16 @@ services:
       - poli
     depends_on:
       - "mqtt-broker"
+  ant:
+    build: ./ant
+    container_name: ant
+    restart: unless-stopped
+    devices:
+      - "/dev/ttyAMA1:/dev/ttyAMA1"
+    networks:
+      - poli
+    depends_on:
+      - "mqtt-broker"
 
 networks:
   poli:

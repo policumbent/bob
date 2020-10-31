@@ -1,7 +1,7 @@
 import time
 import json
 from .settings import Settings
-from .mqtt import MqttRemote
+from ...common_files.mqtt import MqttRemote
 from .httpService import HttpService
 
 data = dict()
@@ -25,8 +25,10 @@ def flat_map(d: dict):
 def start():
     print('Starting Communication')
     settings = Settings({})
-    service = HttpService(settings)
+    settings.load()
     mqtt = MqttRemote('192.168.1.20', 1883, 'http_service', ['ant', 'gps'], new_settings_handler, message_handler)
+    mqtt.publish_settings(settings)
+    service = HttpService(settings)
     while True:
         print(flat_map(data))
         service.add_bike_data(data)

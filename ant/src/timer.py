@@ -4,7 +4,7 @@ import time as tm
 # TODO: cambiare logica per non far modificare i settings
 # TODO: sostituire il dizionario settings con lo state
 # TODO: non funziona
-from .sensor import Sensor
+from common_files.sensor import Sensor
 from .settings import Settings
 
 

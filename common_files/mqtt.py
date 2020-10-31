@@ -4,6 +4,8 @@ import paho.mqtt.client as mqtt
 import json
 import abc
 
+from communication.src.settings import Settings
+
 
 class Mqtt:
     def __init__(self,
@@ -57,7 +59,7 @@ class Mqtt:
         pass
 
     """ Invio i settings del sensore/consumer """
-    def publish_settings(self, settings: str) -> None:
+    def publish_settings(self, settings: Settings) -> None:
         status_topic = 'settings/{}'.format(self.name)
         self.mqtt_client.publish(status_topic, settings, retain=True)
 
@@ -88,6 +90,11 @@ class MqttSensor(Mqtt):
     """ Invio il dato del sensore """
     def publish(self, message: str) -> None:
         status_topic = 'sensors/{}'.format(self.name)
+        self.mqtt_client.publish(status_topic, message, retain=False)
+
+    """ Invio il messaggio del sensore """
+    def publish_message(self, message: str) -> None:
+        status_topic = 'messages/{}'.format(self.name)
         self.mqtt_client.publish(status_topic, message, retain=False)
 
 

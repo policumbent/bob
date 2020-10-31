@@ -1,5 +1,5 @@
 import abc
-from .settings import Settings
+from ant.src.settings import Settings
 
 
 class Sensor:
