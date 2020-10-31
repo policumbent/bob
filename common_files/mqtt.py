@@ -4,7 +4,7 @@ import paho.mqtt.client as mqtt
 import json
 import abc
 
-from communication.src.settings import Settings
+from ..common_files.settings import Settings
 
 
 class Mqtt:
