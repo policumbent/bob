@@ -23,8 +23,9 @@ services:
     build: ./ant
     container_name: ant
     restart: unless-stopped
+    privileged: true
     devices:
-      - "/dev/ttyAMA1:/dev/ttyAMA1"
+      - "/dev/:/dev/"
     networks:
       - poli
     depends_on:
@@ -34,6 +35,16 @@ services:
     build: ./messages
     container_name: messages
     restart: unless-stopped
+    networks:
+      - poli
+    depends_on:
+      - "mqtt-broker"
+
+  manager:
+    build: ./manager
+    container_name: manager
+    restart: unless-stopped
+    privileged: true
     networks:
       - poli
     depends_on:

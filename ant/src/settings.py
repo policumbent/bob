@@ -4,11 +4,6 @@ from .common_settings import CommonSettings
 
 class Settings(CommonSettings):
     @property
-    def vel_power_target_csv(self) -> str:
-        value = self._values['vel_power_target_csv']
-        return value if value is not None and isinstance(value, str) else 'test_Vittoria.csv'
-
-    @property
     def autopause(self) -> bool:
         return self._values['autopause'] \
             if self._values.__contains__('autopause') \

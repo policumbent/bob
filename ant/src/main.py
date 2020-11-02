@@ -12,7 +12,6 @@ from .speed import Speed
 from .timer import Timer
 
 settings = Settings({
-    'vel_power_target_csv': 'test_Vittoria.csv',
     'hour_record': False,
     'run_length': 8046,
     'trap_length': 200,

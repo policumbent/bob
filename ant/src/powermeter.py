@@ -6,7 +6,7 @@ from threading import Thread
 from collections import deque
 
 from .ant.easy.channel import Channel
-from common_files.sensor import Sensor
+from .sensor import Sensor
 from .message import Message, MexType, MexPriority
 
 

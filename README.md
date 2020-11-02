@@ -61,3 +61,8 @@ Per tutti manca la gestione delle impostazioni
   - `messages` => Pubblica un json con i messaggi da mostrare sulle due righe `{"line_1": "Messaggio riga 1", "line_2": "Messaggio riga 2"}`
 - subscribe
   - `messages` => Riceve gli aggiornamenti dai vari sensori
+
+## TODO
+
+- [ ] implementare componenti mancanti
+- [ ] gestione settings

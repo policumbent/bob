@@ -4,7 +4,7 @@ from .message import Message, MexType, MexPriority
 from collections import deque
 from threading import Thread
 
-from common_files.sensor import Sensor
+from .sensor import Sensor
 
 from .timer import Timer
 from .ant.easy.channel import Channel
