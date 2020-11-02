@@ -4,6 +4,7 @@ import json
 import abc
 from .common_settings import CommonSettings
 from .message import Message
+from .alert import Alert
 
 
 class Mqtt:
@@ -75,6 +76,11 @@ class Mqtt:
     """ > Un sensore pubblica un json con il messaggio che vuole mandare """
     def publish_message(self, message: Message) -> None:
         status_topic = 'messages/{}'.format(self.name)
+        self.mqtt_client.publish(status_topic, json.dumps(message.values), retain=True)
+
+    """ > Un sensore pubblica un json con l'alert che vuole mandare """
+    def publish_alert(self, message: Alert) -> None:
+        status_topic = 'alerts/{}'.format(self.name)
         self.mqtt_client.publish(status_topic, json.dumps(message.values), retain=True)
 
     """ Gestisco i risultati delle subscribe"""

@@ -23,12 +23,10 @@ def check_json(json_message: dict):
 
 
 def message_handler(topic, message):
-    if topic == 'connected':
-        pass
     if topic == 'messages':
         return
     json_message = json.loads(message)
-    print(topic, '-', json_message)
+    # print(topic, '-', json_message)
     if not check_json(json_message):
         return
     m = Message(
@@ -58,10 +56,9 @@ def start():
 
     settings.load()
     mqtt = MqttMessage('192.168.1.20', 1883, 'messages', settings, message_handler, new_settings_handler)
-    mqtt.publish_settings(settings)
     while True:
         data = messages.get_values()
-        print(data)
+        # print(data)
         mqtt.publish(data)
         time.sleep(1)
 

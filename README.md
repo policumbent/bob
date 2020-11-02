@@ -22,6 +22,7 @@
   - `states/{name}` => Il sensore pubblica un json `{"connected": True}`quando si connette
   - `settings/{name}` => Un sensore pubblica un json con le sue impostazioni
   - `messages/{name}` => Un sensore pubblica un json con il messaggio che vuole mandare `{"text": "Ciao", "priority": 4, "time": 10, "type": 0}`
+  - `alerts/{name}` => Un sensore pubblica un json con il messaggio che vuole mandare `{"text": "Ciao", "priority": 4}`
 - subscribe
   - `new_settings/{name}` => Un sensore effettua la subscribe sulle nuove impostazioni e se arriva un messaggio aggiorna le proprie
   - `signals` =>  Un sensore effettua la subscribe sui segnali, se arriva un segnale il sensore compie la relativa azione `{"action": "reset"}`
@@ -42,7 +43,8 @@
   - `signals` => Manda dei segnali che saranno letti da tutti i sensori `{"action": "reset"}`
   - `new_settings/{name}` => Manda le impostazioni ad ogni sensores
 - subscribe
-  - settings
+  - `settings`
+  - `alerts`
 
 ### Messaggi (MqttMessages => Estende Mqtt)
 

@@ -31,8 +31,8 @@ class Message:
             'text': self.text,
             'message_priority': self.message_priority,
             'message_type': self.message_type,
-            'time': self.message_time,
-            'timeout': self.message_timeout
+            'message_time': self.message_time,
+            'message_timeout': self.message_timeout
         }
 
     def __cmp__(self, other):

@@ -7,7 +7,7 @@ from collections import deque
 
 from .ant.easy.channel import Channel
 from common_files.sensor import Sensor
-
+from .message import Message, MexType, MexPriority
 
 
 # CHANNEL_PERIOD_VAL = 32768/MESSAGE_RATE(HZ)
@@ -182,7 +182,8 @@ class Powermeter(Sensor):
                 # non avrò dati aggiornati a schermo per la calibrazione, bisogna inventarsi qualcosa
                 # self.mex.set("Calibrazione tra " +
                 #              str(self.calibrazione) + "pacchetti", 3, 1)
-                self.send_message("NON TOCCARE - " + str(self._calibration_value), 3, 5, 1)
+                self.send_message(Message("NON TOCCARE - " + str(self._calibration_value),
+                                          MexPriority.medium, MexType.default, 1, 1))
                 self.calibration_count -= 1
                 return
 
@@ -190,10 +191,11 @@ class Powermeter(Sensor):
                 # todo: verificare che lo shift riporti un risultato giusto pure qui
                 self._calibration_value = (data[6] << 8) + data[7]
                 # print("CALIBRAZIONE ", self._calibration_value)
-                self.send_message("Calibrato a " + str(self._calibration_value), 4)
-#                state.update("calibration_value": offset)
-#                 Settings.save()
-#                 Settings.settings_request = True
+                self.send_message(Message("Calibrato a " + str(self._calibration_value),
+                                          MexPriority.medium, MexType.default, 5, 10))
+                #                state.update("calibration_value": offset)
+                #                 Settings.save()
+                #                 Settings.settings_request = True
                 self.calibration_count -= 1
                 return
 

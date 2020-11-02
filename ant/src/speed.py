@@ -1,6 +1,6 @@
 import threading
 import time
-
+from .message import Message, MexType, MexPriority
 from collections import deque
 from threading import Thread
 
@@ -37,6 +37,7 @@ class Speed(Sensor):
 
         self.count = 0
         self.count2 = 0
+        self.trap_count = 0
         self.lastTime = -1
         self.lastRevolutions = -1
         self.lastRxTime = time.time()
@@ -72,7 +73,9 @@ class Speed(Sensor):
                     self.settings.trap_length - self.distance
                 if self.distance > self.settings.run_length and self.distance_trap >= 0:
                     self.average_array.append(self._speed)
-                # self._send_message(self.trap_info, 3)
+                if self.trap_count == 0:
+                    self._send_message(Message(self.trap_info, MexPriority.medium, MexType.trap, 1, 1))
+                self.trap_count = (self.trap_count + 1) % 10
             time.sleep(0.1)
 
     @property

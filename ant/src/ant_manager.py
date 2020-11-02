@@ -1,5 +1,5 @@
 from threading import Thread
-
+import sys
 from .ant.easy.channel import Channel
 from .ant.easy.node import Node
 from .heartrate import HeartRate
@@ -18,8 +18,7 @@ class Ant:
         self._powermeter = powermeter
 
         self.node = None
-        self._worker_thread = Thread(target=self.setup, daemon=False)
-        self._worker_thread.start()
+        self.setup()
 
     def __del__(self):
         self.stop()
@@ -28,14 +27,7 @@ class Ant:
         # TODO: Aggiustare il try-except
         try:
             self.node = Node()
-        # TODO: Procurare eccezione
-        except Exception as e:
-            print(e)
-            self.send_mex("ANT NON RILEVATO", 4)
-            print("ANT NON RILEVATO")
-            return
-        # TODO: Aggiustare il try-finally
-        try:
+
             self.node.set_network_key(0x00, NETWORK_KEY)
 
             # CANALE POTENZA
@@ -62,8 +54,7 @@ class Ant:
             print(e)
             self.send_mex("ANT NON AVVIATO", 4)
             print("ANT NON AVVIATO")
-        finally:
-            self.node.stop()
+            sys.exit(-1)
 
     def restart(self):
         if self.node is not None:

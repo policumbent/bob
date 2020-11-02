@@ -80,7 +80,7 @@ class Messages:
     def set(self, item: Message):
         if item.message_type == MexType.default:
             self.priority.put(item)
-        elif item.message_type == MexType.trap:
+        if item.message_type == MexType.trap:
             self.set_trap_info(item)
 
     def get(self, riga=1):
