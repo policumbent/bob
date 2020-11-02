@@ -30,6 +30,15 @@ services:
     depends_on:
       - "mqtt-broker"
 
+  messages:
+    build: ./messages
+    container_name: messages
+    restart: unless-stopped
+    networks:
+      - poli
+    depends_on:
+      - "mqtt-broker"
+
 networks:
   poli:
     external: false

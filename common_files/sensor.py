@@ -1,5 +1,5 @@
 import abc
-from ant.src.settings import Settings
+from .common_settings import CommonSettings
 
 
 class Sensor:
@@ -9,7 +9,7 @@ class Sensor:
         pass
 
     @abc.abstractmethod
-    def update_settings(self, settings: Settings):
+    def update_settings(self, settings: CommonSettings):
         pass
 
     @abc.abstractmethod
