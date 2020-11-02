@@ -12,12 +12,18 @@ class MexType:
 
 
 class Message:
-    def __init__(self, text: str, message_priority: MexPriority, message_type: MexType, time: int,  timeout: int):
+    def __init__(
+            self,
+            text: str,
+            message_priority: int,
+            message_type: int,
+            message_time: int,
+            message_timeout: int):
         self.text = text
         self.message_priority = message_priority
         self.message_type = message_type
-        self.time = time
-        self.timeout = timeout
+        self.message_time = message_time
+        self.message_timeout = message_timeout
 
     @property
     def values(self):
@@ -25,6 +31,31 @@ class Message:
             'text': self.text,
             'message_priority': self.message_priority,
             'message_type': self.message_type,
-            'time': self.time,
-            'timeout': self.timeout
+            'time': self.message_time,
+            'timeout': self.message_timeout
         }
+
+    def __cmp__(self, other):
+        return self.message_priority - other.message_priority
+
+    def __lt__(self, other):
+        return self.get_priority() < other.get_priority()
+
+    def reduce_time(self):
+        self.message_time -= 1
+        return self.message_time
+
+    def to_str(self):
+        return self.text + " T:" + str(self.message_time) + " P:" + str(self.message_priority) + " Timeout: " + str(self.message_timeout)
+
+    def get_priority(self):
+        return self.message_priority
+
+    def get_timeout(self):
+        return self.message_timeout
+
+    def reduce_timeout(self):
+        if self.message_timeout > 0:
+            self.message_timeout -= 1
+        return
+

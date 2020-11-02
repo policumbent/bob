@@ -89,14 +89,14 @@ try:
             print("bytesize:        ", self._serial.bytesize)
             print("parity:          ", self._serial.parity)
             print("stopbits:        ", self._serial.stopbits)
-            print("timeout:         ", self._serial.timeout)
+            print("timeout:         ", self._serial.message_timeout)
             print("writeTimeout:    ", self._serial.writeTimeout)
             print("xonxoff:         ", self._serial.xonxoff)
             print("rtscts:          ", self._serial.rtscts)
             print("dsrdtr:          ", self._serial.dsrdtr)
             print("interCharTimeout:", self._serial.interCharTimeout)
 
-            self._serial.timeout = 0
+            self._serial.message_timeout = 0
 
         def read(self):
             data = self._serial.read(4096)

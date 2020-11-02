@@ -24,4 +24,3 @@ class CommonSettings:
                 self._values = json.load(json_file)
         except Exception as e:
             print(e)
-            self._values = {}

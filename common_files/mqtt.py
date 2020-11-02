@@ -11,9 +11,11 @@ class Mqtt:
                  broker_ip: str,
                  port: int,
                  name: str,
+                 settings: CommonSettings,
                  message_handler,
                  new_settings_handler):
         self.name = name
+        self.settings = settings
         self.new_settings_handler = new_settings_handler
         self.message_handler = message_handler
         self.mqtt_client = mqtt.Client()
@@ -25,8 +27,9 @@ class Mqtt:
 
     @classmethod
     def on_log(cls, client, userdata, level, buf) -> None:
+        pass
         """The callback to log all MQTT information"""
-        print("\nlog: ", buf)
+        # print("\nlog: ", buf)
 
     @classmethod
     def on_disconnect(cls, client, userdata, msg) -> None:
@@ -45,10 +48,11 @@ class Mqtt:
         """ Il sensore pubblica un json `{"connected": True}`quando si connette """
         status_topic = 'state/{}'.format(self.name)
         self.mqtt_client.publish(status_topic, json.dumps({"connected": True}), retain=True)
+        self.publish_settings(self.settings)
 
     def on_message(self, client, userdata, msg: mqtt.MQTTMessage) -> None:
         """The callback for when a PUBLISH message is received."""
-        print(msg.topic + " " + str(msg.payload))
+        # print(msg.topic + " " + str(msg.payload))
         if msg.topic == 'new_settings/{}'.format(self.name):
             self.new_settings_handler(msg.payload)
         else:
@@ -64,6 +68,7 @@ class Mqtt:
 
     """ Invio i settings del sensore/consumer """
     def publish_settings(self, settings: CommonSettings) -> None:
+        self.settings = settings
         status_topic = 'settings/{}'.format(self.name)
         self.mqtt_client.publish(status_topic, json.dumps(settings.values), retain=True)
 
@@ -94,9 +99,10 @@ class MqttConsumer(MqttSensor):
                  port: int,
                  name: str,
                  topics: List[str],
+                 settings: CommonSettings,
                  message_handler,
                  new_settings_handler):
-        super(MqttConsumer, self).__init__(broker_ip, port, name, message_handler, new_settings_handler)
+        super(MqttConsumer, self).__init__(broker_ip, port, name, settings, message_handler, new_settings_handler)
         self.topics = topics
 
     """ Un consumer effettua la subscribe alle impostazioni e ai sensori a cui è interessato."""
@@ -111,15 +117,14 @@ class MqttRemote(MqttConsumer):
                  port: int,
                  name: str,
                  topics: List[str],
+                 settings: CommonSettings,
                  message_handler,
                  new_settings_handler):
-        super(MqttRemote, self).__init__(broker_ip, port, name, new_settings_handler)
-        self.topics = topics
-        self.message_handler = message_handler
+        super(MqttRemote, self).__init__(broker_ip, port, name, topics, settings, message_handler, new_settings_handler)
 
     """ Un remote controller effettua la subscribe alle impostazioni e ai sensori a cui è interessato."""
     def subscribe(self, client) -> None:
-        client.subscribe('settings')
+        client.subscribe('settings/#')
 
     def publish_signal(self, signal: str) -> None:
         status_topic = 'signals'.format(self.name)
@@ -135,10 +140,10 @@ class MqttRemote(MqttConsumer):
 class MqttMessage(Mqtt):
     """ Un sensore effettua la subscribe alle impostazioni e ai suoi segnali."""
     def subscribe(self, client) -> None:
-        client.subscribe('messages')
+        client.subscribe('messages/#')
 
     """ Invio il dato del sensore """
     def publish(self, message: dict) -> None:
         status_topic = 'messages'.format(self.name)
-        self.mqtt_client.publish(status_topic, message, retain=False)
+        self.mqtt_client.publish(status_topic, json.dumps(message), retain=False)
 

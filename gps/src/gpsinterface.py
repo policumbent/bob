@@ -61,7 +61,7 @@ class GpsInterface:
 
     @property
     def day_time(self):
-        return self._gps.time
+        return self._gps.message_time
 
     @property
     def date(self):
