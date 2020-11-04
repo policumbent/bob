@@ -32,4 +32,4 @@ class RaspySensors(Sensor):
 
     @property
     def temperature(self):
-        return self._temperature.temperature
+        return round(self._temperature.temperature)

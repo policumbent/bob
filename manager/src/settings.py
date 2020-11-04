@@ -17,3 +17,11 @@ class Settings(CommonSettings):
             if self._values.__contains__('autopause') \
                and isinstance(self._values['autopause'], int) \
             else False
+
+    @property
+    def bike(self) -> str:
+        return self._values['bike'] \
+            if self._values.__contains__('bike') \
+               and isinstance(self._values['bike'], str) \
+            else 'taurusx'
+

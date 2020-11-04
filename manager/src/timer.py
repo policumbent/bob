@@ -22,7 +22,8 @@ class Timer(Sensor):
 
     def export(self):
         return {
-            'timer': self.str_min
+            'time_str': self.str_min,
+            'time_int': round(self.time)
         }
 
     def update_settings(self, settings: Settings):

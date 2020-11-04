@@ -1,14 +1,50 @@
 import time
 import json
+
+from .bikeData import BikeData
+from .alert import Alert
 from .settings import Settings
 from .mqtt import MqttRemote
 from .httpService import HttpService
 
 data = dict()
+service: HttpService
+settings: Settings
+bikeData: BikeData = BikeData()
 
 
+def get_config():
+    config = service.get_config()
+    # todo: qualcosa per pubblicare i settings su tutti i sensori
+    #  si potrebbe anche scegliere di mantenere una struttura gerarchica
+    #  con delle impostazioni per ogni sensore
+    print(config)
+
+
+def send_alert(alert: Alert):
+    service.post_alert(alert)
+
+
+def signal_handler(signal):
+    if signal == 'get_config':
+        get_config()
+
+
+# todo: gestire tutte le eccezioni nella serializzazione
+#  e deserializzazione
 def message_handler(topic, message):
     data[topic] = json.loads(message)
+    if topic == 'signal':
+        signal_handler(message)
+
+    message = json.loads(message)
+    if topic == 'alerts':
+        send_alert(message)
+    if topic == 'sensors/manager':
+        settings.bike = message['bike']
+        bikeData.set_manager(message)
+    if topic == 'sensors/gps':
+        bikeData.set_gps(message)
 
 
 def new_settings_handler(s):
@@ -24,14 +60,26 @@ def flat_map(d: dict):
 
 def start():
     print('Starting Communication')
-    settings = Settings({})
+    global settings
+    settings = Settings({
+        'server_ip': '192.168.1.20',
+        'cert': './cert.crt',
+        'server_port': 8080,
+        'protocol': 'http',
+        'username': 'admin',
+        'password': 'admin'
+    })
     settings.load()
-    mqtt = MqttRemote('192.168.1.20', 1883, 'http_service', ['ant', 'gps'], new_settings_handler, message_handler)
+    mqtt = MqttRemote('192.168.1.20', 1883, 'http_service', ['ant', 'gps'],
+                      settings, message_handler, new_settings_handler)
     mqtt.publish_settings(settings)
+    global service
     service = HttpService(settings)
     while True:
-        print(flat_map(data))
-        service.add_bike_data(data)
+        try:
+            service.add_bike_data(json.loads(bikeData.to_json()))
+        except Exception as e:
+            print(e)
         mqtt.publish(json.dumps(flat_map(data)))
         time.sleep(1)
 

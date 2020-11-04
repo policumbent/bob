@@ -44,6 +44,7 @@ class Mqtt:
         # reconnect then subscriptions will be renewed.
         client.subscribe('new_settings/{}'.format(self.name))
         client.subscribe('signals')
+        client.subscribe('sensors/manager')
         self.subscribe(client)
 
         """ Il sensore pubblica un json `{"connected": True}`quando si connette """
@@ -128,9 +129,12 @@ class MqttRemote(MqttConsumer):
                  new_settings_handler):
         super(MqttRemote, self).__init__(broker_ip, port, name, topics, settings, message_handler, new_settings_handler)
 
-    """ Un remote controller effettua la subscribe alle impostazioni e ai sensori a cui è interessato."""
+    """ Un remote controller effettua la subscribe alle impostazioni,
+     ai sensori a cui è interessato e alle notifiche."""
     def subscribe(self, client) -> None:
+        super().subscribe(client)
         client.subscribe('settings/#')
+        client.subscribe('alerts/#')
 
     def publish_signal(self, signal: str) -> None:
         status_topic = 'signals'.format(self.name)

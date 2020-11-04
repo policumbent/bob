@@ -9,7 +9,8 @@ from .timer import Timer
 
 settings = Settings({
     'max_temp': 70,
-    'autopause': True
+    'autopause': True,
+    'bike': 'taurusx'
 })
 mqtt: MqttConsumer
 timer = Timer()
@@ -61,6 +62,7 @@ def start():
         v = dict()
         v.update(sensors.export())
         v.update(timer.export())
+        v.update({'bike': settings.bike})
         # print(data)
         mqtt.publish(json.dumps(v))
         time.sleep(1)

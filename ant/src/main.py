@@ -24,7 +24,7 @@ settings = Settings({
 mqtt: MqttSensor
 
 
-def signal(s):
+def message_handler(topic, message):
     pass
 
 
@@ -44,6 +44,7 @@ def loop(timer, hr, speed, powermeter):
         v.update(hr.export())
         v.update(speed.export())
         v.update(powermeter.export())
+        print(v)
         mqtt.publish(json.dumps(v))
         time.sleep(1)
 
@@ -55,13 +56,12 @@ def start():
     hr = HeartRate(settings)
     speed = Speed(send_message, settings, timer)
     powermeter = Powermeter(send_message, settings)
-
     worker_thread = Thread(target=loop, args=(timer, hr, speed, powermeter), daemon=True)
     worker_thread.start()
     Ant(send_message, hr, speed, powermeter)
 
 
-mqtt = MqttSensor('192.168.1.20', 1883, 'ant', settings, signal, new_settings)
+mqtt = MqttSensor('192.168.1.20', 1883, 'ant', settings, message_handler, new_settings)
 
 if __name__ == '__main__':
     start()
