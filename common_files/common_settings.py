@@ -24,3 +24,9 @@ class CommonSettings:
                 self._values = json.load(json_file)
         except Exception as e:
             print(e)
+
+    def new_settings(self, settings: dict):
+        for s in self._values:
+            if settings.__contains__(s):
+                self._values[s] = settings[s]
+        self.save()

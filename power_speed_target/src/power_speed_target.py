@@ -7,6 +7,10 @@ from .settings import Settings
 
 # todo: rifare logica
 class PowerSpeedTarget(Sensor):
+    # todo:
+    #  una volta che il file è aperto non posso cambiarlo
+    #  o implemento un metodo che lo chiuda e lo riapra se è stato modificato
+    #  oppure ignoro questo metodo
     def signal(self, value: str):
         pass
 
@@ -15,16 +19,6 @@ class PowerSpeedTarget(Sensor):
             'target_speed': self.target_speed,
             'target_power': self.target_power
         }
-
-    def update_settings(self, settings: Settings):
-        # una volta che il file è aperto non posso cambiarlo
-        # o implemento un metodo che lo chiuda e lo riapra se è stato modificato
-        # oppure ignoro questo metodo
-        with self._file_lock:
-            if settings.vel_power_target_csv != self._settings.vel_power_target_csv:
-                self._settings = settings
-                self._file.close()
-                self.open_file()
 
     def __init__(self, settings: Settings):
         self._settings = settings

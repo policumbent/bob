@@ -40,15 +40,17 @@ def message_handler(topic, message):
     if topic == 'sensors/ant':
         json_message = json.loads(message)
         handle_speed(json_message['speed'])
-        print('ant', json_message['speed'])
+        # print('ant', json_message['speed'])
 
     if topic == 'sensors/gps':
         json_message = json.loads(message)
-        print('gps', json_message['speedGPS'])
+        # print('gps', json_message['speedGPS'])
 
 
 def new_settings_handler(s):
-    pass
+    settings.new_settings(json.loads(s))
+    print(settings.values)
+    mqtt.publish_settings(settings)
 
 
 def start():
@@ -56,7 +58,7 @@ def start():
     settings.load()
     global mqtt
     mqtt = MqttConsumer('192.168.1.20', 1883, 'manager', ['ant', 'gps'],
-                        settings, message_handler, new_settings_handler)
+                        settings, message_handler)
     sensors = RaspySensors(send_message, send_alert, settings)
     while True:
         v = dict()

@@ -1,61 +1,27 @@
 import time
 import json
 from .settings import Settings
-from .mqtt import MqttMessage
+from .mqtt import MqttConsumer
 from .message import Message
+from .power_speed_target import PowerSpeedTarget
 
 settings = Settings({
-    'vel_power_target_csv': 'test_Vittoria.csv',
+    'speed_power_target_csv': 'test_Vittoria.csv',
 })
-
-
-def check_json(json_message: dict):
-    # todo: migliore modo per validare json
-    return (
-        json_message.__contains__('text') and
-        json_message.__contains__('message_priority') and
-        json_message.__contains__('message_type') and
-        json_message.__contains__('message_time') and
-        json_message.__contains__('message_timeout')
-    )
+distance = 0
 
 
 def message_handler(topic, message):
-    if topic == 'messages':
-        return
-    json_message = json.loads(message)
-    # print(topic, '-', json_message)
-    if not check_json(json_message):
-        return
-    m = Message(
-        json_message['text'],
-        json_message['message_priority'],
-        json_message['message_type'],
-        json_message['message_time'],
-        json_message['message_timeout']
-    )
-    global messages
-    messages.set(m)
-
-
-def new_settings_handler(s):
     pass
 
 
-def flat_map(d: dict):
-    v = dict()
-    for e in d:
-        v.update(d[e])
-    return v
-
-
 def start():
-    print('Starting Communication')
+    print('Starting speed_power_target')
 
     settings.load()
-    mqtt = MqttMessage('192.168.1.20', 1883, 'messages', settings, message_handler, new_settings_handler)
+    mqtt = MqttConsumer('192.168.1.20', 1883, 'speed_power_target', ['ant'], settings, message_handler)
+    target: PowerSpeedTarget = PowerSpeedTarget(settings)
     while True:
-        data = messages.get_values()
         # print(data)
         mqtt.publish(data)
         time.sleep(1)
