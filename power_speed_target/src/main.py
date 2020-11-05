@@ -23,7 +23,7 @@ def start():
     target: PowerSpeedTarget = PowerSpeedTarget(settings)
     while True:
         # print(data)
-        mqtt.publish(data)
+        # mqtt.publish(data)
         time.sleep(1)
 
 

@@ -4,6 +4,8 @@ import time
 import RPi.GPIO as GPIO
 import serial
 # from serial import Serial, serialutil
+from .message import Message, MexType, MexPriority
+from .alert import Alert, AlertPriority
 
 
 class ArduinoSerial:
@@ -52,10 +54,19 @@ PIN_UP = 27
 PIN_DOWN = 17
 
 
+class GpioMessage:
+    down = -1
+    reset = 0
+    up = 1
+
+
 # todo: antibouncing
+# todo: reset
 class Gpio:
-    def __init__(self, mex, gear):
-        self._gear = gear
+    def __init__(self, send_message, send_alert, send_pressed):
+        self._send_message = send_message
+        self._send_alert = send_alert
+        self._send_pressed = send_pressed
         self._up = 0
         self._down = 0
         #
@@ -64,7 +75,7 @@ class Gpio:
         # self._video = video
         # self._monitor = monitor
         # SERIAL
-        ArduinoSerial()
+        # ArduinoSerial()
 
         GPIO.setwarnings(False)  # Ignore warning for now
         # GPIO.setmode(GPIO.BOARD)  # Use physical pin numbering
@@ -82,8 +93,6 @@ class Gpio:
 
         GPIO.add_event_detect(PIN_UP, GPIO.BOTH, callback=self.up)
         GPIO.add_event_detect(PIN_DOWN, GPIO.RISING, callback=self.down)
-
-        self.mex = mex
         #
         # self._worker = threading.Thread(target=self.loop, daemon=False)
         # self._worker.start()
@@ -103,34 +112,35 @@ class Gpio:
     def up_pressed(self):
         self._up = time.time()
         print("Button up pressed")
-        self._gear.gear_up()
+        self._send_pressed(GpioMessage.up)
         if self._down > 0:
             self.double_button_pressed()
 
     def down_pressed(self):
         self._down = time.time()
         print("Button down pressed")
-        self._gear.gear_down()
+        self._send_pressed(GpioMessage.down)
         if self._up > 0:
             self.double_button_pressed()
 
     def up_released(self):
-        self._gear.button_released()
+        # self._gear.button_released()
         self._up = 0
 
     def down_released(self):
-        self._gear.button_released()
+        # self._gear.button_released()
         self._down = 0
 
     def reset_pressed(self):
+        self._send_pressed(GpioMessage.reset)
         # pass
         # il reset del csv da problemi
         # self._sensors.simulator.reset()
         # # self._monitor.csv_reset()
         # self._sensors.timer.reset()
         # self._sensors.speed.reset_distance()
-        self.mex.set("RESET EFFETTUATO", 4, 2, 5)
-        Notice.new("Reset effettuato")
+        self._send_message(Message('RESET EFFETTUATO', MexPriority.medium, MexType.default, 5, 10))
+        self._send_alert(Alert('Reset effettuato', AlertPriority.medium))
 
     def double_button_pressed(self):
         self.reset_pressed()

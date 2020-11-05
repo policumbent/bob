@@ -7,10 +7,10 @@ class Sensor:
     @abc.abstractmethod
     def export(self):
         pass
-
-    @abc.abstractmethod
-    def update_settings(self, settings: CommonSettings):
-        pass
+    #
+    # @abc.abstractmethod
+    # def update_settings(self, settings: CommonSettings):
+    #     pass
 
     @abc.abstractmethod
     def signal(self, value: str):
