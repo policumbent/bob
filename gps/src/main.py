@@ -13,7 +13,7 @@ def start():
     print('Starting')
     settings = Settings({})
     gps = GpsInterface(settings)
-    mqtt = MqttSensor('192.168.1.20', 1883, 'gps',
+    mqtt = MqttSensor('127.0.0.1', 1883, 'gps',
                       settings, message_handler)
     while True:
         print(gps.export())

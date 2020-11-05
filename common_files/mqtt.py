@@ -119,6 +119,9 @@ class MqttConsumer(MqttSensor):
         for topic in self.topics:
             client.subscribe('sensors/{}'.format(topic))
 
+    def subscribe_messages(self):
+        self.mqtt_client.subscribe('messages')
+
 
 class MqttRemote(MqttConsumer):
     def __init__(self,

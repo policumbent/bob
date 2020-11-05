@@ -61,7 +61,7 @@ def start():
     Ant(send_message, hr, speed, powermeter)
 
 
-mqtt = MqttSensor('192.168.1.20', 1883, 'ant', settings, message_handler, new_settings)
+mqtt = MqttSensor('127.0.0.1', 1883, 'ant', settings, message_handler)
 
 if __name__ == '__main__':
     start()
