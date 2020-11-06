@@ -4,7 +4,7 @@ import os
 
 from time import sleep
 from PIL import Image, ImageDraw, ImageFont
-from .bikeData import BikeData
+from common_files.bikeData import BikeData
 from .settings import Settings
 
 FONT = "/usr/share/fonts/truetype/freefont/FreeSans.ttf"
@@ -12,10 +12,8 @@ FONT = "/usr/share/fonts/truetype/freefont/FreeSans.ttf"
 
 class Video:
 
-    def __init__(self, bike_data: BikeData, settings : Settings):
+    def __init__(self, bike_data: BikeData, settings: Settings):
         print("Starting video")
-
-        self._video_record = False
         self._video_name = "video_record"
         self._state = False
         self._bike_data = bike_data
@@ -34,7 +32,8 @@ class Video:
         return f'{name} {value} {unit}' if value != "" else ''
 
     def start_recording(self, value):
-        self._video_record = value
+        pass
+        # self._video_record = value
 
     def _run(self):
         print("Starting video")
@@ -119,7 +118,6 @@ class Video:
                     trap_info = ""
                     mex = data.line1
                     mex2 = data.line2
-                    self._video_record = self._settings.video_record
 
                     # img = frame.copy()
                     # if self._video_record:
