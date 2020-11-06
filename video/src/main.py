@@ -5,7 +5,7 @@ from .mqtt import MqttConsumer
 from .message import Message
 from .alert import Alert
 from .video import Video
-from common_files.bikeData import BikeData
+from .bikeData import BikeData
 
 settings = Settings({
     'video_record': False
@@ -13,7 +13,7 @@ settings = Settings({
 print(settings.default_color_1)
 mqtt: MqttConsumer
 bikeData: BikeData = BikeData(
-    ['ant', 'gps', 'power_speed_target', 'manager', 'gear']
+    ['ant', 'gps', 'power_speed_target', 'manager', 'gear', 'messages']
 )
 
 
