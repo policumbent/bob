@@ -19,6 +19,23 @@ services:
       - poli
     depends_on:
       - "mqtt-broker"
+
+  video:
+    build: ./video
+    container_name: video
+    restart: unless-stopped
+    devices:
+      - "/dev/:/dev/"
+    volumes:
+      - "/opt/vc:/opt/vc"
+    environment:
+      - "LD_LIBRARY_PATH=/opt/vc/lib"
+      - "READTHEDOCS=True"
+    networks:
+      - poli
+    privileged: true
+    depends_on:
+      - "mqtt-broker"
   ant:
     build: ./ant
     container_name: ant

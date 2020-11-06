@@ -55,7 +55,7 @@ def start():
     print('Starting Communication')
 
     settings.load()
-    mqtt = MqttMessage('192.168.1.15', 1883, 'messages', settings, message_handler)
+    mqtt = MqttMessage('192.168.1.20', 1883, 'messages', settings, message_handler)
     while True:
         data = messages.get_values()
         # print(data)

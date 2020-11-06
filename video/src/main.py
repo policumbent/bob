@@ -5,14 +5,16 @@ from .mqtt import MqttConsumer
 from .message import Message
 from .alert import Alert
 from .video import Video
-from .bikeData import BikeData
+from common_files.bikeData import BikeData
 
 settings = Settings({
     'video_record': False
 })
 print(settings.default_color_1)
 mqtt: MqttConsumer
-bikeData: BikeData = BikeData()
+bikeData: BikeData = BikeData(
+    ['ant', 'gps', 'power_speed_target', 'manager', 'gear']
+)
 
 
 def send_message(message: Message):

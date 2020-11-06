@@ -12,9 +12,8 @@ FONT = "/usr/share/fonts/truetype/freefont/FreeSans.ttf"
 
 class Video:
 
-    def __init__(self, bike_data: BikeData, settings : Settings):
+    def __init__(self, bike_data: BikeData, settings: Settings):
         print("Starting video")
-
         self._video_name = "video_record"
         self._state = False
         self._bike_data = bike_data
@@ -33,7 +32,8 @@ class Video:
         return f'{name} {value} {unit}' if value != "" else ''
 
     def start_recording(self, value):
-        self._video_record = value
+        pass
+        # self._video_record = value
 
     def _run(self):
         print("Starting video")
@@ -107,7 +107,6 @@ class Video:
 
                     print_data = self._print
                     bike = data.bikeName
-                    print(bike)
                     hr = print_data('FC: ', data.heartrate, 'bpm')
 
                     speed = print_data('Vel:', data.speed, 'km/h')
@@ -117,7 +116,6 @@ class Video:
                     gear = print_data('M:', data.gear, '')
                     timer = print_data('Timer: ', data.timeStr, '')
                     trap_info = ""
-                    print(bike)
                     mex = data.line1
                     mex2 = data.line2
 
@@ -134,12 +132,11 @@ class Video:
                     #
                     draw = ImageDraw.Draw(img)
                     draw.font = ImageFont.truetype(FONT, 40)
-                    print(bike)
+
                     color = tuple(self._settings.default_color_1)
                     color2 = tuple(self._settings.default_color_2)
                     print(color)
                     print(color2)
-                    print(bike)
                     if bike == 'taurus':
                         draw.text((10, 40), hr, color2)
                         draw.text((540, 5), distance, color2)
