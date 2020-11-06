@@ -10,6 +10,7 @@ from .bikeData import BikeData
 settings = Settings({
     'video_record': False
 })
+print(settings.default_color_1)
 mqtt: MqttConsumer
 bikeData: BikeData = BikeData()
 

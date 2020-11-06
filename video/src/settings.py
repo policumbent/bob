@@ -4,27 +4,28 @@ import json
 
 
 class Settings(CommonSettings):
-    def __int__(self):
-        self.video = True
-        self.USB_PATH = '/home/pi/'
-        self.default_color_1 = [255, 255, 255]
-        self.default_color_2 = [0, 0, 0]
+    def __init__(self, values: dict):
+        super(Settings, self).__init__(values)
+        self._video = True
+        self._USB_PATH = '/home/pi/'
+        self.pippo = [255, 255, 255]
+        self._default_color_2 = [0, 0, 0]
 
     @property
     def video(self) -> bool:
-        return self.video
+        return self._video
 
     @property
-    def USB_PATH(self) -> str:
-        return self.USB_PATH
+    def usb_path(self) -> str:
+        return self._USB_PATH
 
     @property
-    def default_color_1(self) -> list:
-        return self.default_color_1
+    def default_color_1(self):
+        return self.pippo
 
     @property
     def default_color_2(self) -> list:
-        return self.default_color_2
+        return self._default_color_2
 
     @property
     def video_record(self) -> bool:
@@ -33,11 +34,6 @@ class Settings(CommonSettings):
                and isinstance(self._values['video_record'], bool) \
             else False
 
-    # @property
-    # def bike(self) -> str:
-    #     return self._values['bike'] \
-    #         if self._values.__contains__('bike') \
-    #            and isinstance(self._values['bike'], str) \
-    #         else 'taurusx'
+
 
 

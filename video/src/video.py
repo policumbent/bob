@@ -15,7 +15,6 @@ class Video:
     def __init__(self, bike_data: BikeData, settings : Settings):
         print("Starting video")
 
-        self._video_record = False
         self._video_name = "video_record"
         self._state = False
         self._bike_data = bike_data
@@ -75,39 +74,40 @@ class Video:
             try:
                 while True:
                     # REGISTRAZIONE SCHERMO
-                    if self._video_record:
-                        # TODO: dovremmo fare un check dello spazio di archiviazione disponibile
-                        if not self.recording_started:
-                            dir_video = 'video'
-                            if dir_video not in os.listdir(self._settings.USB_PATH):
-                                os.mkdir(self._settings.USB_PATH + dir_video)
-
-                            data = self._bike_data
-                            time_t = str(data.timestamp)
-                            time_t = time_t.replace("/", ".")
-                            time_t = time_t.replace(" ", "_")
-                            camera.start_recording(self._settings.USB_PATH + dir_video + "/" + self.video_name + "-"
-                                                   + time_t + '.h264')
-
-                            self.recording_started = True
-                        camera.annotate_foreground = picamera.Color('black')
-                        camera.annotate_text = self._print('Speed: ', self._bike_data.speed, ' km/h')
-                    else:
-                        if self.recording_started:
-                            camera.stop_recording()
-                            # self._mex.set("Registrazione video fermata", 3)
-                            self.recording_started = False
-                            camera.annotate_text = ""
+                    # if self.:
+                    #     # TODO: dovremmo fare un check dello spazio di archiviazione disponibile
+                    #     if not self.recording_started:
+                    #         dir_video = 'video'
+                    #         if dir_video not in os.listdir(self._settings.USB_PATH):
+                    #             os.mkdir(self._settings.USB_PATH + dir_video)
+                    #
+                    #         data = self._bike_data
+                    #         time_t = str(data.timestamp)
+                    #         time_t = time_t.replace("/", ".")
+                    #         time_t = time_t.replace(" ", "_")
+                    #         camera.start_recording(self._settings.USB_PATH + dir_video + "/" + self.video_name + "-"
+                    #                                + time_t + '.h264')
+                    #
+                    #         self.recording_started = True
+                    #     camera.annotate_foreground = picamera.Color('black')
+                    #     camera.annotate_text = self._print('Speed: ', self._bike_data.speed, ' km/h')
+                    # else:
+                    #     if self.recording_started:
+                    #         camera.stop_recording()
+                    #         # self._mex.set("Registrazione video fermata", 3)
+                    #         self.recording_started = False
+                    #         camera.annotate_text = ""
 
                     # I valori sono mostrati a schermo
                     # su due righe parallele
                     # TODO: METTERE LOCK
                     data = self._bike_data
 
-                    self.start_recording(self._settings.video_record)
+                    # self.start_recording(self._settings.video_record)
 
                     print_data = self._print
                     bike = data.bikeName
+                    print(bike)
                     hr = print_data('FC: ', data.heartrate, 'bpm')
 
                     speed = print_data('Vel:', data.speed, 'km/h')
@@ -117,9 +117,9 @@ class Video:
                     gear = print_data('M:', data.gear, '')
                     timer = print_data('Timer: ', data.timeStr, '')
                     trap_info = ""
+                    print(bike)
                     mex = data.line1
                     mex2 = data.line2
-                    self._video_record = self._settings.video_record
 
                     # img = frame.copy()
                     # if self._video_record:
@@ -131,14 +131,15 @@ class Video:
                     # if self._p13:
                     #     if speed == 0:
                     #         img.paste(img_p13, (100, 60), img_p13)
-
+                    #
                     draw = ImageDraw.Draw(img)
                     draw.font = ImageFont.truetype(FONT, 40)
-
+                    print(bike)
                     color = tuple(self._settings.default_color_1)
                     color2 = tuple(self._settings.default_color_2)
                     print(color)
                     print(color2)
+                    print(bike)
                     if bike == 'taurus':
                         draw.text((10, 40), hr, color2)
                         draw.text((540, 5), distance, color2)
@@ -161,8 +162,8 @@ class Video:
                     # draw.text((540, 430), power, (255, 255, 255))
                     # draw.text((360, 430), gear, (255, 255, 255))
 
-                    x1 = int((800 - 20 * (mex[0].__len__())) / 2)
-                    x2 = int((800 - 20 * (mex2[0].__len__())) / 2)
+                    x1 = int((800 - 20 * (mex.__len__())) / 2)
+                    x2 = int((800 - 20 * (mex2.__len__())) / 2)
                     x3 = int((800 - 18 * (trap_info.__len__())) / 2)
                     draw.text((x1, 80), mex, color2)
                     draw.text((x2, 115), mex2, color2)
