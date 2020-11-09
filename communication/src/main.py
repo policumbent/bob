@@ -10,7 +10,8 @@ from .httpService import HttpService
 data = dict()
 service: HttpService
 settings: Settings
-bikeData: BikeData = BikeData()
+bikeData: BikeData = BikeData(['ant', 'gps', 'manager'])
+mqtt: MqttRemote
 
 
 def get_config():
@@ -33,10 +34,14 @@ def signal_handler(signal):
 # todo: gestire tutte le eccezioni nella serializzazione
 #  e deserializzazione
 def message_handler(topic, message):
-    data[topic] = json.loads(message)
     if topic == 'signal':
         signal_handler(message)
-
+        return
+    if topic[0:9] == 'settings/':
+        data[topic] = json.loads(message)
+        all_settings = flat_map(data)
+        mqtt.publish(json.dumps(all_settings))
+        return
     message = json.loads(message)
     if topic == 'alerts':
         send_alert(message)
@@ -70,17 +75,17 @@ def start():
         'password': 'admin'
     })
     settings.load()
-    mqtt = MqttRemote('192.168.1.20', 1883, 'http_service', ['ant', 'gps'],
-                      settings, message_handler, new_settings_handler)
+    global mqtt
+    mqtt = MqttRemote('192.168.1.20', 1883, 'http_service',
+                      ['ant', 'gps'], settings, message_handler)
     mqtt.publish_settings(settings)
     global service
-    service = HttpService(settings)
+    # service = HttpService(settings)
     while True:
         try:
             service.add_bike_data(json.loads(bikeData.to_json()))
         except Exception as e:
             print(e)
-        mqtt.publish(json.dumps(flat_map(data)))
         time.sleep(1)
 
 
