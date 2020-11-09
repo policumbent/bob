@@ -5,6 +5,8 @@ import bluetooth
 import json
 
 from .settings import Settings
+from .message import Message, MexType, MexPriority
+from .alert import Alert, AlertPriority
 
 port = 1
 backlog = 3
@@ -41,11 +43,13 @@ class TaurusBluetooth:
         # with self._settings_lock:
         self._settings = settings
 
-    def __init__(self, settings: dict, send_settings, send_signal):
+    def __init__(self, settings: dict, send_settings, send_signal, send_message, send_alert):
         self._settings = settings
         self._new_settings = settings
         self._send_settings = send_settings
         self._send_signal = send_signal
+        self._send_message = send_message
+        self._send_alert = send_alert
         # self._settings_lock = threading.Lock()
         # self._signals_lock = threading.Lock()
         self._new_update = False
@@ -99,6 +103,12 @@ class TaurusBluetooth:
             if isinstance(t, int):
                 reply, new_settings = self.int_value_change(case, value)
                 return reply, None
+            self._send_message(
+                Message('{} impostato a '.format(case.capitalize()), MexPriority.medium, MexType.default, 5, 15)
+            )
+            self._send_alert(
+                Alert('{} impostato a '.format(case.capitalize()), AlertPriority.medium)
+            )
 
         # SEGNALI
         elif case == "reset":
@@ -138,19 +148,19 @@ class TaurusBluetooth:
         new_settings[name] = int(value)
         # self._settings[name] = int(value)
         self._new_update = True
-        # todo: send message
         return "OK", new_settings
 
     def reset(self):
         print("Reset")
         self._send_signal('reset')
-        # todo: send message and alert
+        self._send_message(Message('Reset effettuato', MexPriority.medium, MexType.default, 5, 15))
+        self._send_alert(Alert('Reset effettuato', AlertPriority.low))
         return "OK"
 
     def powermeter_calibration(self):
         print("Powermeter calibration")
         self._send_signal('powermeter_calibration')
-        # todo: send message and alert
+        self._send_alert(Alert('Calibrazione power meter richiesta', AlertPriority.low))
         return "OK"
 
     # def p13_set(self, value):
@@ -186,6 +196,7 @@ class TaurusBluetooth:
             return self.gear_encode_mex()
         if v[0] == "SET":
             return self.gear_decode_mex(v)
+            # todo: implementare la cambiata da app
             # return mex, new_setting
             # todo: creare signal 'refresh_position' con questo contenuto
             # servo1_pos, servo2_pos = self.get_angle(self.gear, Mode.UP)

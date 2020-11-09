@@ -23,8 +23,9 @@ def check_json(json_message: dict):
 
 
 def message_handler(topic, message):
-    if topic == 'messages':
+    if not topic == 'messages':
         return
+    print(topic, message)
     json_message = json.loads(message)
     # print(topic, '-', json_message)
     if not check_json(json_message):

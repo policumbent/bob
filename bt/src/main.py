@@ -68,7 +68,7 @@ def start():
                       ['ant', 'gps'], settings, message_handler)
     mqtt.publish_settings(settings)
     global bt
-    bt = TaurusBluetooth({}, send_settings, send_signal)
+    bt = TaurusBluetooth({}, send_settings, send_signal, send_message, send_alert)
     while True:
         bt.handle()
 
