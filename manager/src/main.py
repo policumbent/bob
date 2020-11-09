@@ -36,21 +36,25 @@ def handle_speed(speed: float):
 
 
 def message_handler(topic, message: bytes):
-    if topic == 'signals':
-        if message.decode() == 'reset':
-            timer.reset()
+    try:
+        if topic == 'signals':
+            if message.decode() == 'reset':
+                timer.reset()
 
-    if topic == 'sensors/ant':
-        json_message = json.loads(message)
-        if not settings.autopause_on_gps:
-            handle_speed(json_message['speed'])
-        # print('ant', json_message['speed'])
+        if topic == 'sensors/ant':
+            json_message = json.loads(message)
+            if not settings.autopause_on_gps:
+                handle_speed(json_message['speed'])
+            # print('ant', json_message['speed'])
 
-    if topic == 'sensors/gps':
-        json_message = json.loads(message)
-        if settings.autopause_on_gps:
-            handle_speed(json_message['speedGPS'])
-        # print('gps', json_message['speedGPS'])
+        if topic == 'sensors/gps':
+            json_message = json.loads(message)
+            if settings.autopause_on_gps:
+                handle_speed(json_message['speedGPS'])
+            # print('gps', json_message['speedGPS'])
+
+    except Exception as e:
+        print(e)
 
 
 def start():
