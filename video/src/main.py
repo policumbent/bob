@@ -8,7 +8,8 @@ from .video import Video
 from .bikeData import BikeData
 
 settings = Settings({
-    'video_record': False
+    'video_record': False,
+    'power_speed_simulator': True
 })
 print(settings.default_color_1)
 mqtt: MqttConsumer

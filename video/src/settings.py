@@ -7,14 +7,16 @@ class Settings(CommonSettings):
     def __init__(self, values: dict):
         super(Settings, self).__init__(values)
         self._video = True
-        self._power_speed_simulator = True
         self._USB_PATH = '/home/pi/'
         self._default_color_1 = [255, 255, 255]
         self._default_color_2 = [0, 0, 0]
 
     @property
     def power_speed_simulator(self) -> bool:
-        return self._power_speed_simulator
+        return self._values['power_speed_simulator'] \
+            if self._values.__contains__('power_speed_simulator') \
+            and isinstance(self._values['power_speed_simulator'], bool) \
+            else False
 
     @property
     def video(self) -> bool:
