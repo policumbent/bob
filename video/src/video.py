@@ -184,10 +184,10 @@ class Video:
         self._video_name = value
 
     def show_estimator(self, draw):
-        if self._bike_data.targetSpeed == 0:
+        if self._bike_data.target_speed == 0:
             return
-        target_power = self._bike_data.targetPower
-        target_speed = self._bike_data.targetSpeed
+        target_power = self._bike_data.target_power
+        target_speed = self._bike_data.target_speed
 
         current_power = self._bike_data.power
         current_speed = self._bike_data.speed
