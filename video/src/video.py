@@ -114,7 +114,7 @@ class Video:
                 cadence = print_data('Cad:', data.cadence, 'rpm')
                 power = print_data('Power:', data.power, 'W')
                 gear = print_data('M:', data.gear, '')
-                timer = print_data('Timer: ', data.timeStr, '')
+                timer = print_data('Timer: ', data.time_str, '')
                 trap_info = ""
                 mex = data.line1
                 mex2 = data.line2
