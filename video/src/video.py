@@ -106,7 +106,7 @@ class Video:
                 data = self._bike_data
 
                 print_data = self._print
-                bike = data.bikeName
+                bike = data.bike_name
                 hr = print_data('FC: ', data.heartrate, 'bpm')
 
                 speed = print_data('Vel:', data.speed, 'km/h')

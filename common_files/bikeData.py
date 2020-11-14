@@ -93,7 +93,12 @@ class BikeData:
     @property
     def bike_name(self):
         if isinstance(self.__bikeName, str):
-            return self.__bikeName
+            return self.__bikeName\
+
+    @property
+    def time_str(self):
+        if isinstance(self.__timeStr, str):
+            return self.__timeStr
 
     @property
     def cpu_temp(self):
@@ -138,7 +143,7 @@ class BikeData:
     # GPS DATA
 
     @property
-    def time_stamp(self):
+    def timestamp(self):
         if isinstance(self.__timestamp, str):
             return self.__timestamp\
 
