@@ -6,6 +6,8 @@ services:
     container_name: mqtt-broker
     environment:
       - TZ=Europe/Rome
+    networks:
+      - poli
     ports:
       - 1883:1883
     restart: unless-stopped
@@ -15,6 +17,16 @@ services:
     restart: unless-stopped
     devices:
       - "/dev/ttyAMA1:/dev/ttyAMA1"
+    networks:
+      - poli
+    depends_on:
+      - "mqtt-broker"
+  gear:
+    build: ./gear
+    container_name: gear
+    restart: unless-stopped
+    devices:
+      - "/dev/ttyS0:/dev/ttyS0"
     networks:
       - poli
     depends_on:
@@ -62,6 +74,25 @@ services:
     container_name: manager
     restart: unless-stopped
     privileged: true
+    networks:
+      - poli
+    depends_on:
+      - "mqtt-broker"
+
+  bt:
+    build: ./bt
+    container_name: bt
+    restart: unless-stopped
+    privileged: true
+    networks:
+      - poli
+    depends_on:
+      - "mqtt-broker"
+
+  communication:
+    build: ./communication
+    container_name: communication
+    restart: unless-stopped
     networks:
       - poli
     depends_on:

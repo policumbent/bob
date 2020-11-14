@@ -24,8 +24,9 @@ class Video:
         self.recording_started = False
         # if not local.get("video", True):
         #     return
-        self._worker = threading.Thread(target=self._run, daemon=False)
-        self._worker.start()
+        # self._worker = threading.Thread(target=self._run, daemon=False)
+        # self._worker.start()
+        self._run()
 
     @classmethod
     def _print(cls, name, value, unit):

@@ -2,6 +2,7 @@ from threading import Thread
 
 from .ant_manager import Ant
 import time
+import sys
 import json
 from .message import Message
 from .heartrate import HeartRate
@@ -50,7 +51,12 @@ def loop(timer, hr, speed, powermeter):
 
 
 def start():
-    print('Starting')
+    n = len(sys.argv)
+    if n < 2:
+        print("Total arguments passed:", n)
+        return
+    print("Mqtt server ip:", sys.argv[1])
+    print('Starting ANT')
 
     timer = Timer()
     hr = HeartRate(settings)
@@ -61,7 +67,7 @@ def start():
     Ant(send_message, hr, speed, powermeter)
 
 
-mqtt = MqttSensor('127.0.0.1', 1883, 'ant', settings, message_handler)
+mqtt = MqttSensor(sys.argv[1], 1883, 'ant', settings, message_handler)
 
 if __name__ == '__main__':
     start()
