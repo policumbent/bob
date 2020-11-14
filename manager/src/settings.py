@@ -12,6 +12,13 @@ class Settings(CommonSettings):
             else 70
 
     @property
+    def autopause_on_gps(self) -> bool:
+        return self._values['autopause_on_gps'] \
+            if self._values.__contains__('autopause_on_gps') \
+               and isinstance(self._values['autopause_on_gps'], bool) \
+            else False
+
+    @property
     def autopause(self) -> int:
         return self._values['autopause'] \
             if self._values.__contains__('autopause') \

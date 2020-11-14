@@ -3,13 +3,14 @@
 ## Componenti
 
 *Work in progress*
+
 Per tutti manca la gestione delle impostazioni
 
 - sensori
-  - [x] ant
+  - [ ] ant
   - [ ] accelerometer
   - [ ] weather
-  - [x] gps
+  - [ ] gps
   - [ ] gear => gestione cambio e comunicazione seriale
 - consumatori
   - [ ] csv

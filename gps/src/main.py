@@ -11,9 +11,14 @@ def message_handler(topic, message):
 
 def start():
     print('Starting')
-    settings = Settings({})
+    settings = Settings({
+        'latitude_timing_start': 45.032888,
+        'longitude_timing_start': 7.792347,
+        'latitude_timing_end': 45.032888,
+        'longitude_timing_end': 7.792347
+    })
     gps = GpsInterface(settings)
-    mqtt = MqttSensor('127.0.0.1', 1883, 'gps',
+    mqtt = MqttSensor('192.168.1.20', 1883, 'gps',
                       settings, message_handler)
     while True:
         print(gps.export())

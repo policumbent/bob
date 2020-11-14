@@ -10,7 +10,8 @@ from .timer import Timer
 settings = Settings({
     'max_temp': 70,
     'autopause': True,
-    'bike': 'taurusx'
+    'bike': 'taurusx',
+    'autopause_on_gps': False
 })
 mqtt: MqttConsumer
 timer = Timer()
@@ -24,8 +25,6 @@ def send_message(message: Message):
 def send_alert(alert: Alert):
     mqtt.publish_alert(alert)
 
-# todo: opzione per scegliere quale sensore usare per l'autopausa
-
 
 def handle_speed(speed: float):
     global speed_0
@@ -36,29 +35,34 @@ def handle_speed(speed: float):
     speed_0 = speed
 
 
-def message_handler(topic, message):
-    if topic == 'sensors/ant':
-        json_message = json.loads(message)
-        handle_speed(json_message['speed'])
-        # print('ant', json_message['speed'])
+def message_handler(topic, message: bytes):
+    try:
+        if topic == 'signals':
+            if message.decode() == 'reset':
+                timer.reset()
 
-    if topic == 'sensors/gps':
-        json_message = json.loads(message)
-        # print('gps', json_message['speedGPS'])
+        if topic == 'sensors/ant':
+            json_message = json.loads(message)
+            if not settings.autopause_on_gps:
+                handle_speed(json_message['speed'])
+            # print('ant', json_message['speed'])
 
+        if topic == 'sensors/gps':
+            json_message = json.loads(message)
+            if settings.autopause_on_gps:
+                handle_speed(json_message['speedGPS'])
+            # print('gps', json_message['speedGPS'])
 
-def new_settings_handler(s):
-    settings.new_settings(json.loads(s))
-    print(settings.values)
-    mqtt.publish_settings(settings)
+    except Exception as e:
+        print(e)
 
 
 def start():
-    print('Starting Communication')
+    print('Starting Manager')
     settings.load()
     global mqtt
-    mqtt = MqttConsumer('192.168.1.20', 1883, 'manager', ['ant', 'gps'],
-                        settings, message_handler)
+    mqtt = MqttConsumer('192.168.1.20', 1883, 'manager',
+                        ['ant', 'gps'], settings, message_handler)
     sensors = RaspySensors(send_message, send_alert, settings)
     while True:
         v = dict()

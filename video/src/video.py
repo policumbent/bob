@@ -7,7 +7,7 @@ from PIL import Image, ImageDraw, ImageFont
 from .bikeData import BikeData
 from .settings import Settings
 
-FONT = "/usr/share/fonts/truetype/freefont/FreeSans.ttf"
+FONT = "resources/FreeSans.ttf"
 
 
 class Video:
@@ -71,7 +71,7 @@ class Video:
             sleep(0.25)
 
             # TODO: capire a cosa serve questo try
-            try:
+            #try:
                 while True:
                     # REGISTRAZIONE SCHERMO
                     if self._settings.video_record:
@@ -97,80 +97,106 @@ class Video:
                             # self._mex.set("Registrazione video fermata", 3)
                             self.recording_started = False
                             camera.annotate_text = ""
+            # try:
+            while True:
+                # REGISTRAZIONE SCHERMO
+                # if self._video_record:
+                #     # TODO: dovremmo fare un check dello spazio di archiviazione disponibile
+                #     if not self.recording_started:
+                #         dir_video = 'video'
+                #         if dir_video not in os.listdir(self._settings.USB_PATH):
+                #             os.mkdir(self._settings.USB_PATH + dir_video)
+                #
+                #         data = self._bike_data
+                #         time_t = str(data.timestamp)
+                #         time_t = time_t.replace("/", ".")
+                #         time_t = time_t.replace(" ", "_")
+                #         camera.start_recording(self._settings.USB_PATH + dir_video + "/" + self.video_name + "-"
+                #                                + time_t + '.h264')
+                #
+                #         self.recording_started = True
+                #     camera.annotate_foreground = picamera.Color('black')
+                #     camera.annotate_text = self._print('Speed: ', self._bike_data.speed, ' km/h')
+                # else:
+                #     if self.recording_started:
+                #         camera.stop_recording()
+                #         # self._mex.set("Registrazione video fermata", 3)
+                #         self.recording_started = False
+                #         camera.annotate_text = ""
 
-                    # I valori sono mostrati a schermo
-                    # su due righe parallele
-                    # TODO: METTERE LOCK
-                    data = self._bike_data
+                # I valori sono mostrati a schermo
+                # su due righe parallele
+                # TODO: METTERE LOCK
+                data = self._bike_data
 
-                    print_data = self._print
-                    bike = data.bikeName
-                    hr = print_data('FC: ', data.heartrate, 'bpm')
+                print_data = self._print
+                bike = data.bikeName
+                hr = print_data('FC: ', data.heartrate, 'bpm')
 
-                    speed = print_data('Vel:', data.speed, 'km/h')
-                    distance = print_data('Dist:', data.distance, 'km')
-                    cadence = print_data('Cad:', data.cadence, 'rpm')
-                    power = print_data('Power:', data.power, 'W')
-                    gear = print_data('M:', data.gear, '')
-                    timer = print_data('Timer: ', data.timeStr, '')
-                    trap_info = ""
-                    mex = data.line1
-                    mex2 = data.line2
+                speed = print_data('Vel:', data.speed, 'km/h')
+                distance = print_data('Dist:', data.distance, 'km')
+                cadence = print_data('Cad:', data.cadence, 'rpm')
+                power = print_data('Power:', data.power, 'W')
+                gear = print_data('M:', data.gear, '')
+                timer = print_data('Timer: ', data.timeStr, '')
+                trap_info = ""
+                mex = data.line1
+                mex2 = data.line2
 
-                    # img = frame.copy()
-                    # if self._video_record:
-                    #     img.paste(record_video_icon, (300, 10))
-                    # if self.settings.get("telemetry_connected"):
-                    #     img.paste(telemetry_icon, (420, 10))
-                    # # USATO PRINCIPALMENTE PER TESTARE LA TELEMETRIA,
-                    # # MA POTREMMO TENERE LA SORPRESA PER ANDREA, TENETELO SEGRETO
-                    # if self._p13:
-                    #     if speed == 0:
-                    #         img.paste(img_p13, (100, 60), img_p13)
-                    #
-                    draw = ImageDraw.Draw(img)
-                    draw.font = ImageFont.truetype(FONT, 40)
+                # img = frame.copy()
+                # if self._video_record:
+                #     img.paste(record_video_icon, (300, 10))
+                # if self.settings.get("telemetry_connected"):
+                #     img.paste(telemetry_icon, (420, 10))
+                # # USATO PRINCIPALMENTE PER TESTARE LA TELEMETRIA,
+                # # MA POTREMMO TENERE LA SORPRESA PER ANDREA, TENETELO SEGRETO
+                # if self._p13:
+                #     if speed == 0:
+                #         img.paste(img_p13, (100, 60), img_p13)
+                #
+                draw = ImageDraw.Draw(img)
+                draw.font = ImageFont.truetype(FONT, 40)
 
-                    color = tuple(self._settings.default_color_1)
-                    color2 = tuple(self._settings.default_color_2)
-                    print(color)
-                    print(color2)
-                    if bike == 'taurus':
-                        draw.text((10, 40), hr, color2)
-                        draw.text((540, 5), distance, color2)
-                        draw.text((10, 5), timer, color2)
-                        draw.text((540, 40), cadence, color2)
-                    elif bike == 'taurusx':
-                        draw.text((540, 5), cadence, color2)
-                    draw.text((10, 430), speed, color)
-                    draw.text((360, 430), gear, color)
-                    draw.text((540, 430), power, color)
+                color = tuple(self._settings.default_color_1)
+                color2 = tuple(self._settings.default_color_2)
+                print(color)
+                print(color2)
+                if bike == 'taurus':
+                    draw.text((10, 40), hr, color2)
+                    draw.text((540, 5), distance, color2)
+                    draw.text((10, 5), timer, color2)
+                    draw.text((540, 40), cadence, color2)
+                elif bike == 'taurusx':
+                    draw.text((540, 5), cadence, color2)
+                draw.text((10, 430), speed, color)
+                draw.text((360, 430), gear, color)
+                draw.text((540, 430), power, color)
 
                     if self._settings.power_speed_simulator:
                         self.show_estimator(draw)
 
-                    # draw.text((10, 5), hr, (255, 255, 255))
-                    # draw.text((530, 5), speed, (255, 255, 255))
-                    # draw.text((530, 40), distance, (255, 255, 255))
-                    # draw.text((10, 430), cadence, (255, 255, 255))
-                    # draw.text((10, 395), timer, (255, 255, 255))
-                    # draw.text((540, 430), power, (255, 255, 255))
-                    # draw.text((360, 430), gear, (255, 255, 255))
+                # draw.text((10, 5), hr, (255, 255, 255))
+                # draw.text((530, 5), speed, (255, 255, 255))
+                # draw.text((530, 40), distance, (255, 255, 255))
+                # draw.text((10, 430), cadence, (255, 255, 255))
+                # draw.text((10, 395), timer, (255, 255, 255))
+                # draw.text((540, 430), power, (255, 255, 255))
+                # draw.text((360, 430), gear, (255, 255, 255))
 
-                    x1 = int((800 - 20 * (mex.__len__())) / 2)
-                    x2 = int((800 - 20 * (mex2.__len__())) / 2)
-                    x3 = int((800 - 18 * (trap_info.__len__())) / 2)
-                    draw.text((x1, 80), mex, color2)
-                    draw.text((x2, 115), mex2, color2)
-                    draw.text((x3, 150), trap_info, color2)
+                x1 = int((800 - 20 * (mex.__len__())) / 2)
+                x2 = int((800 - 20 * (mex2.__len__())) / 2)
+                x3 = int((800 - 18 * (trap_info.__len__())) / 2)
+                draw.text((x1, 80), mex, color2)
+                draw.text((x2, 115), mex2, color2)
+                draw.text((x3, 150), trap_info, color2)
 
-                    overlay.update(img.tobytes())
-                    sleep(0.25)
-            except Exception as e:
-                print(e)
+                overlay.update(img.tobytes())
+                sleep(0.25)
+            # except Exception as e:
+            #     print(e)
 
-            finally:
-                camera.remove_overlay(overlay)
+            # finally:
+            #     camera.remove_overlay(overlay)
 
     @property
     def video_name(self):
