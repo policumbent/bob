@@ -1,5 +1,6 @@
 import time
 import json
+import sys
 
 from .bikeData import BikeData
 from .alert import Alert
@@ -64,6 +65,11 @@ def flat_map(d: dict):
 
 
 def start():
+    n = len(sys.argv)
+    if n < 2:
+        print("Total arguments passed:", n)
+        return
+    print("Mqtt server ip:", sys.argv[1])
     print('Starting Communication')
     global settings
     settings = Settings({
@@ -76,11 +82,11 @@ def start():
     })
     settings.load()
     global mqtt
-    mqtt = MqttRemote('192.168.1.20', 1883, 'http_service',
+    mqtt = MqttRemote(sys.argv[1], 1883, 'http_service',
                       ['ant', 'gps'], settings, message_handler)
     mqtt.publish_settings(settings)
     global service
-    # service = HttpService(settings)
+    service = HttpService(settings)
     while True:
         try:
             service.add_bike_data(json.loads(bikeData.to_json()))

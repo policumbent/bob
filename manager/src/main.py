@@ -1,4 +1,5 @@
 import time
+import sys
 import json
 from .settings import Settings
 from .mqtt import MqttConsumer
@@ -58,11 +59,16 @@ def message_handler(topic, message: bytes):
 
 
 def start():
+    n = len(sys.argv)
+    if n < 2:
+        print("Total arguments passed:", n)
+        return
+    print("Mqtt server ip:", sys.argv[1])
     print('Starting Manager')
     settings.load()
     global mqtt
-    mqtt = MqttConsumer('192.168.1.20', 1883, 'manager',
-                        ['ant', 'gps'], settings, message_handler)
+    mqtt = MqttConsumer(sys.argv[1], 1883, 'manager', ['ant', 'gps'],
+                        settings, message_handler)
     sensors = RaspySensors(send_message, send_alert, settings)
     while True:
         v = dict()

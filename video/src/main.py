@@ -1,4 +1,4 @@
-import time
+import sys
 import json
 from .settings import Settings
 from .mqtt import MqttConsumer
@@ -47,17 +47,22 @@ def message_handler(topic, message):
 
 
 def start():
+    n = len(sys.argv)
+    if n < 2:
+        print("Total arguments passed:", n)
+        return
+    print("Mqtt server ip:", sys.argv[1])
     print('Starting Video')
     settings.load()
     global mqtt
-    mqtt = MqttConsumer('127.0.0.1', 1883, 'video',
+    mqtt = MqttConsumer(sys.argv[1], 1883, 'video',
                         ['ant', 'gps', 'power_speed_target', 'manager', 'gear'],
                         settings, message_handler)
     mqtt.subscribe_messages()
-    video = Video(bikeData, settings)
-
-    while True:
-        time.sleep(1)
+    Video(bikeData, settings)
+    #
+    # while True:
+    #     time.sleep(1)
 
 
 if __name__ == '__main__':

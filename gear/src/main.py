@@ -1,5 +1,6 @@
 import time
 import json
+import sys
 from .settings import Settings
 from .mqtt import MqttConsumer
 from .message import Message
@@ -41,10 +42,15 @@ def send_pressed(message: int):
 
 
 def start():
-    print('Starting Communication')
+    n = len(sys.argv)
+    if n < 2:
+        print("Total arguments passed:", n)
+        return
+    print("Mqtt server ip:", sys.argv[1])
+    print('Starting Gear')
     settings.load()
     global mqtt
-    mqtt = MqttConsumer('192.168.1.20', 1883, 'gear', ['gpio'],
+    mqtt = MqttConsumer(sys.argv[1], 1883, 'gear', ['gpio'],
                         settings, message_handler)
     mqtt.publish_settings(settings)
     global gear

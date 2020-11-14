@@ -1,5 +1,6 @@
 import time
 import json
+import sys
 from .settings import Settings
 from .mqtt import MqttMessage
 from .messages import Messages
@@ -23,7 +24,7 @@ def check_json(json_message: dict):
 
 
 def message_handler(topic, message):
-    if not topic == 'messages':
+    if not topic[0:9] == 'messages/':
         return
     print(topic, message)
     json_message = json.loads(message)
@@ -53,10 +54,15 @@ def flat_map(d: dict):
 
 
 def start():
+    n = len(sys.argv)
+    if n < 2:
+        print("Total arguments passed:", n)
+        return
+    print("Mqtt server ip:", sys.argv[1])
     print('Starting Communication')
 
     settings.load()
-    mqtt = MqttMessage('192.168.1.20', 1883, 'messages', settings, message_handler)
+    mqtt = MqttMessage(sys.argv[1], 1883, 'messages', settings, message_handler)
     while True:
         data = messages.get_values()
         # print(data)
