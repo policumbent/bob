@@ -64,7 +64,7 @@ def start():
     settings = Settings({})
     # settings.load()
     global mqtt
-    mqtt = MqttRemote('mqtt-broker', 1883, 'bt',
+    mqtt = MqttRemote('127.0.0.1', 1883, 'bt',
                       ['ant', 'gps'], settings, message_handler)
     mqtt.publish_settings(settings)
     global bt

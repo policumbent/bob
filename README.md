@@ -10,16 +10,16 @@ Per tutti manca la gestione delle impostazioni
   - [ ] ant
   - [ ] accelerometer
   - [ ] weather
-  - [ ] gps
+  - [x] gps
   - [ ] gear => gestione cambio e comunicazione seriale
 - consumatori
   - [ ] csv
   - [ ] power/speed profiles
   - [x] raspberry manager (cronometro / temperatura cpu)
-  - [ ] video
+  - [x] video
 - comunicazione
   - [ ] communication => collegamento con il server http
-  - [ ] bt => collegamento con l'app bt
+  - [x] bt => collegamento con l'app bt  **(manca dockerfile)**
 - messaggi
   - [x] messaggi a schermo
   - [ ] alert su alice

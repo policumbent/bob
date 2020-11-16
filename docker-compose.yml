@@ -31,7 +31,6 @@ services:
       - poli
     depends_on:
       - "mqtt-broker"
-
   video:
     build: ./video
     container_name: video
@@ -59,7 +58,6 @@ services:
       - poli
     depends_on:
       - "mqtt-broker"
-
   messages:
     build: ./messages
     container_name: messages
@@ -68,7 +66,6 @@ services:
       - poli
     depends_on:
       - "mqtt-broker"
-
   manager:
     build: ./manager
     container_name: manager
@@ -79,15 +76,15 @@ services:
     depends_on:
       - "mqtt-broker"
 
-  bt:
-    build: ./bt
-    container_name: bt
-    restart: unless-stopped
-    privileged: true
-    networks:
-      - poli
-    depends_on:
-      - "mqtt-broker"
+#  bt:
+#    build: ./bt
+#    container_name: bt
+#    restart: unless-stopped
+#    privileged: true
+#    networks:
+#      - poli
+#    depends_on:
+#      - "mqtt-broker"
 
   communication:
     build: ./communication

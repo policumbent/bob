@@ -182,7 +182,7 @@ class TaurusBluetooth:
     def handle_gear(self, mex: bytes):
         print("Gear calibration")
         # with self._settings_lock:
-        value, new_setting = self.gear_mex_handler(self._settings, mex)
+        value, new_setting = self.gear_mex_handler(mex)
         self._new_update = True
         # self.__sensors.powermeter.calibration = True
         return value, new_setting
