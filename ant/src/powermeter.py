@@ -21,7 +21,6 @@ _logger = logging.getLogger("powermeter")
 
 
 class Powermeter(Sensor):
-
     def signal(self, value: str):
         if value == 'calibrate_powermeter':
             self.calibration = True

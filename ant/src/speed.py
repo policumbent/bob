@@ -6,7 +6,6 @@ from threading import Thread
 
 from .sensor import Sensor
 
-from .timer import Timer
 from .ant.easy.channel import Channel
 
 # CIRCUMFERENCE = 1.450
@@ -15,7 +14,8 @@ from .settings import Settings
 
 class Speed(Sensor):
     def signal(self, value: str):
-        pass
+        if value == 'reset':
+            self.reset_distance()
 
     def update_settings(self, settings: Settings):
         with self._settings_lock:
@@ -27,9 +27,9 @@ class Speed(Sensor):
             'distance': self.distance
         }
 
-    def __init__(self, send_message, settings: Settings, timer: Timer):
+    def __init__(self, send_message, settings: Settings):
         self._speed = 0.0
-        self._timer = timer
+        self.__time_int = 0
         self._send_message = send_message
         self._settings = settings
         self._settings_lock = threading.Lock()
@@ -62,13 +62,6 @@ class Speed(Sensor):
                     self.newData = False
                     # print('>>> dentro __run')
                     self.calculate_speed(self.data)
-                if self.settings.autopause:
-                    if self._speed == 0.0:
-                        self._timer.autopause()
-                    else:
-                        self._timer.autostart()
-                else:
-                    self._timer.autostart()
                 self.distance_trap = self.settings.run_length +\
                     self.settings.trap_length - self.distance
                 if self.distance > self.settings.run_length and self.distance_trap >= 0:
@@ -89,6 +82,14 @@ class Speed(Sensor):
     @settings.setter
     def settings(self, s):
         self._settings = s
+
+    @property
+    def time_int(self) -> int:
+        return self.__time_int
+
+    @time_int.setter
+    def time_int(self, time_int: int):
+        self.__time_int = time_int
 
     def set_channel(self, channel_cad_vel: Channel):
         # CANALE CADENZA/VELOCITA'
@@ -175,9 +176,9 @@ class Speed(Sensor):
     def trap_info(self):
         # per il record dell'ora
         if self.settings.hour_record:
-            if self._timer.time == 0:
+            if self.time_int == 0:
                 return ""
-            return "V_med: " + str(3.6*self.distance/self._timer.time)
+            return "V_med: " + str(3.6*self.distance/self.time_int)
         if self.distance < self.settings.run_length:
             return "Trappola tra " + str(round(self.settings.run_length - self.distance)) + " metri"
         elif self.distance > self.settings.run_length and self.distance_trap >= 0:

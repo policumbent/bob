@@ -1,5 +1,7 @@
 from threading import Thread
+from typing import Dict
 
+from .sensor import Sensor
 from .ant_manager import Ant
 import time
 import sys
@@ -8,7 +10,7 @@ from .message import Message
 from .heartrate import HeartRate
 from .powermeter import Powermeter
 from .settings import Settings
-from .mqtt import MqttSensor
+from .mqtt import MqttConsumer
 from .speed import Speed
 from .timer import Timer
 
@@ -22,15 +24,23 @@ settings = Settings({
     'circumference': 1450,
     'average_power_time': 3
 })
-mqtt: MqttSensor
+mqtt: MqttConsumer
+sensors: dict = dict()
 
 
 def message_handler(topic, message):
-    pass
-
-
-def new_settings(s):
-    pass
+    if topic == 'signals':
+        if message.decode() == 'powermeter_calibration':
+            for e in sensors:
+                sensors[e].signal(message)
+        return
+    try:
+        if topic == 'sensors/manager':
+            json_message = json.loads(message)
+            if sensors.__contains__('speed'):
+                sensors['speed'].time_int = int(json_message['time_int'])
+    except Exception as e:
+        print(e)
 
 
 def send_message(message: Message):
@@ -38,13 +48,15 @@ def send_message(message: Message):
     mqtt.publish_message(message)
 
 
-def loop(timer, hr, speed, powermeter):
+def loop():
     while True:
         v = dict()
-        # v.update(timer.export())
-        v.update(hr.export())
-        v.update(speed.export())
-        v.update(powermeter.export())
+        for e in sensors:
+            v.update(sensors[e].export())
+        # # v.update(timer.export())
+        # v.update(hr.export())
+        # v.update(speed.export())
+        # v.update(powermeter.export())
         print(v)
         mqtt.publish(json.dumps(v))
         time.sleep(1)
@@ -57,17 +69,19 @@ def start():
         return
     print("Mqtt server ip:", sys.argv[1])
     print('Starting ANT')
-
-    timer = Timer()
-    hr = HeartRate(settings)
-    speed = Speed(send_message, settings, timer)
-    powermeter = Powermeter(send_message, settings)
-    worker_thread = Thread(target=loop, args=(timer, hr, speed, powermeter), daemon=True)
+    settings.load()
+    # sensors['timer'] = Timer()
+    sensors['hr'] = HeartRate(settings)
+    sensors['speed'] = Speed(send_message, settings)
+    sensors['powermeter'] = Powermeter(send_message, settings)
+    worker_thread = Thread(
+        target=loop,
+        daemon=True)
     worker_thread.start()
-    Ant(send_message, hr, speed, powermeter)
+    Ant(send_message, sensors['hr'], sensors['speed'], sensors['powermeter'])
 
 
-mqtt = MqttSensor(sys.argv[1], 1883, 'ant', settings, message_handler)
+mqtt = MqttConsumer(sys.argv[1], 1883, 'ant', ['manager'], settings, message_handler)
 
 if __name__ == '__main__':
     start()
