@@ -12,7 +12,7 @@ settings = Settings({
 bikeData: BikeData = BikeData(
     ['ant', 'gps', 'power_speed_target', 'manager', 'gear', 'messages']
 )
-
+mqtt: MqttConsumer
 distance = 0
 
 
@@ -31,14 +31,13 @@ def message_handler(topic, message):
 
 def start():
     print('Starting speed_power_target')
-
     settings.load()
     mqtt = MqttConsumer('192.168.1.20', 1883, 'speed_power_target', ['ant'], settings, message_handler)
     target: PowerSpeedTarget = PowerSpeedTarget(settings, bikeData)
-    # while True:
-    #     # print(data)
-    #     # mqtt.publish(data)
-    #     time.sleep(1)
+    while True:
+        target.export()
+        mqtt.publish()
+        time.sleep(1)
 
 
 if __name__ == '__main__':

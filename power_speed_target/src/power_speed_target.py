@@ -65,11 +65,10 @@ class PowerSpeedTarget(Sensor):
             if not self._exist:
                 return
             while True:
-                if len(self._lines < self._bikeData.distance):
+                if len(self._lines) < self._bikeData.distance:
                     return
                 line = self._lines[self._bikeData.distance]
                 dis, self._speed, self._power = line.split(',')
-                self._bikeData.set_power_speed_target(self.export())
 
     @property
     def target_speed(self):
