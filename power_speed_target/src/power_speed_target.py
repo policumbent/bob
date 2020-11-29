@@ -13,7 +13,8 @@ class PowerSpeedTarget(Sensor):
     #  o implemento un metodo che lo chiuda e lo riapra se è stato modificato
     #  oppure ignoro questo metodo
     def signal(self, value: str):
-        pass
+        if value == 'new_settings':
+            self.reset()
 
     def export(self):
         return {
@@ -56,6 +57,7 @@ class PowerSpeedTarget(Sensor):
         self._exist = False
         self._file.close()
         self.open_file()
+        self.refresh()
 
     def refresh(self):
         with self._file_lock:
