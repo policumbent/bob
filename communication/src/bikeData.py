@@ -108,9 +108,10 @@ class BikeData:
                           sort_keys=True, indent=4)
 
     # MANAGER DATA
+
     @property
     def bike_name(self):
-        return self.__bikeName\
+        return self.__bikeName
 
     @property
     def time_str(self):
@@ -132,17 +133,16 @@ class BikeData:
 
     @property
     def speed(self):
-        return self.__speed \
+        return self.__speed
 
 
     @property
     def distance(self):
-        return self.__distance \
-
+        return self.__distance
 
     @property
     def power(self):
-        return self.__power \
+        return self.__power
 
 
     @property
@@ -153,23 +153,21 @@ class BikeData:
 
     @property
     def timestamp(self):
-        return self.__timestamp\
+        return self.__timestamp
 
 
     @property
     def speed_gps(self):
-        return self.__speedGps\
+        return self.__speedGps
 
 
     @property
     def latitude(self):
-        return self.__latitude\
-
+        return self.__latitude
 
     @property
     def longitude(self):
-        return self.__longitude\
-
+        return self.__longitude
 
     # GEAR DATA
 
@@ -181,8 +179,7 @@ class BikeData:
 
     @property
     def target_speed(self):
-        return self.__targetSpeed\
-
+        return self.__targetSpeed
 
     @property
     def target_power(self):
@@ -192,8 +189,7 @@ class BikeData:
 
     @property
     def line1(self):
-        return self.__line1\
-
+        return self.__line1
 
     @property
     def line2(self):
