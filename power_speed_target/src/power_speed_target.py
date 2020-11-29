@@ -69,9 +69,6 @@ class PowerSpeedTarget(Sensor):
                 dis, self._speed, self._power = line.split(',')
                 self._bikeData.set_power_speed_target(self.export())
 
-    def get(self):
-        return self._line
-
     @property
     def target_speed(self):
         return round(float(self._speed * 3.6, 2))
