@@ -2,6 +2,8 @@ import time
 import json
 import sys
 
+import urllib3
+
 from .bikeData import BikeData
 from .alert import Alert
 from .settings import Settings
@@ -73,25 +75,40 @@ def start():
     print('Starting Communication')
     global settings
     settings = Settings({
-        'server_ip': '192.168.1.20',
+        'server_ip': 'poliserver.duckdns.org',
         'cert': './cert.crt',
-        'server_port': 8080,
-        'protocol': 'http',
+        'server_port': 9002,
+        'protocol': 'https',
         'username': 'admin',
         'password': 'admin'
     })
-    settings.load()
+    # settings.load()
     global mqtt
     mqtt = MqttRemote(sys.argv[1], 1883, 'http_service',
                       ['ant', 'gps'], settings, message_handler)
     mqtt.publish_settings(settings)
     global service
     service = HttpService(settings)
+    counter = 0
     while True:
         try:
-            service.add_bike_data(json.loads(bikeData.to_json()))
-        except Exception as e:
+            # service.add_bike_data(json.loads(bikeData.to_json()))
+            # contsrollo la configurazione ogni minuto
+            counter %= 60
+            # if counter == 0:
+                # print('Get config')
+                # todo: ottenere la configurazione
+                # service.get_config()
+            # ottengo informazioni sul vento ogni 10s
+            if counter % 10 == 0:
+                print('Get weather data from server')
+                # ottengo i dati della stazione meteo dal poli server
+                # e li pubblico sull'mqtt server
+                weather_data = service.get_weather()
+                mqtt.publish_data('weather', json.dumps(weather_data))
+        except ConnectionRefusedError or urllib3.exceptions.MaxRetryError as e:
             print(e)
+        counter += 1
         time.sleep(1)
 
 
