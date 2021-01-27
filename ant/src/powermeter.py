@@ -29,7 +29,8 @@ class Powermeter(Sensor):
         return {
             'average_power': self.getAverage(),
             'power': self.value,
-            '1s_power': self.get_average_1s()
+            '1s_power': self.get_average_1s(),
+            'cadence': self.cadence
         }
 
     def update_settings(self, settings: Settings):
