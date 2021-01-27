@@ -150,6 +150,11 @@ class MqttRemote(MqttConsumer):
     def handle_message(self, client, msg: mqtt.MQTTMessage) -> None:
         self.message_handler(msg.topic, msg.payload)
 
+    """ Invio il dato del sensore remoto"""
+    def publish_data(self, sensor_name: str, message: str) -> None:
+        status_topic = 'sensors/{}'.format(sensor_name)
+        self.mqtt_client.publish(status_topic, message, retain=False)
+
 
 class MqttMessage(Mqtt):
     """ Un sensore effettua la subscribe alle impostazioni e ai suoi segnali."""
