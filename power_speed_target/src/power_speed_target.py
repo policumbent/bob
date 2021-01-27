@@ -3,6 +3,7 @@ import threading
 
 from .sensor import Sensor
 from .settings import Settings
+from .bikeData import BikeData
 
 
 # todo: rifare logica
@@ -12,7 +13,8 @@ class PowerSpeedTarget(Sensor):
     #  o implemento un metodo che lo chiuda e lo riapra se è stato modificato
     #  oppure ignoro questo metodo
     def signal(self, value: str):
-        pass
+        if value == 'new_settings':
+            self.reset()
 
     def export(self):
         return {
@@ -20,17 +22,21 @@ class PowerSpeedTarget(Sensor):
             'target_power': self.target_power
         }
 
-    def __init__(self, settings: Settings):
+    def __init__(self, settings: Settings, bikedata: BikeData):
         self._settings = settings
+        self._bikeData = bikedata
         self._file_lock = threading.Lock()
-
+        self._lines = []
         self._exist = False
         self._file = None
         self._state = False
         self._csv = None
         self._line = (0, 0, 0)
         self._line_count = 0
+        self._speed = 0.0
+        self._power = 0.0
         self.open_file()
+        self.refresh()
 
     def open_file(self):
         with self._file_lock:
@@ -38,13 +44,10 @@ class PowerSpeedTarget(Sensor):
                 self._file = open("power_speed_profiles/" + self._settings.vel_power_target_csv, "r")
                 self._exist = True
                 self._state = True
-                self._csv = csv.reader(self._file, delimiter=',')
-                self._line_count = 0
-                self._line = next(self._csv, None)
             except FileNotFoundError:
                 print("File simulator non esistente")
                 self._exist = False
-                self._line = (0, 0, 0)
+                self._lines = self._file.readlines()
 
     @property
     def state(self):
@@ -54,38 +57,26 @@ class PowerSpeedTarget(Sensor):
         self._exist = False
         self._file.close()
         self.open_file()
+        self.refresh()
 
-    def refresh(self, distance):
+    def refresh(self):
         with self._file_lock:
             # todo: togliere il try catch
             if not self._exist:
                 return
-            try:
-                if self._line is None:
+            while True:
+                if len(self._lines) < self._bikeData.distance:
                     return
-                self._line_count += 1
-                while int(self._line[0]) < distance:
-                    self._line = next(self._csv, None)
-                    if self._line is None:
-                        self._state = False
-                        return
-                    # print("Distance: ", self._line[0])
-                    # print("Speed: ", round(float(self._line[1]) * 3.6, 2))
-                    # print("Power: ", self._line[2])
-            except Exception as e:
-                print(e)
-                print("Errore power speed simulator")
-
-    def get(self):
-        return self._line
+                line = self._lines[self._bikeData.distance]
+                dis, self._speed, self._power = line.split(',')
 
     @property
     def target_speed(self):
-        return round(float(self._line[1]) * 3.6, 2)
+        return round(float(self._speed * 3.6, 2))
 
     @property
     def target_power(self):
-        return round(float(self._line[2]))
+        return round(float(self._power))
 
     def get_running(self):
         return self._state
