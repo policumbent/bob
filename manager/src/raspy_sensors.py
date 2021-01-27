@@ -24,7 +24,7 @@ class RaspySensors(Sensor):
             mex = "Temperatura CPU alta (" + str(round(self.temperature)) + "°C)"
             self._send_message(Message(mex, MexPriority.high, MexType.default, 1, 1))
             self._send_alert(Alert(mex, AlertPriority.very_high))
-        return {'temperature': self.temperature}
+        return {'cpu_temperature': self.temperature}
 
     def update_settings(self, settings: Settings):
         with self._settings_lock:

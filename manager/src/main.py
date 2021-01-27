@@ -75,9 +75,12 @@ def start():
         v.update(sensors.export())
         v.update(timer.export())
         v.update({'bike': settings.bike})
+        v.update({'activity_number': 0})
         # print(data)
         mqtt.publish(json.dumps(v))
         time.sleep(1)
+
+# todo: activity number => progressive number, incremented at restart and reset
 
 
 if __name__ == '__main__':
