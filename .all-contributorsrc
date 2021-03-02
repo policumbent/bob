@@ -15,6 +15,15 @@
         "ideas",
         "infra"
       ]
+    },
+    {
+      "login": "davidegavatorta",
+      "name": "davidegavatorta",
+      "avatar_url": "https://avatars.githubusercontent.com/u/45601520?v=4",
+      "profile": "https://github.com/davidegavatorta",
+      "contributions": [
+        "code"
+      ]
     }
   ],
   "contributorsPerLine": 7,
