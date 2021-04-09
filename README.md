@@ -12,7 +12,7 @@ Per tutti manca la gestione delle impostazioni
 - sensori
   - [ ] ant
   - [ ] accelerometer
-  - [ ] weather
+  - [ ] weather => sensori umidità e temperatura a bordo della bici
   - [x] gps
   - [ ] gear => gestione cambio e comunicazione seriale
 - consumatori
@@ -21,6 +21,7 @@ Per tutti manca la gestione delle impostazioni
   - [x] raspberry manager (cronometro / temperatura cpu)
   - [x] video
 - comunicazione
+  - [x] gpio => tasti cambio e combinazioni tasti
   - [ ] communication => collegamento con il server http
   - [x] bt => collegamento con l'app bt  **(manca dockerfile)**
 - messaggi
