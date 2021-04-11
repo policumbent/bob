@@ -11,7 +11,7 @@ Per tutti manca la gestione delle impostazioni
 
 - sensori
   - [ ] ant
-  - [ ] accelerometer
+  - [x] accelerometer
   - [ ] weather => sensori umidità e temperatura a bordo della bici
   - [x] gps
   - [ ] gear => gestione cambio e comunicazione seriale
