@@ -76,6 +76,21 @@ services:
     depends_on:
       - "mqtt-broker"
 
+  accelerometer:
+    build: ./accelerometer
+    container_name: accelerometer
+    restart: unless-stopped
+    privileged: true
+    devices:
+      - /dev/gpiomem
+    volumes:
+      - ./accelerometer/src:/src
+      - ./accelerometer/data:/data
+    networks:
+      - poli
+    depends_on:
+      - "mqtt-broker"
+
 #  bt:
 #    build: ./bt
 #    container_name: bt

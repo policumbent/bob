@@ -15,10 +15,10 @@ class Message:
     def __init__(
             self,
             text: str,
-            message_priority: int,
-            message_type: int,
-            message_time: int,
-            message_timeout: int):
+            message_priority: int = MexPriority.medium,
+            message_type: int = MexType.default,
+            message_time: int = 5,
+            message_timeout: int = 10):
         self.text = text
         self.message_priority = message_priority
         self.message_type = message_type

@@ -82,6 +82,7 @@ def start():
         'username': 'admin',
         'password': 'admin'
     })
+    # todo: riabilitare load dei settings
     # settings.load()
     global mqtt
     mqtt = MqttRemote(sys.argv[1], 1883, 'http_service',
@@ -92,7 +93,7 @@ def start():
     counter = 0
     while True:
         try:
-            # service.add_bike_data(json.loads(bikeData.to_json()))
+            service.add_bike_data(json.loads(bikeData.to_json()))
             # contsrollo la configurazione ogni minuto
             counter %= 60
             # if counter == 0:

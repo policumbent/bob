@@ -141,7 +141,7 @@ class MqttRemote(MqttConsumer):
         client.subscribe('alerts/#')
 
     def publish_signal(self, signal: str) -> None:
-        status_topic = 'signals'.format(self.name)
+        status_topic = 'signals'
         self.mqtt_client.publish(status_topic, signal, retain=False)
 
     def publish_new_settings(self, message: dict) -> None:
@@ -163,6 +163,6 @@ class MqttMessage(Mqtt):
 
     """ Invio il dato del sensore """
     def publish(self, message: dict) -> None:
-        status_topic = 'messages'.format(self.name)
+        status_topic = 'messages'
         self.mqtt_client.publish(status_topic, json.dumps(message), retain=False)
 
