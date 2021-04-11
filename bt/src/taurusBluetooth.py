@@ -102,7 +102,7 @@ class TaurusBluetooth:
                 return reply, new_settings
             if isinstance(t, int):
                 reply, new_settings = self.int_value_change(case, value)
-                return reply, None
+                return reply, new_settings
             self._send_message(
                 Message('{} impostato a '.format(case.capitalize()), MexPriority.medium, MexType.default, 5, 15)
             )
