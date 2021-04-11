@@ -1,28 +1,38 @@
 from .accelerometer import Accelerometer
 import time
 import json
-
+import sys
 from .settings import Settings
 from .mqtt import MqttSensor
+from .alert import Alert
+from .message import Message
+import os
+
+mqtt: MqttSensor
+accelerometer: Accelerometer
 
 
-def signal(s):
-    pass
+def send_alert(alert: Alert):
+    mqtt.publish_alert(alert)
 
 
-def new_settings(s):
-    pass
+def send_message(message: Message):
+    mqtt.publish_message(message)
 
 
-def send_message(message, priority):
-    print(message, priority)
+def message_handler(topic: str, message: bytes):
+    if topic == 'signals':
+        accelerometer.signal(message.decode())
 
 
 def start():
     print('Starting accelerometer')
     settings = Settings({})
-    accelerometer = Accelerometer(settings)
-    mqtt = MqttSensor('192.168.1.20', 1883, 'accelerometer', signal, new_settings)
+    os.system('i2cdetect -y 1')
+    global accelerometer
+    accelerometer = Accelerometer(settings, send_alert, send_message)
+    global mqtt
+    mqtt = MqttSensor(sys.argv[1], 1883, 'accelerometer', settings, message_handler)
     while True:
         mqtt.publish(json.dumps(accelerometer.export()))
         time.sleep(1)
