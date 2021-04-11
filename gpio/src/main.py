@@ -1,5 +1,6 @@
 import time
 import json
+import sys
 from .settings import Settings
 from .mqtt import MqttRemote
 from .message import Message
@@ -30,10 +31,10 @@ def send_pressed(message: int):
 
 
 def start():
-    print('Starting Communication')
+    print('Starting GPIO')
     settings.load()
     global mqtt
-    mqtt = MqttRemote('192.168.1.20', 1883, 'gpio', [], settings, message_handler)
+    mqtt = MqttRemote(sys.argv[1], 1883, 'gpio', [], settings, message_handler)
     Gpio(send_message, send_alert, send_pressed)
     while True:
         time.sleep(1)
