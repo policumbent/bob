@@ -113,7 +113,7 @@ class Accelerometer(Sensor):
 
     def _run(self):
         while True:
-            t_i = time()
+            # t_i = time()
 
             self._init_values()  # Inizializza massimi e somme
 
@@ -132,5 +132,5 @@ class Accelerometer(Sensor):
                     'z_max':  round(self._data_max["z"], 2)
                 }
 
-            t_f = time()
-            print('t:', t_f-t_i, ' Hz:', 1000/(t_f-t_i))
+            # t_f = time()
+            # print('t:', t_f-t_i, ' Hz:', 1000/(t_f-t_i))

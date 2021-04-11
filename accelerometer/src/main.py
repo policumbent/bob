@@ -37,7 +37,7 @@ def start():
     mqtt = MqttSensor(sys.argv[1], 1883, 'accelerometer', settings, message_handler)
     while True:
         mqtt.publish(json.dumps(accelerometer.export()))
-        print(accelerometer.export())
+        # print(accelerometer.export())
         time.sleep(1)
 
 
