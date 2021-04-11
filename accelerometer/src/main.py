@@ -27,7 +27,9 @@ def message_handler(topic: str, message: bytes):
 
 def start():
     print('Starting accelerometer')
-    settings = Settings({})
+    settings = Settings({
+        'accelerometer_local_csv': False
+    })
     os.system('i2cdetect -y 1')
     global accelerometer
     accelerometer = Accelerometer(settings, send_alert, send_message)
@@ -35,6 +37,7 @@ def start():
     mqtt = MqttSensor(sys.argv[1], 1883, 'accelerometer', settings, message_handler)
     while True:
         mqtt.publish(json.dumps(accelerometer.export()))
+        print(accelerometer.export())
         time.sleep(1)
 
 

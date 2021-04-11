@@ -1,7 +1,8 @@
 import threading
-import time
+from datetime import datetime
 from mpu6050 import mpu6050
-
+from time import time
+from .raw_csv import RawCsv
 from .sensor import Sensor
 from .settings import Settings
 from .alert import Alert, AlertPriority
@@ -10,13 +11,16 @@ from .message import Message, MexPriority
 axis = ['x', 'y', 'z']
 
 
+# todo: si potrebbe usare i vettori di numpy
+#  per calcolare distanze e fare i conti in modo più efficiente
 class Accelerometer(Sensor):
     def export(self):
         with self._value_lock:
             return self._values.copy()
 
     def update_settings(self, settings: Settings):
-        pass
+        if settings.accelerometer_local_csv and not self._accelerometer_local_csv:
+            self._raw_csv = RawCsv(datetime.now().__str__())
 
     def signal(self, value: str):
         if value == 'accel_set_zero':
@@ -44,6 +48,14 @@ class Accelerometer(Sensor):
             self._data[a] = [0]*self._n_samples
             # i massimi (e anche le medie) sono in valore assoluto
             self._data_avg[a] = 0
+
+        # come filename uso il timestamp proveniente dalla rete
+        # questa funzione verrà solo abilitata in pista per i test
+        # quindi presupponiamo che ci sia internet
+        self._accelerometer_local_csv = settings.accelerometer_local_csv
+        self._raw_csv = None
+        if settings.accelerometer_local_csv:
+            self._raw_csv = RawCsv(datetime.now().__str__())
         self._worker = threading.Thread(target=self._run, daemon=True)
         self._worker.start()
 
@@ -59,17 +71,22 @@ class Accelerometer(Sensor):
     def data(self):
         return self._data
 
-    def _is_abnormal(self, max_values: dict):
-        pass
+    # def _is_abnormal(self, max_values: dict):
+    #     for a in axis:
+    #
+    #     pass
 
     def _get_data(self, i):
         sensor_data = self._sensor.get_accel_data()
         if self._zero_count:
+            print('Calibrazione')
             for a in axis:
                 self._data_zero[a] = sensor_data[a]
             self._zero_count = False
         for a in axis:
-            self._data[a][i] = sensor_data[a] - self._data_zero[a]
+            self._data[a][i] = round(sensor_data[a] - self._data_zero[a], 2)
+        if self._accelerometer_local_csv:
+            self._raw_csv.write(sensor_data)
 
     def _update_values(self, i):
         for a in axis:
@@ -96,15 +113,15 @@ class Accelerometer(Sensor):
 
     def _run(self):
         while True:
+            t_i = time()
+
             self._init_values()  # Inizializza massimi e somme
 
             for i in range(self._n_samples):
                 self._get_data(i)  # Legge i dati dall'accelerometro
                 self._update_values(i)  # Aggiorna massimi e somme
-
             for a in axis:
                 self._data_avg[a] = self._data_sum[a] / self._n_samples
-
             with self._value_lock:
                 self._values = {
                     'x_avg':  round(self._data_avg["x"], 2),
@@ -114,3 +131,6 @@ class Accelerometer(Sensor):
                     'y_max':  round(self._data_max["y"], 2),
                     'z_max':  round(self._data_max["z"], 2)
                 }
+
+            t_f = time()
+            print('t:', t_f-t_i, ' Hz:', 1000/(t_f-t_i))
