@@ -91,6 +91,18 @@ services:
     depends_on:
       - "mqtt-broker"
 
+  gpio:
+    build: ./gpio
+    container_name: gpio
+    restart: unless-stopped
+    privileged: true
+    devices:
+      - /dev/gpiomem
+    networks:
+      - poli
+    depends_on:
+      - "mqtt-broker"
+
 #  bt:
 #    build: ./bt
 #    container_name: bt

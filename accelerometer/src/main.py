@@ -26,6 +26,10 @@ def message_handler(topic: str, message: bytes):
 
 
 def start():
+    n = len(sys.argv)
+    if n < 2:
+        print("Total arguments passed:", n)
+        return
     print('Starting accelerometer')
     settings = Settings({
         'accelerometer_local_csv': False

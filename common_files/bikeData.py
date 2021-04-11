@@ -8,7 +8,7 @@ class BikeData:
         # MANAGER DATA
         if sensors.__contains__('manager'):
             self.__timeStr: str = ''
-            self.__bikeName: str = 'taurusx'
+            self.__bikeName: str = 'no_bike'
             self.__cpuTemp: int = 0
             self.__time: int = 0
 
@@ -19,6 +19,15 @@ class BikeData:
             self.__distance: int = 0
             self.__power: int = 0
             self.__cadence: int = 0
+
+        # ACCELEROMETER DATA
+        if sensors.__contains__('accelerometer'):
+            self.__xAvg: float = 0
+            self.__yAvg: float = 0
+            self.__zAvg: float = 0
+            self.__xMax: float = 0
+            self.__yMax: float = 0
+            self.__zMax: float = 0
 
         # GPS DATA
         if sensors.__contains__('gps'):
@@ -68,6 +77,22 @@ class BikeData:
             self.__power = values['1s_power']
         if values.__contains__('cadence') and isinstance(values['cadence'], int):
             self.__cadence = values['cadence']
+
+    def set_accelerometer(self, values: dict):
+        if not self._sensors.__contains__('accelerometer'):
+            return
+        if values.__contains__('x_avg') and isinstance(values['x_avg'], float):
+            self.__xAvg = values['x_avg']
+        if values.__contains__('y_avg') and isinstance(values['y_avg'], float):
+            self.__yAvg = values['y_avg']
+        if values.__contains__('z_avg') and isinstance(values['z_avg'], float):
+            self.__zAvg = values['z_avg']
+        if values.__contains__('x_max') and isinstance(values['x_max'], float):
+            self.__xMax = values['x_max']
+        if values.__contains__('y_max') and isinstance(values['y_max'], float):
+            self.__yMax = values['y_max']
+        if values.__contains__('z_max') and isinstance(values['z_max'], float):
+            self.__zMax = values['z_max']
 
     def set_gps(self, values: dict):
         if not self._sensors.__contains__('gps'):

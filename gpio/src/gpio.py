@@ -1,9 +1,5 @@
-import json
 import time
-# import wiringpi  # pylint: disable=import-error
 import RPi.GPIO as GPIO
-import serial
-# from serial import Serial, serialutil
 from .message import Message, MexType, MexPriority
 from .alert import Alert, AlertPriority
 
