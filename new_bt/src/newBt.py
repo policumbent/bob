@@ -50,7 +50,7 @@ class NewBt:
         # la finestra di accettazione è +1
         # e viene generato casualmente all'avvio
         # dichiaro anche un lock, perchè lo voglio usare/aggiornare in un thread alla volta
-        self.__incremental_number: int = randint(0, pow(2, 32))
+        self.__incremental_number: int = randint(0, pow(2, 32)-1)
         self.__incremental_number_lock: threading.Lock = threading.Lock()
 
         # lista dei client connessi e relativo lock della lista per usarle in scrittura
@@ -91,7 +91,7 @@ class NewBt:
                     self.__client_list.remove(client_sock)
                     # esco dal thread se la socket viene chiusa
                 print(data.decode('utf-8'))
-                self.__handle_data(client_sock, data)
+                self.__handle_data(client_sock, data.decode('utf-8'))
                 # client_sock.send('ciao$\n')
         except Exception as e:
             print(e)
@@ -111,7 +111,8 @@ class NewBt:
     def __validate_incremental_number(self, number):
         with self.__incremental_number_lock:
             self.__incremental_number += 1
-            return self.__incremental_number == number
+            print(self.__incremental_number, '==', number)
+            return self.__incremental_number == int(number)
 
     def send_settings(self, settings: dict):
         data = {
@@ -145,12 +146,24 @@ class NewBt:
 
         # todo: BOB NEW BT: fare controlli sui dati ricevuti
         data = json.loads(data)
-        if not self.__validate_key_digest(data['key_digest'], data['data']):
+        print(type(data['data']))
+
+        # separo il nonce dai dati per la successiva verifica e per l'utilizzo dei dati
+        payload = data['data'].split('$$')
+        nonce = payload[1]
+        payload = payload[0]
+
+        if not self.__validate_key_digest(data['key_digest'], data['data'], nonce):
+            print('chiudo la socket')
             client_socket.close()
             return
         if data['type'] == 'signal':
-            self.__send_signal(data['data'])
-        self.__publish_new_settings()
+            self.__send_signal(payload)
+        elif data['type'] == 'settings':
+            print(data['data'])
+            payload = json.loads(payload)
+            print(payload)
+            self.__publish_new_settings(payload)
 
     # posso ignorare il timeout, tanto sono in un thread dedicato
     # e non ho il problema di dover liberare le risorse
@@ -165,17 +178,11 @@ class NewBt:
         # rimuovo il terminatore '$\n'
         return data[:-2]
 
-    def __validate_key_digest(self, key_digest: str, data) -> bool:
-        if type(data) == dict:
-            data = json.dumps(data)
+    def __validate_key_digest(self, key_digest: str, data: str, nonce: int) -> bool:
         # se non ho una stringa o un dict ritorno falso
         if type(data) != str:
             return False
-        incremental_number = self.incremental_number
-        key = self.__key.encode('utf-16')
-        print(f"{data}{1}")
-        digest = hmac.new('ciaomarta!'.encode('utf-8'), f"{data}".encode('utf-8'), hashlib.sha256)
+        key = self.__key.encode('utf-8')
+        digest = hmac.new(key, f"{data}".encode('utf-8'), hashlib.sha256)
         print(digest.hexdigest(), 'is valid?? ', digest.hexdigest() == key_digest)
-        # todo: BOB NEW BT: qui ritorno true solo per test, successivamente bisognerà ritornare
-        #  return digest == key_digest
-        return True
+        return digest.hexdigest() == key_digest and self.__validate_incremental_number(nonce)

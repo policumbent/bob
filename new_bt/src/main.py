@@ -37,15 +37,16 @@ def send_message(message: Message):
 
 # todo: gestire tutte le eccezioni nella serializzazione
 #  e deserializzazione
-def message_handler(topic, message):
+def message_handler(topic, message: bytes):
     if topic == 'signals':
-        bt.send_signal(message)
+        print('mh signal', message)
+        bt.send_signal(message.decode('utf-8'))
         print('signal: ', message)
     if topic[0:9] == 'settings/':
         global settings
         data[topic] = json.loads(message)
         bt.update_settings(data)
-        print(json.dumps(data, indent=4))
+        # print(json.dumps(data, indent=4))
 
 
 def start():
