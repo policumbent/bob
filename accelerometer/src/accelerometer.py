@@ -14,9 +14,10 @@ axis = ['x', 'y', 'z']
 # todo: si potrebbe usare i vettori di numpy
 #  per calcolare distanze e fare i conti in modo più efficiente
 class Accelerometer(Sensor):
+    # todo: accelerometer da sistemare i lock
     def export(self):
-        with self._value_lock:
-            return self._values.copy()
+        # with self._value_lock:
+        return self._values.copy()
 
     def update_settings(self, settings: Settings):
         if settings.accelerometer_local_csv and not self._accelerometer_local_csv:
@@ -89,16 +90,16 @@ class Accelerometer(Sensor):
             self._raw_csv.write(sensor_data)
 
     def _update_values(self, i):
-        with self._value_lock:
-            for a in axis:
-                if abs(self._data[a][i]) > self._data_max[a]:
-                    self._data_max[a] = abs(self._data[a][i])
-                self._data_sum[a] += abs(self._data[a][i])
+        # with self._value_lock:
+        for a in axis:
+            if abs(self._data[a][i]) > self._data_max[a]:
+                self._data_max[a] = abs(self._data[a][i])
+            self._data_sum[a] += abs(self._data[a][i])
 
     def _max_reset(self):
-        with self._value_lock:
-            for a in axis:
-                self._data_max[a] = 0
+        # with self._value_lock:
+        for a in axis:
+            self._data_max[a] = 0
 
     # def _print_data(self):
     #     print("x max: " + str(self._data_max["x"]) + ", x avg: " + str(self._data["x_avg"]))
@@ -107,11 +108,11 @@ class Accelerometer(Sensor):
     #     print('\n')
 
     def _init_values(self):
-        with self._value_lock:
-            # i massimi (e anche le medie) sono in valore assoluto
-            for a in axis:
-                self._data_max[a] = 0
-                self._data_sum[a] = 0
+        # with self._value_lock:
+        # i massimi (e anche le medie) sono in valore assoluto
+        for a in axis:
+            self._data_max[a] = 0
+            self._data_sum[a] = 0
 
     def _run(self):
         while True:
@@ -122,17 +123,17 @@ class Accelerometer(Sensor):
             for i in range(self._n_samples):
                 self._get_data(i)  # Legge i dati dall'accelerometro
                 self._update_values(i)  # Aggiorna massimi e somme
-            with self._value_lock:
-                for a in axis:
-                    self._data_avg[a] = self._data_sum[a] / self._n_samples
-                self._values = {
-                    'x_avg':  round(self._data_avg["x"], 2),
-                    'y_avg':  round(self._data_avg["y"], 2),
-                    'z_avg':  round(self._data_avg["z"], 2),
-                    'x_max':  round(self._data_max["x"], 2),
-                    'y_max':  round(self._data_max["y"], 2),
-                    'z_max':  round(self._data_max["z"], 2)
-                }
+            # with self._value_lock:
+            for a in axis:
+                self._data_avg[a] = self._data_sum[a] / self._n_samples
+            self._values = {
+                'x_avg':  round(self._data_avg["x"], 2),
+                'y_avg':  round(self._data_avg["y"], 2),
+                'z_avg':  round(self._data_avg["z"], 2),
+                'x_max':  round(self._data_max["x"], 2),
+                'y_max':  round(self._data_max["y"], 2),
+                'z_max':  round(self._data_max["z"], 2)
+            }
 
             t_f = time()
             print('t:', t_f-t_i, ' Hz:', 1000/(t_f-t_i))
