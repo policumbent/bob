@@ -87,9 +87,8 @@ def start():
     # todo: riabilitare load dei settings
     # settings.load()
     global mqtt
-    mqtt = MqttRemote(sys.argv[1], 1883, 'http_service',
-                      ['ant', 'gps', 'accelerometer'],
-                      settings, message_handler)
+    mqtt = MqttRemote(sys.argv[1], 1883, 'http_service', ['ant', 'gps', 'accelerometer'],
+                      [], settings, message_handler)
     mqtt.publish_settings(settings)
     global service
     service = HttpService(settings)

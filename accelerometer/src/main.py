@@ -38,7 +38,8 @@ def start():
     global accelerometer
     accelerometer = Accelerometer(settings, send_alert, send_message)
     global mqtt
-    mqtt = MqttSensor(sys.argv[1], 1883, 'accelerometer', settings, message_handler)
+    mqtt = MqttSensor(sys.argv[1], 1883, 'accelerometer',
+                      ['accel_set_zero', 'reset'], settings, message_handler)
     while True:
         mqtt.publish(json.dumps(accelerometer.export()))
         # print(accelerometer.export())

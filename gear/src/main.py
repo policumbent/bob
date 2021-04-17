@@ -28,7 +28,8 @@ def send_alert(alert: Alert):
     mqtt.publish_alert(alert)
 
 
-def message_handler(topic, message):
+# todo: possiamo gestire la cambiata anche con dei segnali? => per l'app
+def message_handler(topic: str, message: bytes):
     if topic == 'sensors/gpio':
         # todo: gestire parsing error
         json_message = json.loads(message)
@@ -51,7 +52,7 @@ def start():
     settings.load()
     global mqtt
     mqtt = MqttConsumer(sys.argv[1], 1883, 'gear', ['gpio'],
-                        settings, message_handler)
+                        [], settings, message_handler)
     mqtt.publish_settings(settings)
     global gear
     gear = Gear(send_message, settings)

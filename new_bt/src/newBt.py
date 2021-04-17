@@ -21,21 +21,20 @@ uuid = "eb60ae08-b17e-11e9-a2a3-2a2ae2dbcce4"
 # todo: gestire lock
 class NewBt:
 
-    # def get_update(self) -> Settings:
-    #     with self._settings_lock:
-    #         return self._settings
-
-    # def has_new_update(self) -> bool:
-    #     with self._settings_lock:
-    #         return self._new_update
-
     def update_settings(self, settings: dict):
         # with self._settings_lock:
         self.__settings = settings
         self.send_settings(settings)
 
-    def __init__(self, settings: dict, key: str, publish_new_settings, send_signal, send_message, send_alert):
-        self.__settings = settings
+    def update_signals(self, signals: set):
+        # with self._settings_lock:
+        self.__signals = list(signals)
+        self.send_signals_list(signals)
+
+    def __init__(self, settings: dict, signals: set, key: str,
+                 publish_new_settings, send_signal, send_message, send_alert):
+        self.__settings: dict = settings
+        self.__signals: list = list(signals)
         self.__new_settings = settings
         self.__publish_new_settings = publish_new_settings
         self.__send_signal = send_signal
@@ -84,6 +83,7 @@ class NewBt:
         self.__client_list.append(client_sock)
         print("Received data from ", address)
         self.send_settings(self.__settings)
+        self.send_signals_list(self.__signals)
         try:
             while True:
                 data = self.__recv_data(client_sock)
@@ -92,16 +92,10 @@ class NewBt:
                     # esco dal thread se la socket viene chiusa
                 print(data.decode('utf-8'))
                 self.__handle_data(client_sock, data.decode('utf-8'))
-                # client_sock.send('ciao$\n')
         except Exception as e:
             print(e)
             self.__client_list.remove(client_sock)
         print('chiudo il thread')
-        # if self._new_update:
-        #     self._new_update = False
-        #     self._send_settings(new_settings)
-        # client_sock.send(reply.encode("utf-8"))
-        # client_sock.close()
 
     @property
     def incremental_number(self):
@@ -126,6 +120,14 @@ class NewBt:
         data = {
             'type': 'signal',
             'data': signal,
+            'incremental_number': self.incremental_number
+        }
+        self.__send_data(data)
+
+    def send_signals_list(self, signals: list):
+        data = {
+            'type': 'signals_list',
+            'data': signals,
             'incremental_number': self.incremental_number
         }
         self.__send_data(data)

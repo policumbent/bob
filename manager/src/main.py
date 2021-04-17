@@ -68,7 +68,7 @@ def start():
     settings.load()
     global mqtt
     mqtt = MqttConsumer(sys.argv[1], 1883, 'manager', ['ant', 'gps'],
-                        settings, message_handler)
+                        ['reset', 'stop'], settings, message_handler)
     sensors = RaspySensors(send_message, send_alert, settings)
     while True:
         v = dict()

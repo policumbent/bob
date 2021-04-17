@@ -34,7 +34,7 @@ def start():
     print('Starting GPIO')
     settings.load()
     global mqtt
-    mqtt = MqttRemote(sys.argv[1], 1883, 'gpio', [], settings, message_handler)
+    mqtt = MqttRemote(sys.argv[1], 1883, 'gpio', [], [], settings, message_handler)
     Gpio(send_message, send_alert, send_pressed)
     while True:
         time.sleep(1)

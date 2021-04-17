@@ -1,5 +1,6 @@
 import time
 import json
+import ast
 
 from .bikeData import BikeData
 from .settings import Settings
@@ -9,7 +10,8 @@ from .message import Message
 from .alert import Alert
 
 
-data = dict()
+data: dict = dict()
+signals_set: set = set()
 bt: NewBt
 settings: Settings
 mqtt: MqttRemote
@@ -41,8 +43,13 @@ def message_handler(topic, message: bytes):
     if topic == 'signals':
         print('mh signal', message)
         bt.send_signal(message.decode('utf-8'))
-        print('signal: ', message)
-    if topic[0:9] == 'settings/':
+    elif topic[0:13] == 'signals_list/':
+        signals_list = ast.literal_eval(message.decode('utf-8'))
+        for i in signals_list:
+            signals_set.add(i)
+        bt.update_signals(signals_set)
+
+    elif topic[0:9] == 'settings/':
         global settings
         data[topic] = json.loads(message)
         bt.update_settings(data)
@@ -57,10 +64,11 @@ def start():
     global mqtt
     # si iscrive al gps per sapere l'ora e la velocità e all'ant per la velocità
     # se il veicolo si sta muovendo le modifiche alle impostazioni verranno rifiutate
-    mqtt = MqttRemote('127.0.0.1', 1883, 'new_bt', ['ant', 'gps'], settings, message_handler)
-    mqtt.publish_settings(settings)
     global bt
-    bt = NewBt({}, 'ciaomarta!', publish_new_settings, send_signal, send_message, send_alert)
+    bt = NewBt({}, set(), 'ciaomarta!', publish_new_settings, send_signal, send_message, send_alert)
+    mqtt = MqttRemote('127.0.0.1', 1883, 'new_bt', [], [], settings, message_handler)
+    mqtt.publish_settings(settings)
+
     while True:
         bt.handle()
 

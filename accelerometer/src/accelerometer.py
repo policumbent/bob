@@ -89,10 +89,11 @@ class Accelerometer(Sensor):
             self._raw_csv.write(sensor_data)
 
     def _update_values(self, i):
-        for a in axis:
-            if abs(self._data[a][i]) > self._data_max[a]:
-                self._data_max[a] = abs(self._data[a][i])
-            self._data_sum[a] += abs(self._data[a][i])
+        with self._value_lock:
+            for a in axis:
+                if abs(self._data[a][i]) > self._data_max[a]:
+                    self._data_max[a] = abs(self._data[a][i])
+                self._data_sum[a] += abs(self._data[a][i])
 
     def _max_reset(self):
         with self._value_lock:
@@ -106,23 +107,24 @@ class Accelerometer(Sensor):
     #     print('\n')
 
     def _init_values(self):
-        # i massimi (e anche le medie) sono in valore assoluto
-        for a in axis:
-            self._data_max[a] = 0
-            self._data_sum[a] = 0
+        with self._value_lock:
+            # i massimi (e anche le medie) sono in valore assoluto
+            for a in axis:
+                self._data_max[a] = 0
+                self._data_sum[a] = 0
 
     def _run(self):
         while True:
-            # t_i = time()
+            t_i = time()
 
             self._init_values()  # Inizializza massimi e somme
 
             for i in range(self._n_samples):
                 self._get_data(i)  # Legge i dati dall'accelerometro
                 self._update_values(i)  # Aggiorna massimi e somme
-            for a in axis:
-                self._data_avg[a] = self._data_sum[a] / self._n_samples
             with self._value_lock:
+                for a in axis:
+                    self._data_avg[a] = self._data_sum[a] / self._n_samples
                 self._values = {
                     'x_avg':  round(self._data_avg["x"], 2),
                     'y_avg':  round(self._data_avg["y"], 2),
@@ -132,5 +134,5 @@ class Accelerometer(Sensor):
                     'z_max':  round(self._data_max["z"], 2)
                 }
 
-            # t_f = time()
-            # print('t:', t_f-t_i, ' Hz:', 1000/(t_f-t_i))
+            t_f = time()
+            print('t:', t_f-t_i, ' Hz:', 1000/(t_f-t_i))

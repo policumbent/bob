@@ -26,7 +26,11 @@ class CommonSettings:
             print(e)
 
     def new_settings(self, settings: dict):
+        updated = False
         for s in self._values:
             if settings.__contains__(s):
                 self._values[s] = settings[s]
-        self.save()
+                updated = True
+        if updated:
+            self.save()
+        return updated
