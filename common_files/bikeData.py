@@ -65,18 +65,22 @@ class BikeData:
             self.__bikeName = values['bike']
 
     def set_ant(self, values: dict):
+        print('set', values)
         if not self._sensors.__contains__('ant'):
             return
-        if values.__contains__('heartrate') and isinstance(values['heartrate'], int):
-            self.__heartrate = values['heartrate']
-        if values.__contains__('speed') and isinstance(values['speed'], float):
-            self.__speed = values['speed']
-        if values.__contains__('distance') and isinstance(values['distance'], int):
-            self.__distance = values['distance']
-        if values.__contains__('1s_power') and isinstance(values['1s_power'], int):
-            self.__power = values['1s_power']
-        if values.__contains__('cadence') and isinstance(values['cadence'], int):
-            self.__cadence = values['cadence']
+        try:
+            if values.__contains__('heartrate'):
+                self.__heartrate = int(values['heartrate'])
+            if values.__contains__('speed'):
+                self.__speed = float(values['speed'])
+            if values.__contains__('distance'):
+                self.__distance = int(values['distance'])
+            if values.__contains__('1s_power'):
+                self.__power = int(values['1s_power'])
+            if values.__contains__('cadence'):
+                self.__cadence = int(values['cadence'])
+        except Exception as e:
+            print(e)
 
     def set_accelerometer(self, values: dict):
         if not self._sensors.__contains__('accelerometer'):

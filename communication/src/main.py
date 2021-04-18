@@ -45,6 +45,8 @@ def message_handler(topic, message):
         all_settings = flat_map(data)
         mqtt.publish(json.dumps(all_settings))
         return
+    if topic[0:13] == 'signals_list/':
+        return
     message = json.loads(message)
     if topic == 'alerts':
         send_alert(message)
@@ -53,6 +55,9 @@ def message_handler(topic, message):
         bikeData.set_manager(message)
     if topic == 'sensors/gps':
         bikeData.set_gps(message)
+    if topic == 'sensors/ant':
+        print(topic, message)
+        bikeData.set_ant(message)
     if topic == 'sensors/accelerometer':
         bikeData.set_accelerometer(message)
 
@@ -87,7 +92,7 @@ def start():
     # todo: riabilitare load dei settings
     # settings.load()
     global mqtt
-    mqtt = MqttRemote(sys.argv[1], 1883, 'http_service', ['ant', 'gps', 'accelerometer'],
+    mqtt = MqttRemote(sys.argv[1], 1883, 'http_service', ['ant', 'gps', 'accelerometer', 'manager'],
                       [], settings, message_handler)
     mqtt.publish_settings(settings)
     global service
@@ -95,8 +100,8 @@ def start():
     counter = 0
     while True:
         try:
-            print(json.dumps(bikeData.to_json(), indent=4))
-            # service.add_bike_data(bikeData.to_json())
+            # print(json.dumps(bikeData.to_json(), indent=4))
+            service.add_bike_data(bikeData.to_json())
             # contsrollo la configurazione ogni minuto
             counter %= 60
             # if counter == 0:
@@ -109,7 +114,7 @@ def start():
                 # ottengo i dati della stazione meteo dal poli server
                 # e li pubblico sull'mqtt server
                 weather_data = service.get_weather()
-                print(json.dumps(weather_data, indent=4))
+                # print(json.dumps(weather_data))
                 mqtt.publish_data('weather_station', json.dumps(weather_data))
         except ConnectionRefusedError or urllib3.exceptions.MaxRetryError as e:
             print(e)
