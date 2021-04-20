@@ -55,17 +55,20 @@ class BikeData:
     def set_manager(self, values: dict):
         if not self._sensors.__contains__('manager'):
             return
-        if values.__contains__('time_str') and isinstance(values['time_str'], str):
-            self.__timeStr = values['time_str']
-        if values.__contains__('time_int') and isinstance(values['time_int'], int):
-            self.__time = values['time_int']
-        if values.__contains__('temperature') and isinstance(values['temperature'], int):
-            self.__cpuTemp = values['temperature']
-        if values.__contains__('bike') and isinstance(values['bike'], str):
-            self.__bikeName = values['bike']
+        try:
+            if values.__contains__('time_str'):
+                self.__timeStr = str(values['time_str'])
+            if values.__contains__('time_int'):
+                self.__time = int(values['time_int'])
+            if values.__contains__('cpu_temperature'):
+                self.__cpuTemp = int(values['cpu_temperature'])
+            if values.__contains__('bike'):
+                self.__bikeName = str(values['bike'])
+        except Exception as e:
+            print(e)
 
     def set_ant(self, values: dict):
-        print('set', values)
+        # print('set', values)
         if not self._sensors.__contains__('ant'):
             return
         try:
@@ -85,52 +88,67 @@ class BikeData:
     def set_accelerometer(self, values: dict):
         if not self._sensors.__contains__('accelerometer'):
             return
-        if values.__contains__('x_avg') and isinstance(values['x_avg'], float):
-            self.__xAvg = values['x_avg']
-        if values.__contains__('y_avg') and isinstance(values['y_avg'], float):
-            self.__yAvg = values['y_avg']
-        if values.__contains__('z_avg') and isinstance(values['z_avg'], float):
-            self.__zAvg = values['z_avg']
-        if values.__contains__('x_max') and isinstance(values['x_max'], float):
-            self.__xMax = values['x_max']
-        if values.__contains__('y_max') and isinstance(values['y_max'], float):
-            self.__yMax = values['y_max']
-        if values.__contains__('z_max') and isinstance(values['z_max'], float):
-            self.__zMax = values['z_max']
+        try:
+            if values.__contains__('x_avg'):
+                self.__xAvg = float(values['x_avg'])
+            if values.__contains__('y_avg'):
+                self.__yAvg = float(values['y_avg'])
+            if values.__contains__('z_avg'):
+                self.__zAvg = float(values['z_avg'])
+            if values.__contains__('x_max'):
+                self.__xMax = float(values['x_max'])
+            if values.__contains__('y_max'):
+                self.__yMax = float(values['y_max'])
+            if values.__contains__('z_max'):
+                self.__zMax = float(values['z_max'])
+        except Exception as e:
+            print(e)
 
     def set_gps(self, values: dict):
         if not self._sensors.__contains__('gps'):
             return
-        if values.__contains__('timestamp') and isinstance(values['timestamp'], str):
-            self.__timestamp = values['timestamp']
-        if values.__contains__('latitude') and isinstance(values['latitude'], float):
-            self.__latitude = values['latitude']
-        if values.__contains__('longitude') and isinstance(values['longitude'], float):
-            self.__longitude = values['longitude']
-        if values.__contains__('speedGPS') and isinstance(values['speedGPS'], float):
-            self.__speedGps = values['speedGPS']
+        try:
+            if values.__contains__('timestamp'):
+                self.__timestamp = str(values['timestamp'])
+            if values.__contains__('latitude'):
+                self.__latitude = float(values['latitude'])
+            if values.__contains__('longitude'):
+                self.__longitude = float(values['longitude'])
+            if values.__contains__('speedGPS'):
+                self.__speedGps = float(values['speedGPS'])
+        except Exception as e:
+            print(e)
 
     def set_gear(self, values: dict):
         if not self._sensors.__contains__('gear'):
             return
-        if values.__contains__('gear') and isinstance(values['gear'], int):
-            self.__gear = values['gear']
+        try:
+            if values.__contains__('gear'):
+                self.__gear = int(values['gear'])
+        except Exception as e:
+            print(e)
 
     def set_power_speed_target(self, values: dict):
         if not self._sensors.__contains__('power_speed_target'):
             return
-        if values.__contains__('target_power') and isinstance(values['target_power'], float):
-            self.__targetPower = values['target_power']
-        if values.__contains__('target_speed') and isinstance(values['target_speed'], float):
-            self.__targetSpeed = values['target_speed']
+        try:
+            if values.__contains__('target_power'):
+                self.__targetPower = float(values['target_power'])
+            if values.__contains__('target_speed'):
+                self.__targetSpeed = float(values['target_speed'])
+        except Exception as e:
+            print(e)
 
     def set_messages(self, values: dict):
         if not self._sensors.__contains__('messages'):
             return
-        if values.__contains__('line_1') and isinstance(values['line_1'], str):
-            self.__line1 = values['line_1']
-        if values.__contains__('line_2') and isinstance(values['line_2'], str):
-            self.__line2 = values['line_2']
+        try:
+            if values.__contains__('line_1'):
+                self.__line1 = str(values['line_1'])
+            if values.__contains__('line_2'):
+                self.__line2 = str(values['line_2'])
+        except Exception as e:
+            print(e)
 
     def to_json(self):
         elements = self.__dict__.copy()

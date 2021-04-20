@@ -56,7 +56,6 @@ def message_handler(topic, message):
     if topic == 'sensors/gps':
         bikeData.set_gps(message)
     if topic == 'sensors/ant':
-        print(topic, message)
         bikeData.set_ant(message)
     if topic == 'sensors/accelerometer':
         bikeData.set_accelerometer(message)
@@ -119,7 +118,7 @@ def start():
         except ConnectionRefusedError or urllib3.exceptions.MaxRetryError as e:
             print(e)
         counter += 1
-        time.sleep(1)
+        time.sleep(10)
 
 
 if __name__ == '__main__':
