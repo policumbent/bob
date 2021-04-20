@@ -118,7 +118,7 @@ def start():
         except ConnectionRefusedError or urllib3.exceptions.MaxRetryError as e:
             print(e)
         counter += 1
-        time.sleep(10)
+        time.sleep(1)
 
 
 if __name__ == '__main__':
