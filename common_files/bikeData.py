@@ -22,12 +22,12 @@ class BikeData:
 
         # ACCELEROMETER DATA
         if sensors.__contains__('accelerometer'):
-            self.__xAvg: float = 0
-            self.__yAvg: float = 0
-            self.__zAvg: float = 0
-            self.__xMax: float = 0
-            self.__yMax: float = 0
-            self.__zMax: float = 0
+            self.__accX: float = 0
+            self.__accY: float = 0
+            self.__accZ: float = 0
+            self.__accXMax: float = 0
+            self.__accYMax: float = 0
+            self.__accZMax: float = 0
 
         # GPS DATA
         if sensors.__contains__('gps'):
@@ -90,17 +90,17 @@ class BikeData:
             return
         try:
             if values.__contains__('x_avg'):
-                self.__xAvg = float(values['x_avg'])
+                self.__accX = float(values['x_avg'])
             if values.__contains__('y_avg'):
-                self.__yAvg = float(values['y_avg'])
+                self.__accY = float(values['y_avg'])
             if values.__contains__('z_avg'):
-                self.__zAvg = float(values['z_avg'])
+                self.__accZ = float(values['z_avg'])
             if values.__contains__('x_max'):
-                self.__xMax = float(values['x_max'])
+                self.__accXMax = float(values['x_max'])
             if values.__contains__('y_max'):
-                self.__yMax = float(values['y_max'])
+                self.__accYMax = float(values['y_max'])
             if values.__contains__('z_max'):
-                self.__zMax = float(values['z_max'])
+                self.__accZMax = float(values['z_max'])
         except Exception as e:
             print(e)
 

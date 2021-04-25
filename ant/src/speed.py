@@ -23,8 +23,8 @@ class Speed(Sensor):
 
     def export(self):
         return {
-            'speed': self.value,
-            'distance': self.distance
+            'speed': round(self.value, 2),
+            'distance': round(self.distance, 2)
         }
 
     def __init__(self, send_message, settings: Settings):

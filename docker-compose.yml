@@ -17,6 +17,8 @@ services:
     build: ./gps
     container_name: gps
     restart: unless-stopped
+    volumes:
+      - "./gps/data:/data"
     devices:
       - "/dev/ttyAMA1:/dev/ttyAMA1"
     networks:
@@ -28,6 +30,8 @@ services:
     build: ./gear
     container_name: gear
     restart: unless-stopped
+    volumes:
+      - "./gear/data:/data"
     devices:
       - "/dev/ttyS0:/dev/ttyS0"
     networks:
@@ -57,6 +61,8 @@ services:
     container_name: ant
     restart: unless-stopped
     privileged: true
+    volumes:
+      - "./ant/data:/data"
     devices:
       - "/dev/:/dev/"
     networks:
@@ -68,6 +74,8 @@ services:
     build: ./messages
     container_name: messages
     restart: unless-stopped
+    volumes:
+      - "./messages/data:/data"
     networks:
       - poli
     depends_on:
@@ -78,6 +86,8 @@ services:
     container_name: manager
     restart: unless-stopped
     privileged: true
+    volumes:
+      - "./manager/data:/data"
     networks:
       - poli
     depends_on:
@@ -91,7 +101,7 @@ services:
     devices:
       - /dev/gpiomem
     volumes:
-      - ./accelerometer/src:/src
+#      - ./accelerometer/src:/src
       - ./accelerometer/data:/data
     networks:
       - poli
@@ -124,6 +134,8 @@ services:
     build: ./communication
     container_name: communication
     restart: unless-stopped
+    volumes:
+      - "./communication/data:/data"
     networks:
       - poli
     depends_on:

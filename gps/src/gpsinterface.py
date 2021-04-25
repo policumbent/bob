@@ -29,7 +29,8 @@ class GpsInterface(Sensor):
             'longitude': self.longitude,
             'altitude': self.altitude,
             'speedGPS': self.speed,
-            'distanceGPS': self.travelled_distance
+            'distanceGPS': self.travelled_distance,
+            'satellites': self.satellites
         }
 
     def update_settings(self, settings: Settings):

@@ -81,7 +81,7 @@ def start():
     print('Starting Communication')
     global settings
     settings = Settings({
-        'server_ip': 'poliserver.duckdns.org',
+        'server_ip': 'server.policumbent.it',
         'cert': './cert.crt',
         'server_port': 9002,
         'protocol': 'https',
@@ -99,7 +99,7 @@ def start():
     counter = 0
     while True:
         try:
-            # print(json.dumps(bikeData.to_json(), indent=4))
+            print(json.dumps(bikeData.to_json(), indent=4))
             service.add_bike_data(bikeData.to_json())
             # contsrollo la configurazione ogni minuto
             counter %= 60

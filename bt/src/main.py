@@ -65,8 +65,7 @@ def start():
     settings = Settings({})
     # settings.load()
     global mqtt
-    mqtt = MqttRemote('127.0.0.1', 1883, 'bt',
-                      ['ant', 'gps'], settings, message_handler)
+    mqtt = MqttRemote('127.0.0.1', 1883, 'bt', ['ant', 'gps'], [], settings, message_handler)
     mqtt.publish_settings(settings)
     global bt
     bt = TaurusBluetooth({}, send_settings, send_signal, send_message, send_alert)

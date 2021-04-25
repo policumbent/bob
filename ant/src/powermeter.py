@@ -49,7 +49,7 @@ class Powermeter(Sensor):
 
         self.count = 0
         self.count2 = 0
-        self.cadence = "0"
+        self.cadence = 0
         self.eventEquals = 0
         self.n_average = 10
         self.timeStampP = 0
@@ -102,7 +102,7 @@ class Powermeter(Sensor):
 
     @property
     def value(self):
-        return self._power
+        return round(self._power)
 
     @property
     def state(self):
@@ -229,7 +229,7 @@ class Powermeter(Sensor):
             cadencePeriod = deltaTime * 0.0005 / eventCountC
             if cadencePeriod != 0:
                 cadence = 60 / cadencePeriod
-                self.cadence = str(round(cadence))
+                self.cadence = round(cadence)
             else:
                 cadence = 1
             # ## CALCOLO POTENZA
@@ -266,28 +266,28 @@ class Powermeter(Sensor):
 
     def getCadence(self):
         if (time.time() - self.lastRxTime) > 4:
-            self.cadence = str(0)
+            self.cadence = 0
         if self.eventEquals >= 12:
-            self.cadence = str(0)
+            self.cadence = 0
         return self.cadence
 
-    def get(self):
+    def get(self) -> int:
         if self.eventEquals >= 12:
             self._power = 0
-        return str(round(self._power))
+        return round(self._power)
 
     def get_count(self):
         return self.count2
 
-    def getAverage(self):
+    def getAverage(self) -> int:
         if self.averagePower is None:
-            return "0"
-        return str(round(self.averagePower))
+            return 0
+        return round(self.averagePower)
 
-    def get_average_1s_str(self):
+    def get_average_1s_str(self) -> int:
         if self.averagePower1s is None:
-            return "0"
-        return str(round(self.averagePower1s))
+            return 0
+        return round(self.averagePower1s)
 
     def get_average_1s(self) -> int:
         if self.averagePower1s is None:

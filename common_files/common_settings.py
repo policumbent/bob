@@ -1,4 +1,5 @@
 import json
+from os import makedirs
 
 
 class CommonSettings:
@@ -15,12 +16,17 @@ class CommonSettings:
         return self._values
 
     def save(self):
-        with open('config.json', 'w') as json_file:
-            json.dump(self._values, json_file)
+        try:
+            makedirs('./data', exist_ok=True)
+            with open('./data/config.json', 'w') as json_file:
+                json.dump(self._values, json_file)
+        except Exception as e:
+            print(e)
 
     def load(self):
         try:
-            with open('config.json') as json_file:
+            makedirs('./data', exist_ok=True)
+            with open('./data/config.json') as json_file:
                 self._values = json.load(json_file)
         except Exception as e:
             print(e)
