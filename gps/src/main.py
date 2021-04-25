@@ -5,6 +5,7 @@ from .settings import Settings
 from .mqtt import MqttSensor
 from .gpsinterface import GpsInterface
 
+
 gps: GpsInterface
 
 
