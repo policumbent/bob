@@ -1,10 +1,10 @@
 import threading
 import time
-from .message import Message, MexType, MexPriority
+from .common_files.message import Message, MexType, MexPriority
 from collections import deque
 from threading import Thread
 
-from .sensor import Sensor
+from .common_files.sensor import Sensor
 
 from .ant.easy.channel import Channel
 
@@ -23,8 +23,8 @@ class Speed(Sensor):
 
     def export(self):
         return {
-            'speed': self.value,
-            'distance': self.distance
+            'speed': round(self.value, 2),
+            'distance': round(self.distance, 2)
         }
 
     def __init__(self, send_message, settings: Settings):

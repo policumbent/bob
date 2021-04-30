@@ -8,15 +8,19 @@ from .alert import Alert
 
 
 class Mqtt:
-    def __init__(self,
-                 broker_ip: str,
-                 port: int,
-                 name: str,
-                 settings: CommonSettings,
-                 message_handler):
+    def __init__(
+            self,
+            broker_ip: str,
+            port: int,
+            name: str,
+            signal_list: List[str],
+            settings: CommonSettings,
+            message_handler
+    ):
         self.name = name
         self.settings = settings
         self.message_handler = message_handler
+        self.signal_list = signal_list
         self.mqtt_client = mqtt.Client()
         self.mqtt_client.on_connect = self.on_connect
         self.mqtt_client.on_message = self.on_message
@@ -32,12 +36,13 @@ class Mqtt:
 
     @classmethod
     def on_disconnect(cls, client, userdata, msg) -> None:
+        print("Disconnected")
         """The callback called when user is disconnected from the broker."""
         print("Disconnected from broker")
 
     def on_connect(self, client, userdata, flags, rc) -> None:
         """ The callback for when the client receives a CONNACK response. """
-        print("Connected with result code " + str(rc))
+        print("Connected with result code", str(rc))
         # Subscribing in on_connect() means that if we lose the connection and
         # reconnect then subscriptions will be renewed.
         client.subscribe('new_settings')
@@ -49,15 +54,16 @@ class Mqtt:
         status_topic = 'state/{}'.format(self.name)
         self.mqtt_client.publish(status_topic, json.dumps({"connected": True}), retain=True)
         self.publish_settings(self.settings)
+        self.publish_signals_list(self.signal_list)
 
     def on_message(self, client, userdata, msg: mqtt.MQTTMessage) -> None:
         """The callback for when a PUBLISH message is received."""
         # print(msg.topic + " " + str(msg.payload))
         if msg.topic == 'new_settings'.format(self.name):
             try:
-                self.settings.new_settings(json.loads(msg.payload))
-                self.publish_settings(self.settings)
-                self.message_handler('signal', 'settings_updated')
+                if self.settings.new_settings(json.loads(msg.payload)):
+                    self.publish_settings(self.settings)
+                    self.message_handler('signal', 'settings_updated')
             except Exception as e:
                 print(e)
         else:
@@ -76,6 +82,12 @@ class Mqtt:
         self.settings = settings
         status_topic = 'settings/{}'.format(self.name)
         self.mqtt_client.publish(status_topic, json.dumps(settings.values), retain=True)
+
+    """ Invio la lista dei signal del sensore/consumer """
+    def publish_signals_list(self, signal_list: List[str]) -> None:
+        self.signal_list = signal_list
+        status_topic = 'signals_list/{}'.format(self.name)
+        self.mqtt_client.publish(status_topic, str(signal_list), retain=True)
 
     """ > Un sensore pubblica un json con il messaggio che vuole mandare """
     def publish_message(self, message: Message) -> None:
@@ -109,9 +121,10 @@ class MqttConsumer(MqttSensor):
                  port: int,
                  name: str,
                  topics: List[str],
+                 signal_list: List[str],
                  settings: CommonSettings,
                  message_handler):
-        super(MqttConsumer, self).__init__(broker_ip, port, name, settings, message_handler)
+        super(MqttConsumer, self).__init__(broker_ip, port, name, signal_list, settings, message_handler)
         self.topics = topics
 
     """ Un consumer effettua la subscribe alle impostazioni e ai sensori a cui è interessato."""
@@ -129,9 +142,10 @@ class MqttRemote(MqttConsumer):
                  port: int,
                  name: str,
                  topics: List[str],
+                 signal_list: List[str],
                  settings: CommonSettings,
                  message_handler):
-        super(MqttRemote, self).__init__(broker_ip, port, name, topics, settings, message_handler)
+        super(MqttRemote, self).__init__(broker_ip, port, name, topics, signal_list, settings, message_handler)
 
     """ Un remote controller effettua la subscribe alle impostazioni,
      ai sensori a cui è interessato e alle notifiche."""
@@ -139,6 +153,7 @@ class MqttRemote(MqttConsumer):
         super().subscribe(client)
         client.subscribe('settings/#')
         client.subscribe('alerts/#')
+        client.subscribe('signals_list/#')
 
     def publish_signal(self, signal: str) -> None:
         status_topic = 'signals'

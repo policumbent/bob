@@ -2,7 +2,7 @@ import json
 import threading
 import time
 from .SteGPS.steGPS import Gps
-
+from .common_files.sensor import Sensor
 # Define RX and TX pins for the board's serial port connected to the GPS.
 # These are the defaults you should use for the GPS FeatherWing.
 # For other boards set RX = GPS module TX, and TX = GPS module RX pins.
@@ -11,7 +11,7 @@ from .SteGPS.steGPS import Gps
 from .settings import Settings
 
 
-class GpsInterface:
+class GpsInterface(Sensor):
 
     def __init__(self, settings: Settings, timezone_hours=+1):
         self._settings = settings
@@ -19,7 +19,8 @@ class GpsInterface:
         self._gps = Gps('/dev/ttyAMA1', timezone_hours)
 
     def signal(self, value: str):
-        pass
+        if value == 'reset':
+            self.reset_distance()
 
     def export(self):
         return {
@@ -28,7 +29,8 @@ class GpsInterface:
             'longitude': self.longitude,
             'altitude': self.altitude,
             'speedGPS': self.speed,
-            'distanceGPS': self.travelled_distance
+            'distanceGPS': self.travelled_distance,
+            'satellites': self.satellites
         }
 
     def update_settings(self, settings: Settings):

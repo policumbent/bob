@@ -1,5 +1,5 @@
 from typing import List, Dict
-from .common_settings import CommonSettings
+from .common_files.common_settings import CommonSettings
 
 
 class Settings(CommonSettings):

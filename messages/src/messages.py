@@ -2,7 +2,7 @@ from threading import Thread
 import time
 
 from queue import PriorityQueue
-from .message import MexPriority, Message, MexType
+from .common_files.message import MexPriority, Message, MexType
 
 
 class Messages:

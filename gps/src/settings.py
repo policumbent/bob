@@ -1,7 +1,14 @@
-from .common_settings import CommonSettings
+from .common_files.common_settings import CommonSettings
 
 
 class Settings(CommonSettings):
+    @property
+    def trap_length(self) -> float:
+        return self._values['trap_length'] \
+            if self._values.__contains__('trap_length') \
+               and isinstance(self._values['trap_length'], int) \
+            else 200
+
     @property
     def latitude_timing_start(self) -> float:
         return self._values['latitude_timing_start'] \

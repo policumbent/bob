@@ -10,7 +10,7 @@ from .message import Message
 from .heartrate import HeartRate
 from .powermeter import Powermeter
 from .settings import Settings
-from .mqtt import MqttConsumer
+from .common_files.mqtt import MqttConsumer
 from .speed import Speed
 from .timer import Timer
 
@@ -28,11 +28,10 @@ mqtt: MqttConsumer
 sensors: dict = dict()
 
 
-def message_handler(topic, message):
+def message_handler(topic, message: bytes):
     if topic == 'signals':
-        if message.decode() == 'powermeter_calibration':
-            for e in sensors:
-                sensors[e].signal(message)
+        for e in sensors:
+            sensors[e].signal(message)
         return
     try:
         if topic == 'sensors/manager':
@@ -81,7 +80,8 @@ def start():
     Ant(send_message, sensors['hr'], sensors['speed'], sensors['powermeter'])
 
 
-mqtt = MqttConsumer(sys.argv[1], 1883, 'ant', ['manager'], settings, message_handler)
+mqtt = MqttConsumer(sys.argv[1], 1883, 'ant', ['manager'], ['powermeter_calibration', 'reset'],
+                    settings, message_handler)
 
 if __name__ == '__main__':
     start()

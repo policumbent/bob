@@ -3,9 +3,9 @@ import time
 import json
 import sys
 from .settings import Settings
-from .mqtt import MqttSensor
-from .alert import Alert
-from .message import Message
+from .common_files.mqtt import MqttSensor
+from .common_files.alert import Alert
+from .common_files.message import Message
 import os
 
 mqtt: MqttSensor
@@ -26,6 +26,10 @@ def message_handler(topic: str, message: bytes):
 
 
 def start():
+    n = len(sys.argv)
+    if n < 2:
+        print("Total arguments passed:", n)
+        return
     print('Starting accelerometer')
     settings = Settings({
         'accelerometer_local_csv': False
@@ -34,7 +38,10 @@ def start():
     global accelerometer
     accelerometer = Accelerometer(settings, send_alert, send_message)
     global mqtt
-    mqtt = MqttSensor(sys.argv[1], 1883, 'accelerometer', settings, message_handler)
+    mqtt = MqttSensor(sys.argv[1], 1883, 'accelerometer',
+                      ['accel_set_zero', 'reset'], settings, message_handler)
+    time.sleep(1)
+    accelerometer.signal('accel_set_zero')
     while True:
         mqtt.publish(json.dumps(accelerometer.export()))
         # print(accelerometer.export())

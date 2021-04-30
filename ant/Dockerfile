@@ -1,4 +1,5 @@
 FROM python:3.9
+VOLUME /data
 COPY src /src
 RUN  apt-get update && apt-get install libusb-dev apt-utils -y
 

@@ -1,12 +1,12 @@
 import time
 import json
 
-from .bikeData import BikeData
 from .settings import Settings
-from .mqtt import MqttRemote
 from .taurusBluetooth import TaurusBluetooth
-from .message import Message
-from .alert import Alert
+from .common_files.mqtt import MqttSensor
+from .common_files.alert import Alert
+from .common_files.message import Message
+from .common_files.bikeData import BikeData
 
 data = dict()
 bt: TaurusBluetooth
@@ -46,6 +46,7 @@ def message_handler(topic, message):
     if topic[0:9] == 'settings/':
         data[topic] = json.loads(message)
         all_settings = flat_map(data)
+        print(json.dumps(data, indent=4))
         bt.update_settings(all_settings)
         mqtt.publish(json.dumps(all_settings))
         return
@@ -64,8 +65,7 @@ def start():
     settings = Settings({})
     # settings.load()
     global mqtt
-    mqtt = MqttRemote('127.0.0.1', 1883, 'bt',
-                      ['ant', 'gps'], settings, message_handler)
+    mqtt = MqttRemote('127.0.0.1', 1883, 'bt', ['ant', 'gps'], [], settings, message_handler)
     mqtt.publish_settings(settings)
     global bt
     bt = TaurusBluetooth({}, send_settings, send_signal, send_message, send_alert)

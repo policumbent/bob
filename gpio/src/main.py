@@ -2,9 +2,9 @@ import time
 import json
 import sys
 from .settings import Settings
-from .mqtt import MqttRemote
-from .message import Message
-from .alert import Alert
+from .common_files.mqtt import MqttRemote
+from .common_files.message import Message
+from .common_files.alert import Alert
 from .gpio import Gpio, GpioMessage
 settings = Settings({})
 mqtt: MqttRemote
@@ -34,7 +34,7 @@ def start():
     print('Starting GPIO')
     settings.load()
     global mqtt
-    mqtt = MqttRemote(sys.argv[1], 1883, 'gpio', [], settings, message_handler)
+    mqtt = MqttRemote(sys.argv[1], 1883, 'gpio', [], [], settings, message_handler)
     Gpio(send_message, send_alert, send_pressed)
     while True:
         time.sleep(1)

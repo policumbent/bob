@@ -1,9 +1,9 @@
 import csv
 import threading
 
-from .sensor import Sensor
+from .common_files.sensor import Sensor
 from .settings import Settings
-from .bikeData import BikeData
+from .common_files.bikeData import BikeData
 
 
 # todo: rifare logica

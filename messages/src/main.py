@@ -2,9 +2,9 @@ import time
 import json
 import sys
 from .settings import Settings
-from .mqtt import MqttMessage
+from .common_files.mqtt import MqttMessage
 from .messages import Messages
-from .message import Message, MexPriority
+from .common_files.message import Message, MexPriority
 
 settings = Settings({
     'trap_priority': MexPriority.low
@@ -23,7 +23,7 @@ def check_json(json_message: dict):
     )
 
 
-def message_handler(topic, message):
+def message_handler(topic: str, message: bytes):
     if not topic[0:9] == 'messages/':
         return
     print(topic, message)
@@ -62,7 +62,7 @@ def start():
     print('Starting Communication')
 
     settings.load()
-    mqtt = MqttMessage(sys.argv[1], 1883, 'messages', settings, message_handler)
+    mqtt = MqttMessage(sys.argv[1], 1883, 'messages', [], settings, message_handler)
     while True:
         data = messages.get_values()
         # print(data)
