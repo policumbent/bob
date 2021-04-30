@@ -2,7 +2,7 @@ import json
 import threading
 import time
 from .SteGPS.steGPS import Gps
-from .sensor import Sensor
+from .common_files.sensor import Sensor
 # Define RX and TX pins for the board's serial port connected to the GPS.
 # These are the defaults you should use for the GPS FeatherWing.
 # For other boards set RX = GPS module TX, and TX = GPS module RX pins.

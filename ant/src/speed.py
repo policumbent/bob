@@ -1,10 +1,10 @@
 import threading
 import time
-from .message import Message, MexType, MexPriority
+from .common_files.message import Message, MexType, MexPriority
 from collections import deque
 from threading import Thread
 
-from .sensor import Sensor
+from .common_files.sensor import Sensor
 
 from .ant.easy.channel import Channel
 

@@ -1,12 +1,12 @@
 import time
 import json
 
-from .bikeData import BikeData
 from .settings import Settings
-from .mqtt import MqttRemote
 from .taurusBluetooth import TaurusBluetooth
-from .message import Message
-from .alert import Alert
+from .common_files.mqtt import MqttSensor
+from .common_files.alert import Alert
+from .common_files.message import Message
+from .common_files.bikeData import BikeData
 
 data = dict()
 bt: TaurusBluetooth

@@ -10,7 +10,7 @@ from .message import Message
 from .heartrate import HeartRate
 from .powermeter import Powermeter
 from .settings import Settings
-from .mqtt import MqttConsumer
+from .common_files.mqtt import MqttConsumer
 from .speed import Speed
 from .timer import Timer
 

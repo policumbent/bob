@@ -1,5 +1,4 @@
-from .common_settings import CommonSettings
-from .message import MexPriority
+from .common_files.common_settings import CommonSettings
 
 
 class Settings(CommonSettings):

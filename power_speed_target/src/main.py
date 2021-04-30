@@ -1,10 +1,10 @@
 import time
 import json
 from .settings import Settings
-from .mqtt import MqttConsumer
-from .message import Message
+from .common_files.mqtt import MqttConsumer
+from .common_files.message import Message
 from .power_speed_target import PowerSpeedTarget
-from .bikeData import BikeData
+from .common_files.bikeData import BikeData
 
 settings = Settings({
     'speed_power_target_csv': 'test_Vittoria.csv',

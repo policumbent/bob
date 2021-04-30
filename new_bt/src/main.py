@@ -2,12 +2,12 @@ import time
 import json
 import ast
 
-from .bikeData import BikeData
+from .common_files.bikeData import BikeData
 from .settings import Settings
-from .mqtt import MqttRemote
+from .common_files.mqtt import MqttRemote
 from .newBt import NewBt
-from .message import Message
-from .alert import Alert
+from .common_files.message import Message
+from .common_files.alert import Alert
 
 
 data: dict = dict()

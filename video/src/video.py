@@ -4,7 +4,7 @@ import os
 
 from time import sleep
 from PIL import Image, ImageDraw, ImageFont
-from .bikeData import BikeData
+from .common_files.bikeData import BikeData
 from .settings import Settings
 
 FONT = "resources/FreeSans.ttf"

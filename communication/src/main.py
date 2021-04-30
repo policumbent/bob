@@ -4,10 +4,10 @@ import sys
 
 import urllib3
 
-from .bikeData import BikeData
-from .alert import Alert
+from .common_files.bikeData import BikeData
+from .common_files.alert import Alert
 from .settings import Settings
-from .mqtt import MqttRemote
+from .common_files.mqtt import MqttRemote
 from .httpService import HttpService
 
 data = dict()

@@ -9,8 +9,8 @@ import hmac
 
 
 from .settings import Settings
-from .message import Message, MexType, MexPriority
-from .alert import Alert, AlertPriority
+from .common_files.message import Message, MexType, MexPriority
+from .common_files.alert import Alert, AlertPriority
 
 port = 1
 backlog = 3

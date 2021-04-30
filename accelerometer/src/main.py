@@ -3,9 +3,9 @@ import time
 import json
 import sys
 from .settings import Settings
-from .mqtt import MqttSensor
-from .alert import Alert
-from .message import Message
+from .common_files.mqtt import MqttSensor
+from .common_files.alert import Alert
+from .common_files.message import Message
 import os
 
 mqtt: MqttSensor

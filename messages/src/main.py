@@ -2,9 +2,9 @@ import time
 import json
 import sys
 from .settings import Settings
-from .mqtt import MqttMessage
+from .common_files.mqtt import MqttMessage
 from .messages import Messages
-from .message import Message, MexPriority
+from .common_files.message import Message, MexPriority
 
 settings = Settings({
     'trap_priority': MexPriority.low
