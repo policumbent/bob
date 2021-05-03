@@ -29,7 +29,13 @@ def message_handler(topic: str, message: bytes):
         signal_handler(message)
         return
     if topic[0:7] == 'sensors':
-        external_mqtt.publish(f"bikes/{settings.bike}/sensors/{topic[8:]}", message)
+        try:
+            sensor_dict: dict = json.loads(message)
+            for key, value in sensor_dict.items():
+                if type(value) != str:
+                    external_mqtt.publish(f"bikes/{settings.bike}/sensors/{topic[8:]}/{key}", value)
+        except Exception as e:
+            print(e)
     if topic[0:8] == 'settings':
         external_mqtt.publish(f"bikes/{settings.bike}/settings/{topic[9:]}", message, retain=True)
 
@@ -79,7 +85,7 @@ def start():
     # todo: riabilitare load dei settings
     settings.load()
     global external_mqtt
-    external_mqtt = start_external_mqtt('192.168.1.55', 1883, '', '')
+    external_mqtt = start_external_mqtt('192.168.1.76', 1883, '', '')
 
     global mqtt
     mqtt = MqttRemote(sys.argv[1], 1883, 'external_mqtt', ['ant', 'gps', 'accelerometer', 'manager'],

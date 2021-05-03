@@ -1,12 +1,12 @@
 from threading import Thread
 from typing import Dict
 
-from .sensor import Sensor
+from .common_files.sensor import Sensor
 from .ant_manager import Ant
 import time
 import sys
 import json
-from .message import Message
+from .common_files.message import Message
 from .heartrate import HeartRate
 from .powermeter import Powermeter
 from .settings import Settings

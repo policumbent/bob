@@ -3,10 +3,10 @@ from datetime import datetime
 from mpu6050 import mpu6050
 from time import time
 from .raw_csv import RawCsv
-from .sensor import Sensor
+from .common_files.sensor import Sensor
 from .settings import Settings
-from .alert import Alert, AlertPriority
-from .message import Message, MexPriority
+from .common_files.alert import Alert, AlertPriority
+from .common_files.message import Message, MexPriority
 
 axis = ['x', 'y', 'z']
 
