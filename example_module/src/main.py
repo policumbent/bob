@@ -8,7 +8,7 @@ from .common_files.message import Message
 from .example_sensor import ExampleSensor
 
 mqtt: MqttSensor
-example_sensor: ExampleSensor
+hall_sensor: ExampleSensor
 
 
 def send_alert(alert: Alert):
@@ -21,7 +21,7 @@ def send_message(message: Message):
 
 def message_handler(topic: str, message: bytes):
     if topic == 'signals':
-        example_sensor.signal(message.decode())
+        hall_sensor.signal(message.decode())
 #$$message handler$$#
 
 def start():
@@ -33,7 +33,7 @@ def start():
     settings = Settings({
         'example_setting': False
     })
-    global example_sensor
+    global hall_sensor
     example_sensor = ExampleSensor(settings, send_alert, send_message)
     global mqtt
     #$$mqtt start$$#

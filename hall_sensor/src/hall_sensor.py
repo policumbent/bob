@@ -7,8 +7,6 @@ class HallSensor:
         self.pin = pin
         self.timer = -1
         self.frequency = 0
-        self.velocity = 0
-        self.distance = 0
         self.counter = 0
 
     def start_timer(self):
@@ -31,21 +29,24 @@ class HallSensor:
             self.calc_space()
             self.print_status()  # per il debugging
 
-    def calc_freq(self):
-        if self.period >= 0.0375:
-            self.frequency = 1 / self.period
+    def calc_freq(self, period):
+        if period >= 0.036:
+            self.frequency = 1 / period
 
-    def calc_vel(self):
-        self.velocity = 1.5 * self.frequency* 3.6  # circumference * frequency
+    @property
+    def speed(self):
+        # todo: mettere a 0 quando un passaggio da più di 4s
+        return round(self.__settings.circumference * self.frequency * 3.6 / 1000, 2)  # circumference * frequency
 
-    def calc_space(self):
-        self.distance = self.counter * 1.5
+    @property
+    def distance(self):
+        return round(self.counter * self.__settings.circumference / pow(10, 6), 2)
 
     def get_rpm(self):
         return self.frequency * 60
 
     def print_status(self):
-        print(f" freq: {self.get_rpm(): .2f} giri/min vel: {self.velocity: .2f} km/h dist: {self.distance: .2f} m")
+        print(f" freq: {self.get_rpm(): .2f} giri/min vel: {self.speed: .2f} km/h dist: {self.distance: .2f} m")
 
     def print_pin_status(self):
         print(GPIO.input(self.pin))  # prints the status of the pin: HIGH(1)/LOW(0)
