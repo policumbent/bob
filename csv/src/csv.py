@@ -4,6 +4,7 @@ from csv import DictWriter
 from datetime import datetime
 from os import makedirs
 
+
 class Csv:
     def signal(self, value: str):
         if value == 'reset':
@@ -30,7 +31,7 @@ class Csv:
         if gps_timestamp != '00-01-01 00:00:00' and gps_timestamp != '20-- ::':
             file_name += '-' + gps_timestamp.replace(' ', '_')
         self.__csv_file = open(f'./data/{file_name}.csv', 'w')
-        keys: list = list(self.__bike_data.to_json().keys())
+        keys: list = list(self.__bike_data.to_json().keys()) + ['timestamp_ntp']
         print(keys)
         print(type(keys))
         self.__csv_writer = DictWriter(self.__csv_file, fieldnames=keys)
@@ -41,4 +42,6 @@ class Csv:
 
     def write_data(self, bike_data: BikeData):
         # print('row', bike_data.to_json())
-        print(self.__csv_writer.writerow(bike_data.to_json()))
+        bike_data_dict = bike_data.to_json()
+        bike_data_dict['timestamp_ntp'] = datetime.now().strftime('%y-%m-%d_%H:%M:%S')
+        self.__csv_writer.writerow(bike_data_dict)
