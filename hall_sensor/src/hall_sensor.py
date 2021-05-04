@@ -1,10 +1,23 @@
 import RPi.GPIO as GPIO
 import time
+from .common_files.sensor import Sensor
+from .settings import Settings
 
 
-class HallSensor:
-    def __init__(self, pin):
-        self.pin = pin
+class HallSensor(Sensor):
+    def export(self):
+        return {
+            'speed_2': self.speed,
+            'distance_2': self.distance
+        }
+
+    def signal(self, value: str):
+        if value == 'reset':
+            self.counter = 0
+
+    def __init__(self, settings: Settings, send_alert, send_message):
+        self.pin = settings.pin
+        self.__settings: Settings = settings
         self.timer = -1
         self.frequency = 0
         self.counter = 0
@@ -47,16 +60,3 @@ class HallSensor:
 
     def print_pin_status(self):
         print(GPIO.input(self.pin))  # prints the status of the pin: HIGH(1)/LOW(0)
-
-
-def main():
-    hall_sensor = HallSensor(24)
-
-
-    while True:
-        time.sleep(1)
-
-
-
-
-main()
