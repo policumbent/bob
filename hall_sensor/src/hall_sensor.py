@@ -8,13 +8,12 @@ class HallSensor:
         self.timer = -1
         self.frequency = 0
         self.counter = 0
+        GPIO.setmode(GPIO.BCM)
+        GPIO.setup(self.pin, GPIO.IN)
+        GPIO.add_event_detect(self.pin, GPIO.FALLING, callback=self.clock)  # passing from HIGH to LOW
 
-    def start_timer(self):
-        self.start = time.time()
-
-    def end_timer(self):
-        self.stop = time.time()
-        self.period = self.stop - self.start
+    def __del__(self):
+        GPIO.cleanup()
 
     def clock(self, channel):
         self.counter += 1
@@ -22,11 +21,9 @@ class HallSensor:
             self.timer = time.time()
         else:
             tme = time.time()
-            self.period = tme - self.timer
+            period = tme - self.timer
             self.timer = tme
-            self.calc_freq()
-            self.calc_vel()
-            self.calc_space()
+            self.calc_freq(period)
             self.print_status()  # per il debugging
 
     def calc_freq(self, period):
@@ -55,15 +52,11 @@ class HallSensor:
 def main():
     hall_sensor = HallSensor(24)
 
-    GPIO.setmode(GPIO.BCM)
-    GPIO.setup(hall_sensor.pin, GPIO.IN)
-
-    GPIO.add_event_detect(hall_sensor.pin, GPIO.FALLING, callback=hall_sensor.clock)  # passing from HIGH to LOW
 
     while True:
         time.sleep(1)
 
-    GPIO.cleanup()
+
 
 
 main()

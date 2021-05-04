@@ -8,7 +8,7 @@ from .common_files.message import Message
 from .example_sensor import ExampleSensor
 
 mqtt: MqttSensor
-hall_sensor: HallSensor
+hall_sensor: ExampleSensor
 
 
 def send_alert(alert: Alert):
