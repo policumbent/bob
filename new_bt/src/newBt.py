@@ -29,7 +29,7 @@ class NewBt:
     def update_signals(self, signals: set):
         # with self._settings_lock:
         self.__signals = list(signals)
-        self.send_signals_list(signals)
+        self.send_signals_list(self.__signals)
 
     def __init__(self, settings: dict, signals: set, key: str,
                  publish_new_settings, send_signal, send_message, send_alert):
