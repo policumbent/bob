@@ -5,10 +5,10 @@ from .settings import Settings
 from .common_files.mqtt import MqttSensor
 from .common_files.alert import Alert
 from .common_files.message import Message
-from .example_sensor import ExampleSensor
+from .hall_sensor import HallSensor
 
 mqtt: MqttSensor
-hall_sensor: ExampleSensor
+hall_sensor: HallSensor
 
 
 def send_alert(alert: Alert):
@@ -22,7 +22,7 @@ def send_message(message: Message):
 def message_handler(topic: str, message: bytes):
     if topic == 'signals':
         hall_sensor.signal(message.decode())
-#$$message handler$$#
+
 
 def start():
     n = len(sys.argv)
@@ -31,14 +31,15 @@ def start():
         return
     print('Starting ExampleSensor')
     settings = Settings({
-        'example_setting': False
+        'pin': 24,
+        'circumference': 1450
     })
     global hall_sensor
-    example_sensor = ExampleSensor(settings, send_alert, send_message)
+    hall_sensor = HallSensor(settings, send_alert, send_message)
     global mqtt
-    #$$mqtt start$$#
+    mqtt = MqttSensor(sys.argv[1], 1883, 'hall_sensor', ['reset'], settings, message_handler)
     while True:
-        mqtt.publish(json.dumps(example_sensor.export()))
+        mqtt.publish(json.dumps(hall_sensor.export()))
         sleep(1)
 
 

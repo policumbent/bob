@@ -120,6 +120,18 @@ services:
     depends_on:
       - "mqtt-broker"
 
+  hall_sensor:
+    build: ./hall_sensor
+    container_name: hall_sensor
+    restart: unless-stopped
+    privileged: true
+    devices:
+      - /dev/gpiomem
+    networks:
+      - poli
+    depends_on:
+      - "mqtt-broker"
+
 #  bt:
 #    build: ./bt
 #    container_name: bt
