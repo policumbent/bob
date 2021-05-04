@@ -50,6 +50,11 @@ class BikeData:
             self.__line1: str = ''
             self.__line2: str = ''
 
+        # HALL SENSOR
+        if sensors.__contains__('hall_sensor'):
+            self.__speed_2: float = 0.0
+            self.__distance_2: float = 0.0
+
     # TODO: CONTROLLARE CHE PARAMETRI SIANO PRESENTI
 
     def set_manager(self, values: dict):
@@ -82,6 +87,17 @@ class BikeData:
                 self.__power = int(values['1s_power'])
             if values.__contains__('cadence'):
                 self.__cadence = int(values['cadence'])
+        except Exception as e:
+            print(e)
+
+    def set_hall_sensor(self, values: dict):
+        if not self._sensors.__contains__('hall_sensor'):
+            return
+        try:
+            if values.__contains__('speed_2'):
+                self.__speed_2 = float(values['speed_2'])
+            if values.__contains__('distance_2'):
+                self.__distance_2 = float(values['distance_2'])
         except Exception as e:
             print(e)
 

@@ -20,7 +20,7 @@ if module_type != 1:
 print('- - - - - - - - - - - - -')
 module_name = module_name.replace(' ', '_')
 print('Nome modulo: ', module_name)
-print('Tipologia modulo: ', module_types[module_type])
+print('Tipologia modulo: ', module_types[module_type-1])
 signals_list = signals_list.replace(' ', '')
 signals_list = signals_list.split(',')
 print('Segnali accettati: ', signals_list)
@@ -34,6 +34,7 @@ if confirm != 'Y' and confirm != 'y':
     exit()
 makedirs(f'./{module_name}/src/common_files', exist_ok=True)
 copyfile('./example_module/Dockerfile', f'./{module_name}/Dockerfile')
+copyfile('./example_module/.gitignore', f'./{module_name}/.gitignore')
 files = [f for f in listdir('./example_module/src') if isfile(join('./example_module/src', f))]
 for file in files:
     file_dest = join(f'./{module_name}/src', file)
