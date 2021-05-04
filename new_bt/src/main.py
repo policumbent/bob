@@ -48,7 +48,8 @@ def message_handler(topic, message: bytes):
         for i in signals_list:
             signals_set.add(i)
         bt.update_signals(signals_set)
-
+    elif topic == 'settings/gear':
+        return
     elif topic[0:9] == 'settings/':
         global settings
         data[topic] = json.loads(message)
