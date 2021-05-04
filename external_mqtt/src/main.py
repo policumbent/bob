@@ -85,7 +85,7 @@ def start():
     # todo: riabilitare load dei settings
     settings.load()
     global external_mqtt
-    external_mqtt = start_external_mqtt('192.168.1.76', 1883, '', '')
+    external_mqtt = start_external_mqtt('server.policumbent.it', 1883, '', '')
 
     global mqtt
     mqtt = MqttRemote(sys.argv[1], 1883, 'external_mqtt', ['ant', 'gps', 'accelerometer', 'manager'],
