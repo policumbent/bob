@@ -10,6 +10,7 @@ from .csv import Csv
 
 mqtt: MqttConsumer
 bike_data: BikeData
+csv: Csv
 
 
 def send_alert(alert: Alert):
@@ -22,7 +23,7 @@ def send_message(message: Message):
 
 def message_handler(topic: str, message: bytes):
     if topic == 'signals':
-        example_sensor.signal(message.decode())
+        csv.signal(message.decode())
     try:
         if topic == 'sensors/manager':
             manager_dict: dict = json.loads(message)
@@ -55,11 +56,14 @@ def start():
     settings = Settings({})
     global bike_data
     bike_data = BikeData(['manager', 'ant', 'gps', 'hall_sensor', 'gear', 'accelerometer'])
-    csv = Csv(settings, send_alert, send_message)
     global mqtt
     mqtt = MqttConsumer(sys.argv[1], 1883, 'csv', ['manager', 'ant', 'gps', 'hall_sensor', 'gear', 'accelerometer'],
                         ['reset'], settings, message_handler)
+    sleep(3)
+    global csv
+    csv = Csv(settings, send_alert, send_message, bike_data)
     while True:
+        csv.write_data(bike_data)
         sleep(1)
 
 
