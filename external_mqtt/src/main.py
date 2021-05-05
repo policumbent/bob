@@ -88,7 +88,7 @@ def start():
     external_mqtt = start_external_mqtt('server.policumbent.it', 1883, '', '')
 
     global mqtt
-    mqtt = MqttRemote(sys.argv[1], 1883, 'external_mqtt', ['ant', 'gps', 'accelerometer', 'manager'],
+    mqtt = MqttRemote(sys.argv[1], 1883, 'external_mqtt', ['ant', 'gps', 'accelerometer', 'manager', 'hall_sensor'],
                       [], settings, message_handler)
     mqtt.publish_settings(settings)
 
