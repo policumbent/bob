@@ -29,11 +29,11 @@ class PyxbeeV2:
     def send_data(self, bike_data: BikeData):
         message = self.format_data(bike_data.to_json())
         self.__serial.write(message.encode('utf-8'))
-        print(message)
-        message = message[:-1]
-        message_list = message.split(',')
-        keys = bike_data.get_keys()
-        print(keys)
-        res = {keys[i]: message_list[i] for i in range(len(keys))}
-        print(json.dumps(res, indent=4))
-
+        # print(message)
+        # message = message[:-1]
+        # message_list = message.split(',')
+        # keys = bike_data.get_keys()
+        # print(keys)
+        # res = {keys[i]: message_list[i] for i in range(len(keys))}
+        # print(json.dumps(res, indent=4))
+        #

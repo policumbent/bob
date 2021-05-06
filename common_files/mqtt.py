@@ -63,7 +63,7 @@ class Mqtt:
             try:
                 if self.settings.new_settings(json.loads(msg.payload)):
                     self.publish_settings(self.settings)
-                    self.message_handler('signal', 'settings_updated')
+                    self.message_handler('signals', 'settings_updated'.encode('utf-8'))
             except Exception as e:
                 print(e)
         else:
