@@ -28,7 +28,7 @@ class Powermeter(Sensor):
     def export(self):
         return {
             'average_power': self.getAverage(),
-            'power': self.value,
+            # 'power': self.value,
             '1s_power': self.get_average_1s(),
             'cadence': self.cadence
         }

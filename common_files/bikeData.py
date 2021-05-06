@@ -7,7 +7,7 @@ class BikeData:
         self._sensors = sensors
         # MANAGER DATA
         if sensors.__contains__('manager'):
-            self.__timeStr: str = ''
+            # self.__timeStr: str = ''
             self.__bikeName: str = 'no_bike'
             self.__cpuTemp: int = 0
             self.__time: int = 0
@@ -61,8 +61,8 @@ class BikeData:
         if not self._sensors.__contains__('manager'):
             return
         try:
-            if values.__contains__('time_str'):
-                self.__timeStr = str(values['time_str'])
+            # if values.__contains__('time_str'):
+            #     self.__timeStr = str(values['time_str'])
             if values.__contains__('time_int'):
                 self.__time = int(values['time_int'])
             if values.__contains__('cpu_temperature'):
@@ -166,21 +166,24 @@ class BikeData:
         except Exception as e:
             print(e)
 
-    def to_json(self):
+    def to_json(self) -> dict:
         elements = self.__dict__.copy()
         elements.pop('_sensors', None)
         v = json.dumps(elements, sort_keys=True, indent=4)
         v = v.replace('_BikeData__', '')
         return json.loads(v)
 
+    def get_keys(self) -> list:
+        return list(self.to_json().keys())
+
     # MANAGER DATA
     @property
     def bike_name(self):
         return self.__bikeName
 
-    @property
-    def time_str(self):
-        return self.__timeStr
+    # @property
+    # def time_str(self):
+    #     return self.__timeStr
 
     @property
     def cpu_temp(self):

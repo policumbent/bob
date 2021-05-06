@@ -25,10 +25,10 @@ class GpsInterface(Sensor):
     def export(self):
         return {
             'timestamp': self.timestamp,
-            'latitude': self.latitude,
-            'longitude': self.longitude,
+            'latitude': round(self.latitude, 6),
+            'longitude': round(self.longitude, 6),
             'altitude': self.altitude,
-            'speedGPS': self.speed,
+            'speedGPS': round(self.speed, 2),
             'distanceGPS': self.travelled_distance,
             'satellites': self.satellites
         }
