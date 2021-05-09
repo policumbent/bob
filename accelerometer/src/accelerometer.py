@@ -2,6 +2,7 @@ import threading
 from datetime import datetime
 from mpu6050 import mpu6050
 from time import time
+from threading import Lock
 from .raw_csv import RawCsv
 from .common_files.sensor import Sensor
 from .settings import Settings
@@ -19,9 +20,15 @@ class Accelerometer(Sensor):
         # with self._value_lock:
         return self._values.copy()
 
-    def update_settings(self, settings: Settings):
-        if settings.accelerometer_local_csv and not self._accelerometer_local_csv:
-            self._raw_csv = RawCsv(datetime.now().__str__())
+    def update_settings(self):
+        print('settings', self.__settings.accelerometer_local_csv)
+        with self.__csv_lock:
+            if self.__settings.accelerometer_local_csv and not self._accelerometer_local_csv:
+                self._raw_csv = RawCsv(datetime.now().__str__())
+                self._accelerometer_local_csv = True
+            if not self.__settings.accelerometer_local_csv and self._accelerometer_local_csv:
+                self._raw_csv.close()
+                self._accelerometer_local_csv = False
 
     def signal(self, value: str):
         if value == 'accel_set_zero':
@@ -30,10 +37,14 @@ class Accelerometer(Sensor):
             self._zero_count = True
         elif value == 'reset':
             self._max_reset()
+        elif value == 'settings_updated':
+            self.update_settings()
 
     def __init__(self, settings: Settings, send_alert, send_message):
         self._send_alert = send_alert
         self._send_message = send_message
+        self.__settings = settings
+        self.__csv_lock = Lock()
         self._sensor = mpu6050(0x68)
         self._n_samples = settings.accelerometer_samples
         self._zero_count = False
@@ -43,7 +54,7 @@ class Accelerometer(Sensor):
         self._data_sum = dict()
         self._data_zero = dict()
         self._values = dict()
-        self._value_lock = threading.Lock()
+        self._value_lock = Lock()
         for a in axis:
             self._data_zero[a] = 0
             self._data[a] = [0]*self._n_samples
@@ -56,7 +67,8 @@ class Accelerometer(Sensor):
         self._accelerometer_local_csv = settings.accelerometer_local_csv
         self._raw_csv = None
         if settings.accelerometer_local_csv:
-            self._raw_csv = RawCsv(datetime.now().__str__())
+            with self.__csv_lock:
+                self._raw_csv = RawCsv(datetime.now().__str__())
         self._worker = threading.Thread(target=self._run, daemon=True)
         self._worker.start()
 
@@ -86,8 +98,10 @@ class Accelerometer(Sensor):
             self._zero_count = False
         for a in axis:
             self._data[a][i] = round(sensor_data[a] - self._data_zero[a], 2)
-        if self._accelerometer_local_csv:
-            self._raw_csv.write(sensor_data)
+
+        with self.__csv_lock:
+            if self._accelerometer_local_csv:
+                self._raw_csv.write(sensor_data)
 
     def _update_values(self, i):
         # with self._value_lock:
