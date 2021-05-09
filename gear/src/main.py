@@ -37,9 +37,10 @@ def message_handler(topic: str, message: bytes):
         mqtt.publish(json.dumps(gear.export()))
 
 
-def send_pressed(message: int):
-    m = {'message': message}
-    mqtt.publish(json.dumps(m))
+# def send_pressed(message: int):
+#     m = {'message': message}
+#     print(message)
+#     mqtt.publish(json.dumps(m))
 
 
 def start():
@@ -51,8 +52,7 @@ def start():
     print('Starting Gear')
     settings.load()
     global mqtt
-    mqtt = MqttConsumer(sys.argv[1], 1883, 'gear', ['gpio'],
-                        [], settings, message_handler)
+    mqtt = MqttConsumer(sys.argv[1], 1883, 'gear', ['gpio'], [], settings, message_handler)
     mqtt.publish_settings(settings)
     global gear
     gear = Gear(send_message, settings)
