@@ -21,8 +21,15 @@ class Gpio:
         self._send_message = send_message
         self._send_alert = send_alert
         self._send_pressed = send_pressed
-        self._up = 0
-        self._down = 0
+        self.__up = {
+            'pressed': False,
+            'last': .0
+        }
+        self.__down = {
+            'pressed': False,
+            'last': .0
+        }
+        self.__pressure_time = .5  # secondi
         #
         # # NOTE: per gestire il reset e la registr. video
         # self._sensors = sensors
@@ -46,7 +53,7 @@ class Gpio:
         # Set pin 10 to be an input pin and set initial value to be pulled low (off)
 
         GPIO.add_event_detect(PIN_UP, GPIO.BOTH, callback=self.up)
-        GPIO.add_event_detect(PIN_DOWN, GPIO.RISING, callback=self.down)
+        GPIO.add_event_detect(PIN_DOWN, GPIO.BOTH, callback=self.down)
         #
         # self._worker = threading.Thread(target=self.loop, daemon=False)
         # self._worker.start()
@@ -64,41 +71,40 @@ class Gpio:
             self.down_released()
 
     def up_pressed(self):
-        self._up = time.time()
-        print("Button up pressed")
-        self._send_pressed(GpioMessage.up)
-        if self._down > 0:
+        self.__up['pressed'] = True
+        t = time.time()
+        if (t - self.__up['last']) > self.__pressure_time:
+            print("Button up pressed")
+            self.__up['last'] = t
+            self._send_pressed(GpioMessage.up)
             self.double_button_pressed()
 
     def down_pressed(self):
-        self._down = time.time()
-        print("Button down pressed")
-        self._send_pressed(GpioMessage.down)
-        if self._up > 0:
+        self.__down['pressed'] = True
+        t = time.time()
+        if (t - self.__down['last']) > self.__pressure_time:
+            print("Button down pressed")
+            self.__down['last'] = t
+            self._send_pressed(GpioMessage.down)
             self.double_button_pressed()
 
     def up_released(self):
-        # self._gear.button_released()
-        self._up = 0
+        self.__up['pressed'] = False
+        self.__up['last'] = time.time()
 
     def down_released(self):
-        # self._gear.button_released()
-        self._down = 0
+        self.__down['pressed'] = False
+        self.__down['last'] = time.time()
 
     def reset_pressed(self):
         self._send_pressed(GpioMessage.reset)
-        # pass
-        # il reset del csv da problemi
-        # self._sensors.simulator.reset()
-        # # self._monitor.csv_reset()
-        # self._sensors.timer.reset()
-        # self._sensors.speed.reset_distance()
         self._send_message(Message('RESET EFFETTUATO', MexPriority.medium, MexType.default, 5, 10))
         self._send_alert(Alert('Reset effettuato', AlertPriority.medium))
 
     def double_button_pressed(self):
-        self.reset_pressed()
-        time.sleep(0.2)
+        if self.__down['pressed'] and self.__up['pressed']:
+            self.reset_pressed()
+            print('Double pressed')
 
     def video_record(self):
         pass
