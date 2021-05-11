@@ -26,6 +26,17 @@ services:
     depends_on:
       - "mqtt-broker"
 
+  csv:
+    build: ./csv
+    container_name: csv
+    restart: unless-stopped
+    volumes:
+      - "./csv/data:/data"
+    networks:
+      - poli
+    depends_on:
+      - "mqtt-broker"
+
   gear:
     build: ./gear
     container_name: gear
