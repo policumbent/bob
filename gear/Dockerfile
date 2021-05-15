@@ -1,4 +1,4 @@
-FROM python:3.9-alpine
+FROM python:3.9
 COPY src /src
 RUN python3 -m pip install -r /src/requirements.txt
 ENV ip 'mqtt-broker'
