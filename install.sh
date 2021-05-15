@@ -20,9 +20,6 @@ ip=$(eval "$ip_command")
 echo "Ricordati di impostare la password all'indirizzo http://"$ip":9000"
 
 echo "Installazione BOB"
-sudo apt install git -y
-git clone https://github.com/policumbent/BOB.git
-cd BOB
 python3 copy_common.py
 sudo docker-compose build
 sudo apt-get install bluetooth bluez libbluetooth-dev -y
@@ -31,6 +28,7 @@ sudo python3 -m pip install pybluez
 
 sudo cp dbus-org.bluez.service /etc/systemd/system/dbus-org.bluez.service
 
+sudo chmod +x start.sh
 sudo cp BOB.service /etc/systemd/system/
 sudo systemctl enable BOB.service
 sudo systemctl start BOB.service
