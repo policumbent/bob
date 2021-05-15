@@ -28,62 +28,62 @@ sudo python3 -m pip install pybluez paho-mqtt
 
 sudo cp dbus-org.bluez.service /etc/systemd/system/dbus-org.bluez.service
 
-
-uart1=$(eval "cat /boot/config.txt | grep enable_uart | wc -l")
-if [[ $uart1 -eq 0 ]]
-then
-  echo 'enable_uart=1' | sudo tee -a  /boot/config.txt
-fi
-
-uart2=$(eval "cat /boot/config.txt | grep dtoverlay=uart2 | wc -l")
-if [[ $uart2 -eq 0 ]]
-then
-  echo 'dtoverlay=uart2 # abilita la uart 2' | sudo tee -a  /boot/config.txt
-fi
-
-uart3=$(eval "cat /boot/config.txt | grep dtoverlay=uart3 | wc -l")
-if [[ $uart3 -eq 0 ]]
-then
-  echo 'dtoverlay=uart3 # abilita la uart 3' | sudo tee -a  /boot/config.txt
-fi
-
-
-uart4=$(eval "cat /boot/config.txt | grep dtoverlay=uart4 | wc -l")
-if [[ $uart4 -eq 0 ]]
-then
-  echo 'dtoverlay=uart4 # abilita la uart 4' | sudo tee -a  /boot/config.txt
-fi
-
-
-cond=$(eval "cat /boot/config.txt | grep dtoverlay=uart5 | wc -l")
-if [[ $cond -eq 0 ]]
-then
-  echo 'dtoverlay=uart5 # abilita la uart 5' | sudo tee -a  /boot/config.txt
-fi
-
-cond=$(eval "cat /boot/config.txt | grep dtparam=i2c_arm=on | wc -l")
-if [[ $cond -eq 0 ]]
-then
-  echo 'dtparam=i2c_arm=on # attiva i2c' | sudo tee -a  /boot/config.txt
-fi
-
-cond=$(eval "cat /boot/config.txt | grep dtparam=i2c_arm_baudrate=400000 | wc -l")
-if [[ $cond -eq 0 ]]
-then
-  echo 'dtparam=i2c_arm_baudrate=400000 # i2c speed per accelerometro' | sudo tee -a  /boot/config.txt
-fi
-
-cond=$(eval "cat /boot/config.txt | grep gpu_mem=128 | wc -l")
-if [[ $cond -eq 0 ]]
-then
-  echo 'gpu_mem=128' | sudo tee -a  /boot/config.txt
-fi
-
-cond=$(eval "cat /boot/config.txt | grep start_x=1 | wc -l")
-if [[ $cond -eq 0 ]]
-then
-  echo 'start_x=1' | sudo tee -a  /boot/config.txt
-fi
+# todo: modificare /boot/config.txt durante l'installazione
+#uart1=$(eval "cat /boot/config.txt | grep enable_uart | wc -l")
+#if [[ $uart1 -eq 0 ]]
+#then
+#  echo 'enable_uart=1' | sudo tee -a  /boot/config.txt
+#fi
+#
+#uart2=$(eval "cat /boot/config.txt | grep dtoverlay=uart2 | wc -l")
+#if [[ $uart2 -eq 0 ]]
+#then
+#  echo 'dtoverlay=uart2 # abilita la uart 2' | sudo tee -a  /boot/config.txt
+#fi
+#
+#uart3=$(eval "cat /boot/config.txt | grep dtoverlay=uart3 | wc -l")
+#if [[ $uart3 -eq 0 ]]
+#then
+#  echo 'dtoverlay=uart3 # abilita la uart 3' | sudo tee -a  /boot/config.txt
+#fi
+#
+#
+#uart4=$(eval "cat /boot/config.txt | grep dtoverlay=uart4 | wc -l")
+#if [[ $uart4 -eq 0 ]]
+#then
+#  echo 'dtoverlay=uart4 # abilita la uart 4' | sudo tee -a  /boot/config.txt
+#fi
+#
+#
+#cond=$(eval "cat /boot/config.txt | grep dtoverlay=uart5 | wc -l")
+#if [[ $cond -eq 0 ]]
+#then
+#  echo 'dtoverlay=uart5 # abilita la uart 5' | sudo tee -a  /boot/config.txt
+#fi
+#
+#cond=$(eval "cat /boot/config.txt | grep dtparam=i2c_arm=on | wc -l")
+#if [[ $cond -eq 0 ]]
+#then
+#  echo 'dtparam=i2c_arm=on # attiva i2c' | sudo tee -a  /boot/config.txt
+#fi
+#
+#cond=$(eval "cat /boot/config.txt | grep dtparam=i2c_arm_baudrate=400000 | wc -l")
+#if [[ $cond -eq 0 ]]
+#then
+#  echo 'dtparam=i2c_arm_baudrate=400000 # i2c speed per accelerometro' | sudo tee -a  /boot/config.txt
+#fi
+#
+#cond=$(eval "cat /boot/config.txt | grep gpu_mem=128 | wc -l")
+#if [[ $cond -eq 0 ]]
+#then
+#  echo 'gpu_mem=128' | sudo tee -a  /boot/config.txt
+#fi
+#
+#cond=$(eval "cat /boot/config.txt | grep start_x=1 | wc -l")
+#if [[ $cond -eq 0 ]]
+#then
+#  echo 'start_x=1' | sudo tee -a  /boot/config.txt
+#fi
 
 
 sudo chmod +x start.sh
@@ -97,3 +97,6 @@ sudo apt install fbi -y
 sudo cp splashscreen.service /etc/systemd/system/
 sudo systemctl enable splashscreen.service
 sudo systemctl start splashscreen.service
+
+echo ""
+echo "Ricordati di modificare il file /boot/config.txt"
