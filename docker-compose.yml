@@ -50,6 +50,19 @@ services:
     depends_on:
       - "mqtt-broker"
 
+  pyxbee_v2:
+    build: ./pyxbee_v2
+    container_name: pyxbee_v2
+    restart: unless-stopped
+    volumes:
+      - "./pyxbee_v2/data:/data"
+    devices:
+      - "/dev/ttyUSB0:/dev/ttyUSB0"
+    networks:
+      - poli
+    depends_on:
+      - "mqtt-broker"
+
 #  video:
 #    build: ./video
 #    container_name: video
