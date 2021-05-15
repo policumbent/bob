@@ -24,9 +24,43 @@ python3 copy_common.py
 sudo docker-compose build
 sudo apt-get install bluetooth bluez libbluetooth-dev -y
 sudo apt install python3-pip -y
-sudo python3 -m pip install pybluez
+sudo python3 -m pip install pybluez paho-mqtt
 
 sudo cp dbus-org.bluez.service /etc/systemd/system/dbus-org.bluez.service
+
+
+uart1=$(eval "cat /boot/config.txt | grep enable_uart | wc -l")
+if [[ $uart1 -eq 0 ]]
+then
+  echo 'enable_uart=1' | sudo tee -a  /boot/config.txt
+fi
+
+uart2=$(eval "cat /boot/config.txt | grep dtoverlay=uart2 | wc -l")
+if [[ $uart2 -eq 0 ]]
+then
+  echo 'dtoverlay=uart2 # abilita la uart 2' | sudo tee -a  /boot/config.txt
+fi
+
+uart3=$(eval "cat /boot/config.txt | grep dtoverlay=uart3 | wc -l")
+if [[ $uart3 -eq 0 ]]
+then
+  echo 'dtoverlay=uart3 # abilita la uart 3' | sudo tee -a  /boot/config.txt
+fi
+
+
+uart4=$(eval "cat /boot/config.txt | grep dtoverlay=uart4 | wc -l")
+if [[ $uart4 -eq 0 ]]
+then
+  echo 'dtoverlay=uart4 # abilita la uart 4' | sudo tee -a  /boot/config.txt
+fi
+
+
+uart5=$(eval "cat /boot/config.txt | grep dtoverlay=uart5 | wc -l")
+if [[ $uart5 -eq 0 ]]
+then
+  echo 'dtoverlay=uart5 # abilita la uart 5' | sudo tee -a  /boot/config.txt
+fi
+
 
 sudo chmod +x start.sh
 sudo cp BOB.service /etc/systemd/system/
