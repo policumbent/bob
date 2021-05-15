@@ -55,10 +55,34 @@ then
 fi
 
 
-uart5=$(eval "cat /boot/config.txt | grep dtoverlay=uart5 | wc -l")
-if [[ $uart5 -eq 0 ]]
+cond=$(eval "cat /boot/config.txt | grep dtoverlay=uart5 | wc -l")
+if [[ $cond -eq 0 ]]
 then
   echo 'dtoverlay=uart5 # abilita la uart 5' | sudo tee -a  /boot/config.txt
+fi
+
+cond=$(eval "cat /boot/config.txt | grep dtparam=i2c_arm=on | wc -l")
+if [[ $cond -eq 0 ]]
+then
+  echo 'dtparam=i2c_arm=on # attiva i2c' | sudo tee -a  /boot/config.txt
+fi
+
+cond=$(eval "cat /boot/config.txt | grep dtparam=i2c_arm_baudrate=400000 | wc -l")
+if [[ $cond -eq 0 ]]
+then
+  echo 'dtparam=i2c_arm_baudrate=400000 # i2c speed per accelerometro' | sudo tee -a  /boot/config.txt
+fi
+
+cond=$(eval "cat /boot/config.txt | grep gpu_mem=128 | wc -l")
+if [[ $cond -eq 0 ]]
+then
+  echo 'gpu_mem=128' | sudo tee -a  /boot/config.txt
+fi
+
+cond=$(eval "cat /boot/config.txt | grep start_x=1 | wc -l")
+if [[ $cond -eq 0 ]]
+then
+  echo 'start_x=1' | sudo tee -a  /boot/config.txt
 fi
 
 
