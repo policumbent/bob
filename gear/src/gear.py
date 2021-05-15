@@ -44,26 +44,28 @@ class Gear(Sensor):
         return self.count
 
     def gear_up(self):
-        if self.gear < 11 and not self.gear_changed:
+        # if self.gear < 11 and not self.gear_changed:
+        if self.gear < 11:
             new_gear = self.gear + 1
             servo1_pos, servo2_pos = self.get_angle(new_gear, Mode.UP)
             print("Movimentazione servo in salita: ", new_gear)
             self.servo_move(servo1_pos, servo2_pos)
             self.gear = new_gear
             self.save_last_gear()
-            self.gear_changed = True
-            time.sleep(0.2)
+            # self.gear_changed = True
+            # time.sleep(0.2)
 
     def gear_down(self):
-        if self.gear > 1 and not self.gear_changed:
+        # if self.gear > 1 and not self.gear_changed:
+        if self.gear > 1:
             new_gear = self.gear - 1
             servo1_pos, servo2_pos = self.get_angle(new_gear, Mode.DOWN)
             print("Movimentazione in discesa", new_gear)
             self.servo_move(servo1_pos, servo2_pos)
             self.gear = new_gear
             self.save_last_gear()
-            self.gear_changed = True
-            time.sleep(0.1)
+            # self.gear_changed = True
+            # time.sleep(0.1)
 
     def button_released(self):
         self.gear_changed = False
@@ -133,6 +135,7 @@ class Gear(Sensor):
         ArduinoSerial.send_gear_pos(servo2_pos, servo1_pos)
 
     def shift(self, mode: int):
+        print('shift ', mode)
         if mode == Mode.UP:
             self.gear_up()
         else:

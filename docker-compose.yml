@@ -26,6 +26,17 @@ services:
     depends_on:
       - "mqtt-broker"
 
+  csv:
+    build: ./csv
+    container_name: csv
+    restart: unless-stopped
+    volumes:
+      - "./csv/data:/data"
+    networks:
+      - poli
+    depends_on:
+      - "mqtt-broker"
+
   gear:
     build: ./gear
     container_name: gear
@@ -34,6 +45,19 @@ services:
       - "./gear/data:/data"
     devices:
       - "/dev/ttyS0:/dev/ttyS0"
+    networks:
+      - poli
+    depends_on:
+      - "mqtt-broker"
+
+  pyxbee_v2:
+    build: ./pyxbee_v2
+    container_name: pyxbee_v2
+    restart: unless-stopped
+    volumes:
+      - "./pyxbee_v2/data:/data"
+    devices:
+      - "/dev/ttyUSB0:/dev/ttyUSB0"
     networks:
       - poli
     depends_on:
