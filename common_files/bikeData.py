@@ -35,6 +35,7 @@ class BikeData:
             self.__speedGps: float = 0.0
             self.__latitude: float = 0.0
             self.__longitude: float = 0.0
+            self.__satellites: int = 0
 
         # GEAR DATA
         if sensors.__contains__('gear'):
@@ -132,6 +133,8 @@ class BikeData:
                 self.__longitude = float(values['longitude'])
             if values.__contains__('speedGPS'):
                 self.__speedGps = float(values['speedGPS'])
+            if values.__contains__('satellites'):
+                self.__speedGps = float(values['satellites'])
         except Exception as e:
             print(e)
 
@@ -232,6 +235,10 @@ class BikeData:
     @property
     def longitude(self):
         return self.__longitude
+
+    @property
+    def satellites(self):
+        return self.__satellites
 
     # GEAR DATA
 
