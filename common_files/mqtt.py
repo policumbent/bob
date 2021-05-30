@@ -53,6 +53,7 @@ class Mqtt:
         """ Il sensore pubblica un json `{"connected": True}`quando si connette """
         status_topic = 'state/{}'.format(self.name)
         self.mqtt_client.publish(status_topic, json.dumps({"connected": True}), retain=True)
+        self.mqtt_client.will_set(status_topic, json.dumps({"connected": False}), retain=True)
         self.publish_settings(self.settings)
         self.publish_signals_list(self.signal_list)
 
