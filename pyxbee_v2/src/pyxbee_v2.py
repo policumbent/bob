@@ -1,25 +1,26 @@
 import json
 
-import serial
-
+from serial import Serial
 from .settings import Settings
 from .common_files.bikeData import BikeData
 from datetime import datetime
 
+keys2bike = ["wind_speed", "wind_direction", "temperature", "humidity"]
+
 
 class PyxbeeV2:
     def __init__(self, settings: Settings, send_alert, send_message):
+        keys2bike.sort()
         self.__settings = settings
         self.__send_alert = send_alert
         self.__send__message = send_message
-        self.__serial: serial.Serial = serial.Serial('/dev/ttyUSB0', 115200)
+        self.__serial: Serial = Serial('/dev/ttyUSB0', 115200)
 
     @staticmethod
     def format_data(bike_data_dict: dict) -> str:
         try:
             dt = datetime.strptime(bike_data_dict['timestamp'], '%Y-%m-%d %H:%M:%S')
             bike_data_dict['timestamp'] = int((dt - datetime(1970, 1, 1)).total_seconds())
-            print(bike_data_dict['timestamp'])
         except ValueError as e:
             print(e)
             bike_data_dict['timestamp'] = 0
@@ -36,4 +37,16 @@ class PyxbeeV2:
         # print(keys)
         # res = {keys[i]: message_list[i] for i in range(len(keys))}
         # print(json.dumps(res, indent=4))
-        #
+
+    def get_data(self) -> dict:
+        try:
+            if self.__serial.in_waiting:
+                line = self.__serial.readline().decode()
+                data_list = line.split(',')
+                print(keys2bike)
+                res = {keys2bike[i]: data_list[i] for i in range(len(keys2bike))}
+                print(json.dumps(res, indent=4))
+                return res
+        except Exception as e:
+            print(e)
+        return {}

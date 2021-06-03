@@ -1,5 +1,5 @@
 import sys
-from time import sleep
+from time import sleep, time
 import json
 from .settings import Settings
 from .common_files.mqtt import MqttRemote
@@ -61,7 +61,11 @@ def start():
                       ['manager', 'ant', 'gps', 'hall_sensor', 'accelerometer', 'gear'], [''],
                       settings, message_handler)
     while True:
+        t_i = time()
         pyxbee_v2.send_data(bike_data)
+        remote_data = pyxbee_v2.get_data()
+        mqtt.publish_data('remote_data', json.dumps(remote_data))
+        print('Time: ', time()-t_i)
         sleep(1)
 
 
