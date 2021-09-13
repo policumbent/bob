@@ -177,16 +177,16 @@ services:
     depends_on:
       - "mqtt-broker"
 
-  external_mqtt:
-    build: ./external_mqtt
-    container_name: external_mqtt
-    restart: unless-stopped
-    volumes:
-      - "./external_mqtt/data:/data"
-    networks:
-      - poli
-    depends_on:
-      - "mqtt-broker"
+#  external_mqtt:
+#    build: ./external_mqtt
+#    container_name: external_mqtt
+#    restart: unless-stopped
+#    volumes:
+#      - "./external_mqtt/data:/data"
+#    networks:
+#      - poli
+#    depends_on:
+#      - "mqtt-broker"
 
 networks:
   poli:

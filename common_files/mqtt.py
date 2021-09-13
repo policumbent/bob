@@ -25,6 +25,8 @@ class Mqtt:
         self.mqtt_client.on_connect = self.on_connect
         self.mqtt_client.on_message = self.on_message
         self.mqtt_client.on_log = self.on_log
+        status_topic = 'state/{}'.format(self.name)
+        self.mqtt_client.will_set(status_topic, json.dumps({"connected": False}), retain=True)
         self.mqtt_client.connect_async(broker_ip, port, 60)
         self.mqtt_client.loop_start()
 
