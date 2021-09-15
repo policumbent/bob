@@ -37,18 +37,18 @@ services:
     depends_on:
       - "mqtt-broker"
 
-  gear:
-    build: ./gear
-    container_name: gear
-    restart: unless-stopped
-    volumes:
-      - "./gear/data:/data"
-    devices:
-      - "/dev/ttyS0:/dev/ttyS0"
-    networks:
-      - poli
-    depends_on:
-      - "mqtt-broker"
+#  gear:
+#    build: ./gear
+#    container_name: gear
+#    restart: unless-stopped
+#    volumes:
+#      - "./gear/data:/data"
+#    devices:
+#      - "/dev/ttyS0:/dev/ttyS0"
+#    networks:
+#      - poli
+#    depends_on:
+#      - "mqtt-broker"
 
   pyxbee_v2:
     build: ./pyxbee_v2
