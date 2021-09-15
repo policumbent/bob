@@ -1,6 +1,7 @@
-FROM python:3.9
+FROM python:3.7
+COPY src/requirements.txt /src/requirements.txt
+RUN pip install -r /src/requirements.txt
 COPY src /src
-RUN python3 -m pip install -r /src/requirements.txt
 ENV ip 'mqtt-broker'
 CMD python3 -m src.main ${ip}
 

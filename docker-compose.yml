@@ -166,16 +166,16 @@ services:
 #    depends_on:
 #      - "mqtt-broker"
 
-  communication:
-    build: ./communication
-    container_name: communication
-    restart: unless-stopped
-    volumes:
-      - "./communication/data:/data"
-    networks:
-      - poli
-    depends_on:
-      - "mqtt-broker"
+#  communication:
+#    build: ./communication
+#    container_name: communication
+#    restart: unless-stopped
+#    volumes:
+#      - "./communication/data:/data"
+#    networks:
+#      - poli
+#    depends_on:
+#      - "mqtt-broker"
 
 #  external_mqtt:
 #    build: ./external_mqtt
