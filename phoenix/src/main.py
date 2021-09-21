@@ -49,7 +49,7 @@ def start():
         return
     print('Starting Phoenix')
     settings = Settings({})
-    serial: Serial = Serial('/dev/ttyAMA0', 115200)
+    serial: Serial = Serial('/dev/ttyAMA1', 115200)
     global bike_data
     bike_data = BikeData(['manager', 'ant', 'hall_sensor', 'messages'])
     global mqtt

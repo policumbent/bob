@@ -1,0 +1,2 @@
+libusb-dev
+apt-utils

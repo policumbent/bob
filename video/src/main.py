@@ -58,7 +58,7 @@ def start():
     global mqtt
     mqtt = MqttConsumer(sys.argv[1], 1883, 'video',
                         ['ant', 'gps', 'power_speed_target', 'manager', 'gear'],
-                        settings, message_handler)
+                        [], settings, message_handler)
     mqtt.subscribe_messages()
     Video(bikeData, settings)
     #

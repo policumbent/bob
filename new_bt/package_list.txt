@@ -1,0 +1,3 @@
+bluetooth
+bluez
+libbluetooth-dev

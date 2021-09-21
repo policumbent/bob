@@ -1,0 +1,3 @@
+libopenjp2-7
+libtiff5
+python3-picamera
