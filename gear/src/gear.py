@@ -30,6 +30,7 @@ class Gear(Sensor):
         self._settings_lock = threading.Lock()
         self._settings: Settings = settings
         self.gear = self.read_last_gear()
+        ArduinoSerial()
         # # VETTORE CON GLI ANGOLI DEI SERVO PER OGNI MARCIA
         # self.read_gear_positions()
 
