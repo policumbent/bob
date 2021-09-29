@@ -40,8 +40,8 @@ class Video:
         print("Starting video")
 
         # Video Resolution
-        video_height = 480
-        video_width = 800
+        video_height = 720
+        video_width = 1280
 
         # telemetry_icon = Image.open('src/icons/icona_telemetria.png')
         # record_video_icon = Image.open('src/icons/icona_video.png')
@@ -57,10 +57,9 @@ class Video:
         frame.load()
         with picamera.PiCamera() as camera:
             camera.resolution = (video_width, video_height)
-            camera.framerate = 90
             camera.rotation = 180
             # MASSIMO 57 POI DEGRADA LE  IMMAGINI (FORSE E' LA CAMERA VECCHIA)
-            camera.framerate = 55
+            camera.framerate = 40
             # camera.led = False
             # camera.expsure_speed = 100
             # TODO: da testare la stabilizzazione
@@ -143,10 +142,10 @@ class Video:
                     draw.text((10, 5), timer, color2)
                     draw.text((540, 40), cadence, color2)
                 elif bike == 'taurusx':
-                    draw.text((540, 5), cadence, color2)
-                draw.text((10, 430), speed, color)
-                draw.text((360, 430), gear, color)
-                draw.text((540, 430), power, color)
+                    draw.text((video_width-280, 5), cadence, color2)
+                draw.text((10, video_height-50), speed, color)
+                draw.text((video_width-video_width/2-50, video_height-50), gear, color)
+                draw.text((video_width-280, video_height-50), power, color)
 
                 if self._settings.power_speed_simulator:
                     self.show_estimator(draw)
@@ -159,7 +158,7 @@ class Video:
                 # draw.text((540, 430), power, (255, 255, 255))
                 # draw.text((360, 430), gear, (255, 255, 255))
 
-                x1 = int((800 - 20 * (mex.__len__())) / 2)
+                x1 = int((video_width - 20 * (mex.__len__())) / 2)
                 x2 = int((800 - 20 * (mex2.__len__())) / 2)
                 x3 = int((800 - 18 * (trap_info.__len__())) / 2)
                 draw.text((x1, 80), mex, color2)
