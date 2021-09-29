@@ -134,7 +134,7 @@ class BikeData:
             if values.__contains__('speedGPS'):
                 self.__speedGps = float(values['speedGPS'])
             if values.__contains__('satellites'):
-                self.__speedGps = float(values['satellites'])
+                self.__satellites = int(values['satellites'])
         except Exception as e:
             print(e)
 

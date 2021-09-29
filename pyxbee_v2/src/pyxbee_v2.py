@@ -40,7 +40,9 @@ class PyxbeeV2:
 
     def send_data(self, bike_data: BikeData):
         if self.__serial_open and self.__serial is not None:
-            message = self.format_data(bike_data.to_json())
+            data = bike_data.to_json()
+            print(data)
+            message = self.format_data(data)
             print(message)
             aa = self.__serial.write(message.encode('utf-8'))
             print(aa)

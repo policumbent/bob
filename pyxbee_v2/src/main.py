@@ -63,8 +63,8 @@ def start():
     while True:
         t_i = time()
         pyxbee_v2.send_data(bike_data)
-        remote_data = pyxbee_v2.get_data()
-        mqtt.publish_data('remote_data', json.dumps(remote_data))
+        # remote_data = pyxbee_v2.get_data()
+        # mqtt.publish_data('remote_data', json.dumps(remote_data))
         print('Time: ', time()-t_i)
         sleep(1)
 
