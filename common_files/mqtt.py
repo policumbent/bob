@@ -132,9 +132,13 @@ class MqttConsumer(MqttSensor):
     """ Un consumer effettua la subscribe alle impostazioni e ai sensori a cui è interessato."""
     def subscribe(self, client) -> None:
         for topic in self.topics:
-            client.subscribe('sensors/{}'.format(topic))
+            if topic == "messages":
+                client.subscribe('messages')
+            else:
+                client.subscribe('sensors/{}'.format(topic))
 
     def subscribe_messages(self):
+        print(str(self.mqtt_client))
         self.mqtt_client.subscribe('messages')
 
 
