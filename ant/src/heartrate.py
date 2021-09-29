@@ -31,7 +31,7 @@ class HeartRate(Sensor):
     @property
     def value(self):
         if (time.time() - self._lastRxTime) > 5:
-            self._value = str(0)
+            self._value = 0
         return self._value
 
     @value.setter
@@ -52,9 +52,10 @@ class HeartRate(Sensor):
 
     def on_data_heartrate(self, data):
         self._state = True
-        self.value = str(data[7])
+        self.value = int(data[7])
         self._lastRxTime = time.time()
         self._count += 1
+        print(self._lastRxTime)
 
     def get(self):
         if (time.time() - self._lastRxTime) > 5:
