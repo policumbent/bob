@@ -31,11 +31,14 @@ def send_alert(alert: Alert):
 # todo: possiamo gestire la cambiata anche con dei segnali? => per l'app
 def message_handler(topic: str, message: bytes):
     if topic == 'sensors/gpio':
-        # todo: gestire parsing error
-        json_message = json.loads(message)
-        gear.shift(json_message['message'])
-        mqtt.publish(json.dumps(gear.export()))
-
+        try:
+            # todo: gestire parsing error
+            json_message = json.loads(message)
+            gear.shift(json_message['message'])
+            mqtt.publish(json.dumps(gear.export()))
+        except Exception as e:
+            send_message(Message('Errore cambiata'))
+            print(e)
 
 # def send_pressed(message: int):
 #     m = {'message': message}
