@@ -159,10 +159,10 @@ class Video:
                 # draw.text((360, 430), gear, (255, 255, 255))
 
                 x1 = int((video_width - 20 * (mex.__len__())) / 2)
-                x2 = int((800 - 20 * (mex2.__len__())) / 2)
+                x2 = int((video_width - 20 * (mex2.__len__())) / 2)
                 x3 = int((800 - 18 * (trap_info.__len__())) / 2)
                 draw.text((x1, 80), mex, color2)
-                draw.text((x2, 115), mex2, color2)
+                draw.text((x2, 120), mex2, color2)
                 draw.text((x3, 150), trap_info, color2)
 
                 overlay.update(img.tobytes())
