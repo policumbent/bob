@@ -33,8 +33,8 @@ class ArduinoSerial:
         print(p1, p2, 'AAAAAAA')
         if ArduinoSerial.started:
             x = {
-                "pos_1": int(p1),
-                "pos_2": int(p2)
+                "pos_2": int(p1),
+                "pos_1": int(p2)
             }
 
             json_s = json.dumps(x)

@@ -14,18 +14,18 @@ class PyxbeeV2:
         self.__settings = settings
         self.__send_alert = send_alert
         self.__send__message = send_message
-        self.__serial_open = False
-        self.__serial = None
-        self.__open_serial()
+        # self.__serial_open = False
+        # self.__serial = None
+        # self.__open_serial()
 
-    def __open_serial(self):
-        try:
-            self.__serial: Serial = Serial('/dev/ttyUSB1', 115200)
-            self.__serial_open = True
-            print('Serial LORA open')
-        except Exception as e:
-            print(e)
-            self.__serial_open = False
+    # def __open_serial(self):
+    #     try:
+    #         self.__serial: Serial = Serial('/dev/ttyUSB1', 115200)
+    #         self.__serial_open = True
+    #         print('Serial LORA open')
+    #     except Exception as e:
+    #         print(e)
+    #         self.__serial_open = False
 
     @staticmethod
     def format_data(bike_data_dict: dict) -> str:
@@ -38,16 +38,10 @@ class PyxbeeV2:
         bike_data_str_list = [str(d) for d in bike_data_dict.values()]
         return ','.join(bike_data_str_list) + '\n'
 
-    def send_data(self, bike_data: BikeData):
-        if self.__serial_open and self.__serial is not None:
-            data = bike_data.to_json()
-            print(data)
-            message = self.format_data(data)
-            print(message)
-            aa = self.__serial.write(message.encode('utf-8'))
-            print(aa)
-        else:
-            self.__open_serial()
+    def get_mqtt_data(self, bike_data: BikeData):
+        data = bike_data.to_json()
+        message = self.format_data(data)
+        return message
 
         # print(message)
         # message = message[:-1]
@@ -57,15 +51,15 @@ class PyxbeeV2:
         # res = {keys[i]: message_list[i] for i in range(len(keys))}
         # print(json.dumps(res, indent=4))
 
-    def get_data(self) -> dict:
-        try:
-            if self.__serial.in_waiting:
-                line = self.__serial.readline().decode()
-                data_list = line.split(',')
-                print(keys2bike)
-                res = {keys2bike[i]: data_list[i] for i in range(len(keys2bike))}
-                print(json.dumps(res, indent=4))
-                return res
-        except Exception as e:
-            print(e)
-        return {}
+    # def get_data(self) -> dict:
+    #     try:
+    #         if self.__serial.in_waiting:
+    #             line = self.__serial.readline().decode()
+    #             data_list = line.split(',')
+    #             print(keys2bike)
+    #             res = {keys2bike[i]: data_list[i] for i in range(len(keys2bike))}
+    #             print(json.dumps(res, indent=4))
+    #             return res
+    #     except Exception as e:
+    #         print(e)
+    #     return {}

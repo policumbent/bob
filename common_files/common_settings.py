@@ -28,6 +28,7 @@ class CommonSettings:
             makedirs('./data', exist_ok=True)
             with open('./data/config.json') as json_file:
                 self._values = json.load(json_file)
+                print('settings:', self._values)
         except Exception as e:
             print(e)
 

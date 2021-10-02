@@ -8,14 +8,14 @@ from .common_files.alert import Alert
 from .gear import Gear
 
 settings = Settings(
-    {
-        'gear': {
-            'up_positions_s1': [49, 60, 70, 78, 92, 99, 108, 120, 131, 141, 170],
-            'up_positions_s2': [171, 156, 143, 133, 115, 106, 93, 78, 64, 51, 12],
-            'down_positions_s1': [49, 63, 71, 78, 88, 97, 107, 118, 131, 141, 153],
-            'down_positions_s2': [171, 152, 142, 132, 120, 108, 94, 80, 64, 51, 35]
-        }
-    })
+    {"gear": {
+             "up_positions_s1": [96, 107, 119, 129, 138, 148, 159, 166, 168, 170, 171],
+             "up_positions_s2": [174, 165, 157, 146, 141, 134, 127, 117, 115, 113, 112],
+             "down_positions_s1": [96, 107, 119, 129, 138, 148, 159, 164, 168, 168, 171],
+             "down_positions_s2": [174, 165, 157, 146, 141, 134, 126, 119, 115, 115, 112]
+         }
+    }
+)
 mqtt: MqttConsumer
 gear: Gear
 
