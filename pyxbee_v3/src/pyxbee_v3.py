@@ -8,7 +8,7 @@ from datetime import datetime
 keys2bike = ["wind_speed", "wind_direction", "temperature", "humidity"]
 
 
-class PyxbeeV2:
+class PyxbeeV3:
     def __init__(self, settings: Settings, send_alert, send_message):
         keys2bike.sort()
         self.__settings = settings

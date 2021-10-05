@@ -5,11 +5,11 @@ from .settings import Settings
 from .common_files.mqtt import MqttRemote
 from .common_files.alert import Alert
 from .common_files.message import Message
-from .pyxbee_v2 import PyxbeeV2
+from .pyxbee_v3 import PyxbeeV3
 from .common_files.bikeData import BikeData
 
 mqtt: MqttRemote
-pyxbee_v2: PyxbeeV2
+pyxbee_v3: PyxbeeV3
 bike_data: BikeData
 
 
@@ -52,8 +52,8 @@ def start():
         return
     print('Starting Pyxbee V2')
     settings = Settings({})
-    global pyxbee_v2
-    pyxbee_v2 = PyxbeeV2(settings, send_alert, send_message)
+    global pyxbee_v3
+    pyxbee_v3 = PyxbeeV3(settings, send_alert, send_message)
     global bike_data
     bike_data = BikeData(['manager', 'ant', 'gps', 'hall_sensor', 'gear', 'accelerometer'])
     global mqtt
@@ -61,7 +61,7 @@ def start():
                       ['manager', 'ant', 'gps', 'hall_sensor', 'accelerometer', 'gear'], [''],
                       settings, message_handler)
     while True:
-        message = pyxbee_v2.get_mqtt_data(bike_data)
+        message = pyxbee_v3.get_mqtt_data(bike_data)
         mqtt.publish(message)
         # remote_data = pyxbee_v2.get_data()
         # mqtt.publish_data('remote_data', json.dumps(remote_data))
