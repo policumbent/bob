@@ -8,13 +8,12 @@ from .common_files.alert import Alert
 from .gear import Gear
 
 settings = Settings(
-    {
-        "gear": {
-            "up_positions_s1": [97, 107, 121, 131, 141, 151, 160, 167, 169, 171, 172],
-            "up_positions_s2": [175, 165, 155, 144, 138, 131, 126, 116, 114, 112, 111],
-            "down_positions_s1": [96, 107, 122, 130, 139, 150, 159, 165, 168, 169, 172],
-            "down_positions_s2": [176, 165, 154, 144, 140, 132, 126, 118, 115, 114, 111]
-        }
+    {"gear": {
+             "up_positions_s1": [96, 107, 119, 129, 138, 148, 159, 166, 168, 170, 171],
+             "up_positions_s2": [174, 165, 157, 146, 141, 134, 127, 117, 115, 113, 112],
+             "down_positions_s1": [96, 107, 119, 129, 138, 148, 159, 164, 168, 168, 171],
+             "down_positions_s2": [174, 165, 157, 146, 141, 134, 126, 119, 115, 115, 112]
+         }
     }
 )
 mqtt: MqttConsumer
@@ -36,7 +35,7 @@ def message_handler(topic: str, message: bytes):
             # todo: gestire parsing error
             json_message = json.loads(message)
             gear.shift(json_message['message'])
-            # mqtt.publish(json.dumps(gear.export()))
+            mqtt.publish(json.dumps(gear.export()))
         except Exception as e:
             send_message(Message('Errore cambiata'))
             print(e)
@@ -53,14 +52,15 @@ def start():
         print("Total arguments passed:", n)
         return
     print("Mqtt server ip:", sys.argv[1])
-    print('Starting Gear WiFi')
+    print('Starting Gear')
     settings.load()
     global mqtt
     mqtt = MqttConsumer(sys.argv[1], 1883, 'gear', ['gpio'], [], settings, message_handler)
     mqtt.publish_settings(settings)
     global gear
-    gear = Gear(send_message, settings, mqtt)
+    gear = Gear(send_message, settings)
     while True:
+        mqtt.publish(json.dumps(gear.export()))
         time.sleep(1)
 
 

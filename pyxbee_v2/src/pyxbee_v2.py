@@ -20,7 +20,7 @@ class PyxbeeV2:
 
     def __open_serial(self):
         try:
-            self.__serial: Serial = Serial('/dev/ttyUSB0', 115200)
+            self.__serial: Serial = Serial('/dev/ttyUSB1', 115200)
             self.__serial_open = True
             print('Serial LORA open')
         except Exception as e:
