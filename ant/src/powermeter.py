@@ -238,7 +238,7 @@ class Powermeter(Sensor):
             cadencePeriod = deltaTime * 0.0005 / eventCountC
             if cadencePeriod != 0:
                 cadence = 60 / cadencePeriod
-                self.cadence = round(cadence)
+                self._cadence = round(cadence)
             else:
                 cadence = 1
             # ## CALCOLO POTENZA
