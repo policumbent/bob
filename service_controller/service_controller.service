@@ -1,0 +1,12 @@
+[Unit]
+Description=service_controller service
+After=multi-user.target
+
+[Service]
+Type=simple
+Restart=always
+WorkingDirectory=/home/pi/BOB/service_controller
+ExecStart=/usr/bin/python3 -m src.main
+
+[Install]
+WantedBy=multi-user.target
