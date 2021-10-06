@@ -1,12 +1,12 @@
 [Unit]
-Description=service_controller service
-After=multi-user.target
+Description="service_controller service"
+After=network.target
 
 [Service]
 Type=simple
 Restart=always
-WorkingDirectory=/home/pi/BOB/service_controller
-ExecStart=/usr/bin/python3 -m src.main
+WorkingDirectory=/home/pi/bob_davdev/service_controller/src
+ExecStart="/usr/bin/python3 main.py"
 
 [Install]
 WantedBy=multi-user.target

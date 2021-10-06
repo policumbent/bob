@@ -1,8 +1,8 @@
 from flask import Flask
-from .systemd_manager import SystemdManager
+import systemd_manager
 
 app = Flask(__name__)
-manager = SystemdManager()
+manager = systemd_manager.SystemdManager()
 
 
 @app.route("/")
@@ -45,3 +45,7 @@ def service_status(module):
         return '<p>{module} is active</p>'.format(module=module)
     else:
         return '<p>{module} is not active</p>'.format(module=module)
+
+
+if __name__ == '__main__':
+    app.run(debug=True, host="0.0.0.0")
