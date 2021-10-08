@@ -41,6 +41,9 @@ def message_handler(topic: str, message: bytes):
         if topic == 'sensors/accelerometer':
             accelerometer_dict: dict = json.loads(message)
             bike_data.set_accelerometer(accelerometer_dict)
+        if topic == 'sensors/weather':
+            weather_dict: dict = json.loads(message)
+            bike_data.set_weather(weather_dict)
     except Exception as e:
         print(e)
 
@@ -55,10 +58,10 @@ def start():
     global pyxbee_v3
     pyxbee_v3 = PyxbeeV3(settings, send_alert, send_message)
     global bike_data
-    bike_data = BikeData(['manager', 'ant', 'gps', 'hall_sensor', 'gear', 'accelerometer'])
+    bike_data = BikeData(['manager', 'ant', 'gps', 'hall_sensor', 'gear', 'accelerometer', 'weather'])
     global mqtt
     mqtt = MqttRemote(sys.argv[1], 1883, 'pyxbee_v3',
-                      ['manager', 'ant', 'gps', 'hall_sensor', 'accelerometer', 'gear'], [''],
+                      ['manager', 'ant', 'gps', 'hall_sensor', 'accelerometer', 'gear', 'weather'], [''],
                       settings, message_handler)
     while True:
         message = pyxbee_v3.get_mqtt_data(bike_data)
