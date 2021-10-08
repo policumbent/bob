@@ -56,6 +56,11 @@ class BikeData:
             self.__speed_2: float = 0.0
             self.__distance_2: float = 0.0
 
+        # WEATHER
+        if sensors.__contains__('weather'):
+            self.__temperature: float = 0.0
+            self.__humidity: float = 0.0
+
     # TODO: CONTROLLARE CHE PARAMETRI SIANO PRESENTI
 
     def set_manager(self, values: dict):
@@ -99,6 +104,17 @@ class BikeData:
                 self.__speed_2 = float(values['speed_2'])
             if values.__contains__('distance_2'):
                 self.__distance_2 = float(values['distance_2'])
+        except Exception as e:
+            print(e)
+
+    def set_weather(self, values: dict):
+        if not self._sensors.__contains__('weather'):
+            return
+        try:
+            if values.__contains__('temperature'):
+                self.__temperature = float(values['temperature'])
+            if values.__contains__('humidity'):
+                self.__humidity = float(values['humidity'])
         except Exception as e:
             print(e)
 

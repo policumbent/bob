@@ -40,7 +40,9 @@ class PyxbeeV3:
 
     def get_mqtt_data(self, bike_data: BikeData):
         data = bike_data.to_json()
+        print(data)
         message = self.format_data(data)
+        print(message)
         return message
 
         # print(message)
