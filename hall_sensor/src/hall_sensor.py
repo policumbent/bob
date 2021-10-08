@@ -46,6 +46,8 @@ class HallSensor(Sensor):
 
     @property
     def speed(self):
+        if (time.time() - self.timer) > 5.0:
+            return 0.0
         return round(self.__settings.circumference * self.frequency * 3.6 / 1000, 2)  # circumference * frequency
 
     @property
