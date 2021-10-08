@@ -9,14 +9,13 @@ from .gear import Gear
 
 settings = Settings(
     {
-        "gear": {
-            "up_positions_s1": [97, 107, 121, 131, 141, 151, 160, 167, 169, 171, 172],
-            "up_positions_s2": [175, 165, 155, 144, 138, 131, 126, 116, 114, 112, 111],
-            "down_positions_s1": [96, 107, 122, 130, 139, 150, 159, 165, 168, 169, 172],
-            "down_positions_s2": [176, 165, 154, 144, 140, 132, 126, 118, 115, 114, 111]
+        'gear': {
+            'up_positions_s1': [49, 60, 70, 78, 92, 99, 108, 120, 131, 141, 170],
+            'up_positions_s2': [171, 156, 143, 133, 115, 106, 93, 78, 64, 51, 12],
+            'down_positions_s1': [49, 63, 71, 78, 88, 97, 107, 118, 131, 141, 153],
+            'down_positions_s2': [171, 152, 142, 132, 120, 108, 94, 80, 64, 51, 35]
         }
-    }
-)
+    })
 mqtt: MqttConsumer
 gear: Gear
 
@@ -32,14 +31,11 @@ def send_alert(alert: Alert):
 # todo: possiamo gestire la cambiata anche con dei segnali? => per l'app
 def message_handler(topic: str, message: bytes):
     if topic == 'sensors/gpio':
-        try:
-            # todo: gestire parsing error
-            json_message = json.loads(message)
-            gear.shift(json_message['message'])
-            # mqtt.publish(json.dumps(gear.export()))
-        except Exception as e:
-            send_message(Message('Errore cambiata'))
-            print(e)
+        # todo: gestire parsing error
+        json_message = json.loads(message)
+        gear.shift(json_message['message'])
+        mqtt.publish(json.dumps(gear.export()))
+
 
 # def send_pressed(message: int):
 #     m = {'message': message}
@@ -53,14 +49,15 @@ def start():
         print("Total arguments passed:", n)
         return
     print("Mqtt server ip:", sys.argv[1])
-    print('Starting Gear WiFi')
+    print('Starting Gear')
     settings.load()
     global mqtt
     mqtt = MqttConsumer(sys.argv[1], 1883, 'gear', ['gpio'], [], settings, message_handler)
     mqtt.publish_settings(settings)
     global gear
-    gear = Gear(send_message, settings, mqtt)
+    gear = Gear(send_message, settings)
     while True:
+        mqtt.publish(json.dumps(gear.export()))
         time.sleep(1)
 
 

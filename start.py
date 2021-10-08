@@ -1,8 +1,8 @@
 from os import system
 import subprocess
 
-modules = ['ant', 'gps', 'csv', 'messages', 'video', 'gpio', 'gear',
-           'manager', 'accelerometer', 'hall_sensor', 'pyxbee_v3']
+modules = ['ant', 'gps', 'csv', 'pyxbee_v2', 'messages', 'video', 'gpio',
+           'gear', 'manager', 'accelerometer', 'hall_sensor']
 
 broker_ip = '127.0.0.1'
 

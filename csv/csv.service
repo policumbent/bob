@@ -4,7 +4,8 @@ After=multi-user.target
 
 [Service]
 Type=simple
-Restart=always
+Restart=on-failure
+User=pi
 WorkingDirectory=/home/pi/BOB/csv
 ExecStart=/usr/bin/python3 -m src.main 127.0.0.1
 
