@@ -4,8 +4,8 @@ from .common_files.message import Message, MexType, MexPriority
 from .common_files.alert import Alert, AlertPriority
 
 
-PIN_UP = 27
-PIN_DOWN = 17
+PIN_UP = 17
+PIN_DOWN = 27
 
 
 class GpioMessage:

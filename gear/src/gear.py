@@ -17,7 +17,7 @@ POS_FILE_PATH = "gear_pos.config"
 class Gear(Sensor):
 
     def signal(self, value: str):
-        pass
+        print(value)
 
     def export(self) -> dict:
         return {
