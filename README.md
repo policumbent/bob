@@ -10,19 +10,20 @@
 Per tutti manca la gestione delle impostazioni
 
 - sensori
-  - [ ] ant
+  - [x] ant
   - [x] accelerometer
   - [ ] weather => sensori umidità e temperatura a bordo della bici
   - [x] gps
   - [ ] gear => gestione cambio e comunicazione seriale
 - consumatori
-  - [ ] csv
+  - [x] csv
   - [ ] power/speed profiles
   - [x] raspberry manager (cronometro / temperatura cpu)
   - [x] video
 - comunicazione
   - [x] gpio => tasti cambio e combinazioni tasti
-  - [ ] communication => collegamento con il server http
+  - [x] communication => collegamento con il server http
+  - [x] pyxbee_v2 => comunicazione tramite lora
   - [x] bt => collegamento con l'app bt  **(manca dockerfile)**
 - messaggi
   - [x] messaggi a schermo

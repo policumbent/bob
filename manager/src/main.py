@@ -41,6 +41,7 @@ def message_handler(topic, message: bytes):
         if topic == 'signals':
             if message.decode() == 'reset':
                 timer.reset()
+                send_message(Message('Reset timer effetuato'))
 
         if topic == 'sensors/ant':
             json_message = json.loads(message)

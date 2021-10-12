@@ -9,7 +9,6 @@ from .ant.easy.channel import Channel
 from .common_files.sensor import Sensor
 from .common_files.message import Message, MexType, MexPriority
 
-
 # CHANNEL_PERIOD_VAL = 32768/MESSAGE_RATE(HZ)
 # MESSAGE_RATE = 32768/32768 = 32768/8182 = 4HZ
 # TEMPO_PER_LA_MEDIA = 3s
@@ -49,7 +48,7 @@ class Powermeter(Sensor):
 
         self.count = 0
         self.count2 = 0
-        self.cadence = 0
+        self._cadence = 0
         self.eventEquals = 0
         self.n_average = 10
         self.timeStampP = 0
@@ -69,6 +68,7 @@ class Powermeter(Sensor):
         self.lastAverageTime1s = 0
         self.average_array = deque(lunghezza_vettore_media * [0])
         self.average_array_1s = deque(lunghezza_vettore_media_1s * [0])
+        self._last_rx = time.time()
 
         self._calibration_lock = threading.Lock()
         self._worker_thread = Thread(target=self._run, daemon=True)
@@ -102,7 +102,15 @@ class Powermeter(Sensor):
 
     @property
     def value(self):
+        if (time.time() - self._last_rx) > 5:
+            self._power = 0
         return round(self._power)
+
+    @property
+    def cadence(self):
+        if (time.time() - self._last_rx) > 5:
+            self._cadence = 0
+        return self._cadence
 
     @property
     def state(self):
@@ -135,6 +143,7 @@ class Powermeter(Sensor):
         self.data = data
         self.newData = True
         self.count += 1
+        self._last_rx = time.time()
         # t2 = time.time()
         # print("Tempo acquisizione: " + str(t2 - t1))
 
@@ -153,7 +162,7 @@ class Powermeter(Sensor):
     def calculate_average_power(self):
         if (time.time() - self.lastAverageTime) < 0.25:
             return
-        self.average_array.appendleft(self._power)
+        self.average_array.appendleft(self.value)
         self.average_array.pop()
         somma = 0
         for elem in self.average_array:
@@ -164,7 +173,7 @@ class Powermeter(Sensor):
     def calculateAveragePower1s(self):
         if (time.time() - self.lastAverageTime1s) < 0.25:
             return
-        self.average_array_1s.appendleft(self._power)
+        self.average_array_1s.appendleft(self.value)
         self.average_array_1s.pop()
         somma = 0
         for elem in self.average_array_1s:

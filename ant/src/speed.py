@@ -23,7 +23,7 @@ class Speed(Sensor):
 
     def export(self):
         return {
-            'speed': round(self.value, 2),
+            'speed': round(self.speed, 2),
             'distance': round(self.distance, 2)
         }
 
@@ -65,14 +65,16 @@ class Speed(Sensor):
                 self.distance_trap = self.settings.run_length +\
                     self.settings.trap_length - self.distance
                 if self.distance > self.settings.run_length and self.distance_trap >= 0:
-                    self.average_array.append(self._speed)
+                    self.average_array.append(self.speed)
                 if self.trap_count == 0:
                     self._send_message(Message(self.trap_info, MexPriority.medium, MexType.trap, 1, 1))
                 self.trap_count = (self.trap_count + 1) % 10
             time.sleep(0.1)
 
     @property
-    def value(self):
+    def speed(self):
+        if (time.time() - self.lastRxTime) > 5:
+            self._speed = 0
         return self._speed
 
     @property

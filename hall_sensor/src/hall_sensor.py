@@ -21,6 +21,7 @@ class HallSensor(Sensor):
         self.timer = -1
         self.frequency = 0
         self.counter = 0
+        self._last_rx = time.time()
         GPIO.setmode(GPIO.BCM)
         GPIO.setup(self.pin, GPIO.IN)
         GPIO.add_event_detect(self.pin, GPIO.FALLING, callback=self.clock)  # passing from HIGH to LOW
@@ -45,7 +46,8 @@ class HallSensor(Sensor):
 
     @property
     def speed(self):
-        # todo: mettere a 0 quando un passaggio da più di 4s
+        if (time.time() - self.timer) > 5.0:
+            return 0.0
         return round(self.__settings.circumference * self.frequency * 3.6 / 1000, 2)  # circumference * frequency
 
     @property

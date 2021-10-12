@@ -14,7 +14,18 @@ class PyxbeeV2:
         self.__settings = settings
         self.__send_alert = send_alert
         self.__send__message = send_message
-        self.__serial: Serial = Serial('/dev/ttyUSB0', 115200)
+        self.__serial_open = False
+        self.__serial = None
+        self.__open_serial()
+
+    def __open_serial(self):
+        try:
+            self.__serial: Serial = Serial('/dev/ttyUSB0', 115200)
+            self.__serial_open = True
+            print('Serial LORA open')
+        except Exception as e:
+            print(e)
+            self.__serial_open = False
 
     @staticmethod
     def format_data(bike_data_dict: dict) -> str:
@@ -28,8 +39,16 @@ class PyxbeeV2:
         return ','.join(bike_data_str_list) + '\n'
 
     def send_data(self, bike_data: BikeData):
-        message = self.format_data(bike_data.to_json())
-        self.__serial.write(message.encode('utf-8'))
+        if self.__serial_open and self.__serial is not None:
+            data = bike_data.to_json()
+            print(data)
+            message = self.format_data(data)
+            print(message)
+            aa = self.__serial.write(message.encode('utf-8'))
+            print(aa)
+        else:
+            self.__open_serial()
+
         # print(message)
         # message = message[:-1]
         # message_list = message.split(',')

@@ -3,7 +3,7 @@ version: '3'
 services:
 
   mqtt-broker:
-    image: eclipse-mosquitto:1.6
+    image: eclipse-mosquitto:1.6.14
     container_name: mqtt-broker
     environment:
       - TZ=Europe/Rome
@@ -12,181 +12,181 @@ services:
     ports:
       - 1883:1883
     restart: unless-stopped
-
-  gps:
-    build: ./gps
-    container_name: gps
-    restart: unless-stopped
-    volumes:
-      - "./gps/data:/data"
-    devices:
-      - "/dev/ttyAMA1:/dev/ttyAMA1"
-    networks:
-      - poli
-    depends_on:
-      - "mqtt-broker"
-
-  csv:
-    build: ./csv
-    container_name: csv
-    restart: unless-stopped
-    volumes:
-      - "./csv/data:/data"
-    networks:
-      - poli
-    depends_on:
-      - "mqtt-broker"
-
-  gear:
-    build: ./gear
-    container_name: gear
-    restart: unless-stopped
-    volumes:
-      - "./gear/data:/data"
-    devices:
-      - "/dev/ttyS0:/dev/ttyS0"
-    networks:
-      - poli
-    depends_on:
-      - "mqtt-broker"
-
-  pyxbee_v2:
-    build: ./pyxbee_v2
-    container_name: pyxbee_v2
-    restart: unless-stopped
-    volumes:
-      - "./pyxbee_v2/data:/data"
-    devices:
-      - "/dev/ttyUSB0:/dev/ttyUSB0"
-    networks:
-      - poli
-    depends_on:
-      - "mqtt-broker"
-
-#  video:
-#    build: ./video
-#    container_name: video
+#
+#  gps:
+#    build: ./gps
+#    container_name: gps
 #    restart: unless-stopped
+#    volumes:
+#      - "./gps/data:/data"
+#    devices:
+#      - "/dev/ttyAMA1:/dev/ttyAMA1"
+#    networks:
+#      - poli
+#    depends_on:
+#      - "mqtt-broker"
+#
+#  csv:
+#    build: ./csv
+#    container_name: csv
+#    restart: unless-stopped
+#    volumes:
+#      - "./csv/data:/data"
+#    networks:
+#      - poli
+#    depends_on:
+#      - "mqtt-broker"
+#
+##  gear:
+##    build: ./gear
+##    container_name: gear
+##    restart: unless-stopped
+##    volumes:
+##      - "./gear/data:/data"
+##    devices:
+##      - "/dev/ttyS0:/dev/ttyS0"
+##    networks:
+##      - poli
+##    depends_on:
+##      - "mqtt-broker"
+#
+#  pyxbee_v2:
+#    build: ./pyxbee_v2
+#    container_name: pyxbee_v2
+#    restart: unless-stopped
+#    volumes:
+#      - "./pyxbee_v2/data:/data"
+#    devices:
+#      - "/dev/ttyUSB0:/dev/ttyUSB0"
+#    networks:
+#      - poli
+#    depends_on:
+#      - "mqtt-broker"
+#
+##  video:
+##    build: ./video
+##    container_name: video
+##    restart: unless-stopped
+##    devices:
+##      - "/dev/:/dev/"
+##    volumes:
+##      - "/opt/vc:/opt/vc"
+##    environment:
+##      - "LD_LIBRARY_PATH=/opt/vc/lib"
+##      - "READTHEDOCS=True"
+##    networks:
+##      - poli
+##    privileged: true
+##    depends_on:
+##      - "mqtt-broker"
+#
+#  ant:
+#    build: ./ant
+#    container_name: ant
+#    restart: unless-stopped
+#    privileged: true
+#    volumes:
+#      - "./ant/data:/data"
 #    devices:
 #      - "/dev/:/dev/"
-#    volumes:
-#      - "/opt/vc:/opt/vc"
-#    environment:
-#      - "LD_LIBRARY_PATH=/opt/vc/lib"
-#      - "READTHEDOCS=True"
 #    networks:
 #      - poli
-#    privileged: true
 #    depends_on:
 #      - "mqtt-broker"
-
-  ant:
-    build: ./ant
-    container_name: ant
-    restart: unless-stopped
-    privileged: true
-    volumes:
-      - "./ant/data:/data"
-    devices:
-      - "/dev/:/dev/"
-    networks:
-      - poli
-    depends_on:
-      - "mqtt-broker"
-
-  messages:
-    build: ./messages
-    container_name: messages
-    restart: unless-stopped
-    volumes:
-      - "./messages/data:/data"
-    networks:
-      - poli
-    depends_on:
-      - "mqtt-broker"
-
-  manager:
-    build: ./manager
-    container_name: manager
-    restart: unless-stopped
-    privileged: true
-    volumes:
-      - "./manager/data:/data"
-    networks:
-      - poli
-    depends_on:
-      - "mqtt-broker"
-
-  accelerometer:
-    build: ./accelerometer
-    container_name: accelerometer
-    restart: unless-stopped
-    privileged: true
-    devices:
-      - /dev/gpiomem
-    volumes:
-#      - ./accelerometer/src:/src
-      - ./accelerometer/data:/data
-    networks:
-      - poli
-    depends_on:
-      - "mqtt-broker"
-
-  gpio:
-    build: ./gpio
-    container_name: gpio
-    restart: unless-stopped
-    privileged: true
-    devices:
-      - /dev/gpiomem
-    networks:
-      - poli
-    depends_on:
-      - "mqtt-broker"
-
-  hall_sensor:
-    build: ./hall_sensor
-    container_name: hall_sensor
-    restart: unless-stopped
-    privileged: true
-    devices:
-      - /dev/gpiomem
-    networks:
-      - poli
-    depends_on:
-      - "mqtt-broker"
-
-#  bt:
-#    build: ./bt
-#    container_name: bt
+#
+#  messages:
+#    build: ./messages
+#    container_name: messages
+#    restart: unless-stopped
+#    volumes:
+#      - "./messages/data:/data"
+#    networks:
+#      - poli
+#    depends_on:
+#      - "mqtt-broker"
+#
+#  manager:
+#    build: ./manager
+#    container_name: manager
 #    restart: unless-stopped
 #    privileged: true
-#    networks:
-#      - poli
-#    depends_on:
-#      - "mqtt-broker"
-
-#  communication:
-#    build: ./communication
-#    container_name: communication
-#    restart: unless-stopped
 #    volumes:
-#      - "./communication/data:/data"
+#      - "./manager/data:/data"
 #    networks:
 #      - poli
 #    depends_on:
 #      - "mqtt-broker"
-
-#  external_mqtt:
-#    build: ./external_mqtt
-#    container_name: external_mqtt
+#
+#  accelerometer:
+#    build: ./accelerometer
+#    container_name: accelerometer
 #    restart: unless-stopped
+#    privileged: true
+#    devices:
+#      - /dev/gpiomem
 #    volumes:
-#      - "./external_mqtt/data:/data"
+##      - ./accelerometer/src:/src
+#      - ./accelerometer/data:/data
 #    networks:
 #      - poli
 #    depends_on:
 #      - "mqtt-broker"
+#
+#  gpio:
+#    build: ./gpio
+#    container_name: gpio
+#    restart: unless-stopped
+#    privileged: true
+#    devices:
+#      - /dev/gpiomem
+#    networks:
+#      - poli
+#    depends_on:
+#      - "mqtt-broker"
+#
+#  hall_sensor:
+#    build: ./hall_sensor
+#    container_name: hall_sensor
+#    restart: unless-stopped
+#    privileged: true
+#    devices:
+#      - /dev/gpiomem
+#    networks:
+#      - poli
+#    depends_on:
+#      - "mqtt-broker"
+#
+##  bt:
+##    build: ./bt
+##    container_name: bt
+##    restart: unless-stopped
+##    privileged: true
+##    networks:
+##      - poli
+##    depends_on:
+##      - "mqtt-broker"
+#
+##  communication:
+##    build: ./communication
+##    container_name: communication
+##    restart: unless-stopped
+##    volumes:
+##      - "./communication/data:/data"
+##    networks:
+##      - poli
+##    depends_on:
+##      - "mqtt-broker"
+#
+##  external_mqtt:
+##    build: ./external_mqtt
+##    container_name: external_mqtt
+##    restart: unless-stopped
+##    volumes:
+##      - "./external_mqtt/data:/data"
+##    networks:
+##      - poli
+##    depends_on:
+##      - "mqtt-broker"
 
 networks:
   poli:
