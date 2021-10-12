@@ -7,7 +7,7 @@ directories = [f for f in listdir() if isdir(f)]
 
 for directory in directories:
     if directory != 'common_files' and directory[0] != '.' and \
-            directory[0] != 'utility' and directory != 'example_module':
+            directory != 'utility' and directory != 'example_module':
         makedirs(f"./{directory}/src/common_files", exist_ok=True)
         for file in files:
             file_dest = join('./{}/src/common_files'.format(directory), file)
