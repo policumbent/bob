@@ -3,11 +3,10 @@ import time
 import json
 
 from enum import IntEnum
-
-from .common_files.mqtt import MqttConsumer
 from .common_files.message import Message
 from .common_files.sensor import Sensor
 from .settings import Settings
+from .arduino_serial import ArduinoSerial
 from pathlib import Path
 
 LAST_GEAR_FILE_PATH = "gear_last_pos.json"
@@ -21,19 +20,17 @@ class Gear(Sensor):
 
     def export(self) -> dict:
         return {
-            'pos_1': 97,
-            'pos_2': 175,
             'gear': self.value
         }
 
-    def __init__(self, send_message, settings: Settings, mqtt: MqttConsumer):
+    def __init__(self, send_message, settings: Settings):
         self._send_message = send_message
         self.gear_changed = False
         self.count = 0
         self._settings_lock = threading.Lock()
         self._settings: Settings = settings
         self.gear = self.read_last_gear()
-        self.__mqtt = mqtt
+        ArduinoSerial()
         # # VETTORE CON GLI ANGOLI DEI SERVO PER OGNI MARCIA
         # self.read_gear_positions()
 
@@ -53,8 +50,8 @@ class Gear(Sensor):
             new_gear = self.gear + 1
             servo1_pos, servo2_pos = self.get_angle(new_gear, Mode.UP)
             print("Movimentazione servo in salita: ", new_gear)
-            self.gear = new_gear
             self.servo_move(servo1_pos, servo2_pos)
+            self.gear = new_gear
             self.save_last_gear()
             # self.gear_changed = True
             # time.sleep(0.2)
@@ -65,8 +62,8 @@ class Gear(Sensor):
             new_gear = self.gear - 1
             servo1_pos, servo2_pos = self.get_angle(new_gear, Mode.DOWN)
             print("Movimentazione in discesa", new_gear)
-            self.gear = new_gear
             self.servo_move(servo1_pos, servo2_pos)
+            self.gear = new_gear
             self.save_last_gear()
             # self.gear_changed = True
             # time.sleep(0.1)
@@ -112,7 +109,7 @@ class Gear(Sensor):
     def save_gear_positions(self):
         print("Salvataggio posizioni marce")
         with open(POS_FILE_PATH, "w") as write_file:
-            write_file.write(self.gear)
+            write_file.write(self.encode_mex())
             print("Posizioni servomotori cambio salvata")
 
     def get_angle(self, gear, up_or_down):
@@ -136,15 +133,7 @@ class Gear(Sensor):
         print("Movimentazione servo")
         print("\tservo 1 -> ", servo1_pos)
         print("\tservo 2 -> ", servo2_pos)
-        x = {
-                "pos_2": int(servo2_pos),
-                "pos_1": int(servo1_pos),
-                "gear": self.gear
-            }
-
-        json_s = json.dumps(x)
-        mex = json_s + "\n"
-        self.__mqtt.publish(mex)
+        ArduinoSerial.send_gear_pos(servo2_pos, servo1_pos)
 
     def shift(self, mode: int):
         print('shift ', mode)

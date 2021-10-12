@@ -29,7 +29,7 @@ class Gpio:
             'pressed': False,
             'last': .0
         }
-        self.__pressure_time = .4  # secondi
+        self.__pressure_time = .5  # secondi
         #
         # # NOTE: per gestire il reset e la registr. video
         # self._sensors = sensors
