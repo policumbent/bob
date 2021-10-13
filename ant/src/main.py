@@ -69,6 +69,7 @@ def start():
     print("Mqtt server ip:", sys.argv[1])
     print('Starting ANT')
     settings.load()
+    print(settings.values)
     # sensors['timer'] = Timer()
     sensors['hr'] = HeartRate(settings)
     sensors['speed'] = Speed(send_message, settings)
