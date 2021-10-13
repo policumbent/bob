@@ -32,7 +32,7 @@ def start():
         print("Total arguments passed:", n)
         return
     print('Starting indoor weather')
-    settings = Settings({})
+    settings = Settings({}, 'indoor_weather')
     os.system('i2cdetect -y 1')
     global weather
     weather = Weather(settings, send_alert, send_message)

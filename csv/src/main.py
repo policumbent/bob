@@ -53,7 +53,7 @@ def start():
         print("Total arguments passed:", n)
         return
     print('Starting Csv')
-    settings = Settings({})
+    settings = Settings({}, 'csv')
     global bike_data
     bike_data = BikeData(['manager', 'ant', 'gps', 'hall_sensor', 'gear', 'accelerometer'])
     global mqtt

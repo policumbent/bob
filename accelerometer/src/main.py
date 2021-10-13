@@ -33,7 +33,7 @@ def start():
     print('Starting accelerometer')
     settings = Settings({
         'accelerometer_local_csv': False
-    })
+    }, 'accelerometer')
     os.system('i2cdetect -y 1')
     global accelerometer
     accelerometer = Accelerometer(settings, send_alert, send_message)

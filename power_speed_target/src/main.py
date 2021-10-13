@@ -8,7 +8,7 @@ from .common_files.bikeData import BikeData
 
 settings = Settings({
     'speed_power_target_csv': 'test_Vittoria.csv',
-})
+}, 'power_speed_target')
 bikeData: BikeData = BikeData(
     ['ant', 'gps', 'power_speed_target', 'manager', 'gear', 'messages']
 )

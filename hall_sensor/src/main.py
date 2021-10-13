@@ -33,7 +33,7 @@ def start():
     settings = Settings({
         'pin': 24,
         'circumference': 1450
-    })
+    }, 'hall_sensor')
     global hall_sensor
     hall_sensor = HallSensor(settings, send_alert, send_message)
     global mqtt

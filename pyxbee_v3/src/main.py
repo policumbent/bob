@@ -53,8 +53,8 @@ def start():
     if n < 2:
         print("Total arguments passed:", n)
         return
-    print('Starting Pyxbee V2')
-    settings = Settings({})
+    print('Starting Pyxbee V3')
+    settings = Settings({}, 'pyxbee_v3')
     global pyxbee_v3
     pyxbee_v3 = PyxbeeV3(settings, send_alert, send_message)
     global bike_data

@@ -29,7 +29,7 @@ def start():
     print('Starting LED controller')
     settings = Settings({
         'mode': 0
-    })
+    }, 'LED')
     settings.load()
     global mqtt
     mqtt = MqttSensor(sys.argv[1], 1883, 'LED', [''], settings, message_handler)

@@ -8,7 +8,7 @@ from .common_files.message import Message, MexPriority
 
 settings = Settings({
     'trap_priority': MexPriority.low
-})
+}, 'messages')
 messages = Messages(settings)
 
 

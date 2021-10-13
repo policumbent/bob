@@ -3,9 +3,8 @@ from .common_files.common_settings import CommonSettings
 
 class Settings(CommonSettings):
 
-    def __init__(self, values):
-        self.bike = 'taurusx'
-        super().__init__(values)
+    def __init__(self, values, name):
+        super().__init__(values, name)
 
     @property
     def bike(self):

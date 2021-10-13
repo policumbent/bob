@@ -48,7 +48,7 @@ def start():
         print("Total arguments passed:", n)
         return
     print('Starting Phoenix')
-    settings = Settings({})
+    settings = Settings({}, 'phoenix')
     serial: Serial = Serial('/dev/ttyAMA1', 115200)
     global bike_data
     bike_data = BikeData(['manager', 'ant', 'hall_sensor', 'messages'])

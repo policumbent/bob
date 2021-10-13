@@ -13,7 +13,7 @@ settings = Settings({
     'autopause': True,
     'bike': 'taurusx',
     'autopause_on_gps': False
-})
+}, 'manager')
 mqtt: MqttConsumer
 timer = Timer()
 speed_0 = 0.1
