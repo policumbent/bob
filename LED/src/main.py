@@ -18,8 +18,7 @@ def send_message(message: Message):
 
 
 def message_handler(topic: str, message: bytes):
-    if topic == 'signals':
-        hall_sensor.signal(message.decode())
+    pass
 
 
 def start():
@@ -31,8 +30,11 @@ def start():
     settings = Settings({
         'mode': 0
     })
-    MqttSensor(sys.argv[1], 1883, 'LED', [''], settings, message_handler)
+    settings.load()
+    global mqtt
+    mqtt = MqttSensor(sys.argv[1], 1883, 'LED', [''], settings, message_handler)
     while True:
+        mqtt.publish(str(settings.mode))
         sleep(1)
 
 
