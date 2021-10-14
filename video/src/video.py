@@ -109,7 +109,7 @@ class Video:
                 hr = print_data('FC: ', data.heartrate, 'bpm')
 
                 speed = print_data('Vel:', data.speed, 'km/h')
-                distance = print_data('Dist:', data.distance, 'km')
+                distance = print_data('Dist:', round(data.distance/1000, 2), 'km')
                 cadence = print_data('Cad:', data.cadence, 'rpm')
                 power = print_data('Power:', data.power, 'W')
                 gear = print_data('M:', data.gear, '')
@@ -136,13 +136,17 @@ class Video:
                 color = tuple(self._settings.default_color_1)
                 color2 = tuple(self._settings.default_color_2)
 
+                if self._settings.lap_position:
+                    position = data.distance % self._settings.track_length
+                    p = (position * (900-350)) / self._settings.track_length
+                    draw.line((350, 180, 900, 180), width=5, fill='white')
+                    draw.ellipse((340+p, 170, 360+p, 190), fill="red")
+
                 if bike == 'taurus':
                     draw.text((10, 40), hr, color2)
-                    draw.text((540, 5), distance, color2)
-                    draw.text((10, 5), timer, color2)
-                    draw.text((540, 40), cadence, color2)
-                elif bike == 'taurusx':
-                    draw.text((video_width-280, 5), cadence, color2)
+                draw.text((10, 40), timer, color2)
+                draw.text((video_width-280, 5), cadence, color2)
+                draw.text((10, 5), distance, color2)
                 draw.text((10, video_height-50), speed, color)
                 draw.text((video_width-video_width/2-50, video_height-50), gear, color)
                 draw.text((video_width-280, video_height-50), power, color)
@@ -164,6 +168,7 @@ class Video:
                 draw.text((x1, 80), mex, color2)
                 draw.text((x2, 120), mex2, color2)
                 draw.text((x3, 150), trap_info, color2)
+
 
                 overlay.update(img.tobytes())
                 sleep(0.25)

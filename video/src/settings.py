@@ -40,6 +40,20 @@ class Settings(CommonSettings):
             and isinstance(self._values['video_record'], bool) \
             else False
 
+    @property
+    def lap_position(self) -> bool:
+        return self._values['lap_position'] \
+            if self._values.__contains__('lap_position') \
+            and isinstance(self._values['lap_position'], bool) \
+            else False
+
+    @property
+    def track_length(self) -> int:
+        return self._values['track_length'] \
+            if self._values.__contains__('track_length') \
+            and isinstance(self._values['track_length'], int) \
+            else 8000
+
 
 
 
