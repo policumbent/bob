@@ -6,7 +6,7 @@ from .common_files.mqtt import MqttRemote
 from .common_files.message import Message
 from .common_files.alert import Alert
 from .gpio import Gpio, GpioMessage
-settings = Settings({})
+settings = Settings({}, 'gpio')
 mqtt: MqttRemote
 
 

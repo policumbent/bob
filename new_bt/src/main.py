@@ -60,13 +60,13 @@ def message_handler(topic, message: bytes):
 def start():
     print('Starting Communication')
     global settings
-    settings = Settings({})
+    settings = Settings({}, 'new_bt')
     # settings.load()
     global mqtt
     # si iscrive al gps per sapere l'ora e la velocità e all'ant per la velocità
     # se il veicolo si sta muovendo le modifiche alle impostazioni verranno rifiutate
     global bt
-    bt = NewBt({}, set(), 'ciaomarta!', publish_new_settings, send_signal, send_message, send_alert)
+    bt = NewBt({}, set(), 'addiomarta!', publish_new_settings, send_signal, send_message, send_alert)
     mqtt = MqttRemote('127.0.0.1', 1883, 'new_bt', [], [], settings, message_handler)
     mqtt.publish_settings(settings)
 

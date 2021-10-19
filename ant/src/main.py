@@ -23,7 +23,7 @@ settings = Settings({
     'power_sensor_id': 0,
     'circumference': 1450,
     'average_power_time': 3
-})
+}, 'ant')
 mqtt: MqttConsumer
 sensors: dict = dict()
 
@@ -69,6 +69,7 @@ def start():
     print("Mqtt server ip:", sys.argv[1])
     print('Starting ANT')
     settings.load()
+    print(settings.values)
     # sensors['timer'] = Timer()
     sensors['hr'] = HeartRate(settings)
     sensors['speed'] = Speed(send_message, settings)

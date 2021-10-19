@@ -3,8 +3,8 @@ import json
 
 
 class Settings(CommonSettings):
-    def __init__(self, values: dict):
-        super(Settings, self).__init__(values)
+    def __init__(self, values: dict, name):
+        super(Settings, self).__init__(values, name)
         self._video = True
         self._USB_PATH = '/home/pi/'
         self._default_color_1 = [255, 255, 255]
@@ -39,6 +39,20 @@ class Settings(CommonSettings):
             if self._values.__contains__('video_record') \
             and isinstance(self._values['video_record'], bool) \
             else False
+
+    @property
+    def lap_position(self) -> bool:
+        return self._values['lap_position'] \
+            if self._values.__contains__('lap_position') \
+            and isinstance(self._values['lap_position'], bool) \
+            else False
+
+    @property
+    def track_length(self) -> int:
+        return self._values['track_length'] \
+            if self._values.__contains__('track_length') \
+            and isinstance(self._values['track_length'], int) \
+            else 8000
 
 
 

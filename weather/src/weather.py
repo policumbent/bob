@@ -30,8 +30,8 @@ class Weather(Sensor):
         self._settings = settings
         self._send_alert = send_alert
         self._send_message = send_message
-        self._settings_lock = threading.Lock()
-        self._value_lock = threading.Lock()
+        # self._settings_lock = threading.Lock()
+        # self._value_lock = threading.Lock()
         self._sensor = BME280(i2c_dev=self._bus)
         self._data = dict()
         self._worker = Thread(target=self._loop, daemon=False)
@@ -39,14 +39,13 @@ class Weather(Sensor):
 
     def _loop(self):
         while True:
-            with self._value_lock:
-                self._data["temperature"] = round(self._sensor.get_temperature(), 2)
-                self._data["pressure"] = round(self._sensor.get_pressure(), 2)
-                self._data["humidity"] = round(self._sensor.get_humidity(), 2)
-                # print('{:05.2f}*C {:05.2f}hPa {:05.2f}%'
-                #       .format(self._data["temperature"],
-                #               self._data["pressure"],
-                #               self._data["humidity"]))
+            self._data["temperature"] = round(self._sensor.get_temperature(), 2)
+            self._data["pressure"] = round(self._sensor.get_pressure(), 2)
+            self._data["humidity"] = round(self._sensor.get_humidity(), 2)
+            # print('{:05.2f}*C {:05.2f}hPa {:05.2f}%'
+            #       .format(self._data["temperature"],
+            #               self._data["pressure"],
+            #               self._data["humidity"]))
             time.sleep(1)
 
     @property
@@ -54,9 +53,7 @@ class Weather(Sensor):
         return self._data
 
     def update_settings(self, settings: Settings):
-        with self._settings_lock:
-            self._settings = settings
+        self._settings = settings
 
     def export(self):
-        with self._value_lock:
-            return self._data.copy()
+        return self._data.copy()

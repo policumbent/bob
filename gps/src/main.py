@@ -28,7 +28,7 @@ def start():
         'longitude_timing_start': 7.792347,
         'latitude_timing_end': 45.032888,
         'longitude_timing_end': 7.792347
-    })
+    }, 'gps')
     global gps
     gps = GpsInterface(settings)
     mqtt = MqttSensor(sys.argv[1], 1883, 'gps', ['reset'],

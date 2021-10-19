@@ -87,9 +87,8 @@ def start():
         'protocol': 'https',
         'username': 'admin',
         'password': 'admin'
-    })
-    # todo: riabilitare load dei settings
-    # settings.load()
+    }, 'communication')
+    settings.load()
     global mqtt
     mqtt = MqttRemote(sys.argv[1], 1883, 'http_service', ['ant', 'gps', 'accelerometer', 'manager'],
                       [], settings, message_handler)

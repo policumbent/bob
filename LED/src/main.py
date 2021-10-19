@@ -5,10 +5,8 @@ from .settings import Settings
 from .common_files.mqtt import MqttSensor
 from .common_files.alert import Alert
 from .common_files.message import Message
-from .hall_sensor import HallSensor
 
 mqtt: MqttSensor
-hall_sensor: HallSensor
 
 
 def send_alert(alert: Alert):
@@ -20,8 +18,7 @@ def send_message(message: Message):
 
 
 def message_handler(topic: str, message: bytes):
-    if topic == 'signals':
-        hall_sensor.signal(message.decode())
+    pass
 
 
 def start():
@@ -29,17 +26,15 @@ def start():
     if n < 2:
         print("Total arguments passed:", n)
         return
-    print('Starting ExampleSensor')
+    print('Starting LED controller')
     settings = Settings({
-        'pin': 24,
-        'circumference': 1450
-    }, 'hall_sensor')
-    global hall_sensor
-    hall_sensor = HallSensor(settings, send_alert, send_message)
+        'mode': 0
+    }, 'LED')
+    settings.load()
     global mqtt
-    mqtt = MqttSensor(sys.argv[1], 1883, 'hall_sensor', ['reset'], settings, message_handler)
+    mqtt = MqttSensor(sys.argv[1], 1883, 'LED', [''], settings, message_handler)
     while True:
-        mqtt.publish(json.dumps(hall_sensor.export()))
+        mqtt.publish(str(settings.mode))
         sleep(1)
 
 

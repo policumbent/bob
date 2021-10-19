@@ -15,7 +15,7 @@ settings = Settings(
             'down_positions_s1': [49, 63, 71, 78, 88, 97, 107, 118, 131, 141, 153],
             'down_positions_s2': [171, 152, 142, 132, 120, 108, 94, 80, 64, 51, 35]
         }
-    })
+    }, 'gear')
 mqtt: MqttConsumer
 gear: Gear
 

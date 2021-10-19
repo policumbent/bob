@@ -81,8 +81,7 @@ def start():
         'protocol': 'https',
         'username': 'taurusx',
         'password': 'ciao1234'
-    })
-    # todo: riabilitare load dei settings
+    }, 'external_mqtt')
     settings.load()
     global external_mqtt
     external_mqtt = start_external_mqtt('server.policumbent.it', 1883, '', '')
