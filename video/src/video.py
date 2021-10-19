@@ -1,7 +1,7 @@
 import picamera  # pylint: disable=import-error
 import threading
 import os
-
+from math import trunc
 from time import sleep
 from PIL import Image, ImageDraw, ImageFont
 from .common_files.bikeData import BikeData
@@ -113,7 +113,7 @@ class Video:
                 cadence = print_data('Cad:', data.cadence, 'rpm')
                 power = print_data('Power:', data.power, 'W')
                 gear = print_data('M:', data.gear, '')
-                timer = print_data('Timer: ', data.time, '')
+                timer = print_data('Time:', f'{trunc(data.time/60)}\' {data.time%60}"', '')
                 trap_info = ""
                 mex = data.line1
                 mex2 = data.line2
