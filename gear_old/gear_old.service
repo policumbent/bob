@@ -1,11 +1,11 @@
 [Unit]
-Description=external mqtt service
+Description=gear service
 After=multi-user.target
 
 [Service]
 Type=simple
 Restart=always
-WorkingDirectory=/home/pi/BOB/external_mqtt
+WorkingDirectory=/home/pi/BOB/gear_old
 ExecStart=/usr/bin/python3 -m src.main 127.0.0.1
 
 [Install]
