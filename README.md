@@ -75,6 +75,7 @@ Per tutti manca la gestione delle impostazioni
 - [ ] Eliminare moduli inutilizzati
 - [ ] Scrivere tutti i README dei singoli moduli
 - [ ] Gestire le dipendenze con Poetry
+- [ ] Integrare la UI con gli script di startup
 ## Contributors ✨
 
 Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/docs/en/emoji-key)):
