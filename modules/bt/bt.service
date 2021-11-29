@@ -1,0 +1,12 @@
+[Unit]
+Description=new bt service
+After=multi-user.target
+
+[Service]
+Type=simple
+Restart=always
+WorkingDirectory=/home/pi/BOB/modules/bt
+ExecStart=bash /home/pi/BOB/bt/start.sh
+
+[Install]
+WantedBy=multi-user.target

@@ -2,7 +2,7 @@ import glob
 import os
 import shutil
 
-files = glob.glob('./**/*.service')
+files = glob.glob('./modules/**/*.service')
 dest = '/etc/systemd/system/'
 
 for file_path in files:

@@ -72,6 +72,9 @@ Per tutti manca la gestione delle impostazioni
 
 - [ ] implementare componenti mancanti
 - [ ] gestione settings
+- [ ] Eliminare moduli inutilizzati
+- [ ] Scrivere tutti i README dei singoli moduli
+- [ ] Gestire le dipendenze con Poetry
 ## Contributors ✨
 
 Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/docs/en/emoji-key)):

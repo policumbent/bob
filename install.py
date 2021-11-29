@@ -1,5 +1,5 @@
 from os import listdir, system
-from os.path import isdir
+from os.path import isdir, join
 
 
 # INSTALLO LE DIPENDENZE E LE LIBRERIE PER TUTTI I MODULI
@@ -7,13 +7,13 @@ print('Installare librerie e dipendenze? (y/N)')
 resp = input()
 if resp[0] == 'y':
     system('sudo apt update && sudo apt upgrade -y')
-    directories = [f for f in listdir() if isdir(f)]
+    directories = [f for f in listdir('modules') if isdir(join('modules', f))]
     for directory in directories:
         if directory != 'common_files' and directory[0] != '.' and \
                 directory != 'utility' and directory != 'example_module':
             print(f'Installation requirements of {directory}')
-            system(f'python3 -m pip install -r ./{directory}/src/requirements.txt')
-            with open(f'./{directory}/package_list.txt') as f:
+            system(f'python3 -m pip install -r ./modules/{directory}/src/requirements.txt')
+            with open(f'./modules/{directory}/package_list.txt') as f:
                 for line in f.readlines():
                     app = line.replace('\n', '')
                     system(f'sudo apt install {app} -y')
@@ -31,15 +31,6 @@ print('Modificare file config.txt?')
 resp = input()
 if resp[0] == 'y':
     system('sudo cp utility/config.txt /boot/config.txt')
-
-print('Installare servizio per auto avvio?')
-resp = input()
-if resp[0] == 'y':
-    system('sudo chmod +x start.sh')
-    system('sudo cp utility/BOB.service /etc/systemd/system/')
-    system('sudo systemctl enable BOB.service')
-    system('sudo systemctl start BOB.service')
-
 
 print('Installare splashscreen?')
 resp = input()

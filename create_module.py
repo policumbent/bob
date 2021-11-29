@@ -32,24 +32,24 @@ confirm = input('Vuoi confermare? (Y/n) ')
 if confirm != 'Y' and confirm != 'y':
     print('Operazione annullata')
     exit()
-makedirs(f'./{module_name}/src/common_files', exist_ok=True)
-copyfile('./example_module/Dockerfile', f'./{module_name}/Dockerfile')
-copyfile('./example_module/.gitignore', f'./{module_name}/.gitignore')
-files = [f for f in listdir('./example_module/src') if isfile(join('./example_module/src', f))]
+makedirs(f'./modules/{module_name}/src/common_files', exist_ok=True)
+# copyfile('modules/example_module/Dockerfile', f'./modules/{module_name}/Dockerfile')
+copyfile('modules/example_module/.gitignore', f'./modules/{module_name}/.gitignore')
+files = [f for f in listdir('modules/example_module/src') if isfile(join('modules/example_module/src', f))]
 for file in files:
-    file_dest = join(f'./{module_name}/src', file)
-    file_src = join('./example_module/src', file)
+    file_dest = join(f'./modules/{module_name}/src', file)
+    file_src = join('modules/example_module/src', file)
     copyfile(file_src, file_dest)
-files = [f for f in listdir('./common_files') if isfile(join('./common_files', f))]
+files = [f for f in listdir('common_files') if isfile(join('common_files', f))]
 for file in files:
-    file_dest = join(f'./{module_name}/src/common_files', file)
-    file_src = join('./common_files', file)
+    file_dest = join(f'./modules/{module_name}/src/common_files', file)
+    file_src = join('common_files', file)
     copyfile(file_src, file_dest)
 # signals_list = ['reset']
 # module_type = 2
 # module_name = 'pippo'
 # topics_list = ['manager', 'gps']
-with open('./example_module/src/main.py') as f:
+with open('modules/example_module/src/main.py') as f:
     main = ''.join(f.readlines())
     # print(main)
     message_handler = ''
@@ -74,7 +74,7 @@ with open('./example_module/src/main.py') as f:
                     f" {str(signals_list)}, settings, message_handler)"
     main = main.replace('#$$mqtt start$$#', mqtt_init)
     main = main.replace('#$$message handler$$#', message_handler)
-    with open(f'./{module_name}/src/main.py', 'w') as fw:
+    with open(f'./modules/{module_name}/src/main.py', 'w') as fw:
         fw.write(main)
-system(f'git add {module_name}')
+system(f'git add modules/{module_name}')
 print('Modulo creato')

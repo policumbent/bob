@@ -1,0 +1,11 @@
+[Unit]
+Description=BOB
+
+[Service]
+User=pi
+Type=simple
+WorkingDirectory=/home/pi/BOB
+ExecStart=/home/pi/BOB/start_core.sh
+
+[Install]
+WantedBy=multi-user.target
