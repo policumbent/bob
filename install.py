@@ -41,3 +41,10 @@ if resp[0] == 'y':
     system('sudo systemctl start splashscreen.service')
 
 
+print('Installare cockpit?')
+resp = input()
+if resp[0] == 'y':
+    system('sudo apt install cockpit')
+    system('sudo apt install screenfetch')
+
+
