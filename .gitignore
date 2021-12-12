@@ -1,1 +1,7 @@
 .idea
+.venv
+.env
+.pytest*
+.vscode
+__pycache__
+dist
