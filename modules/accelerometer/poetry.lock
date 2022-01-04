@@ -1,0 +1,46 @@
+[[package]]
+name = "mpu6050-raspberrypi"
+version = "1.2"
+description = "A Python module for accessing the MPU-6050 digital accelerometer and gyroscope on a Raspberry Pi."
+category = "main"
+optional = false
+python-versions = "*"
+
+[[package]]
+name = "paho-mqtt"
+version = "1.6.1"
+description = "MQTT version 5.0/3.1.1 client class"
+category = "main"
+optional = false
+python-versions = "*"
+
+[package.extras]
+proxy = ["pysocks"]
+
+[[package]]
+name = "smbus"
+version = "1.1.post2"
+description = "Python bindings for Linux SMBus access through i2c-dev"
+category = "main"
+optional = false
+python-versions = "*"
+
+[metadata]
+lock-version = "1.1"
+python-versions = "^3.7"
+content-hash = "0a82236f0b8af3a8be30f42edf2c7b599b08e38e332648f5e279af7ac6041af7"
+
+[metadata.files]
+mpu6050-raspberrypi = [
+    {file = "mpu6050-raspberrypi-1.2.tar.gz", hash = "sha256:10801a5fde8af5132ccd77d0c819b7e25b9dc82bde7405aab7f132c6c08a4c4b"},
+    {file = "mpu6050_raspberrypi-1.2-py3-none-any.whl", hash = "sha256:89c7dc3e16904ffe9eb2d6b64d464477cbcc00f4640cd563519eefb1d16cf1ba"},
+]
+paho-mqtt = [
+    {file = "paho-mqtt-1.6.1.tar.gz", hash = "sha256:2a8291c81623aec00372b5a85558a372c747cbca8e9934dfe218638b8eefc26f"},
+]
+smbus = [
+    {file = "smbus-1.1.post2-cp27-cp27mu-linux_armv7l.whl", hash = "sha256:529f9effc383b6381534d1d845eaf1078bdd2d4e625c945b23cf274d5cf1c306"},
+    {file = "smbus-1.1.post2-cp34-cp34m-linux_armv7l.whl", hash = "sha256:39923448455a41c6bbe823de62b191103dd711917056362d9e4b1d2c6ec0f06d"},
+    {file = "smbus-1.1.post2-cp35-cp35m-linux_armv7l.whl", hash = "sha256:b467235734ae5c147c4ec0eff1afb9dba189d9d3cc086ed7e0d3dbf0ae485230"},
+    {file = "smbus-1.1.post2.tar.gz", hash = "sha256:f96d345e0aa10053a8a4917634f1dc37ba1f656fa5cace7629b71777e90855c6"},
+]

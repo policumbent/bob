@@ -7,7 +7,7 @@ Type=simple
 User=pi
 Restart=always
 WorkingDirectory=/home/pi/BOB/modules/accelerometer
-ExecStart=/usr/bin/python3 -m src.main 127.0.0.1
+ExecStart=poetry run python3 -m src.main 127.0.0.1
 
 [Install]
 WantedBy=multi-user.target

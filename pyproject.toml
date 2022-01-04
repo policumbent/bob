@@ -2,7 +2,7 @@
 name = "bob"
 version = "0.1.0"
 description = ""
-authors = ["Stefano Loscalzo <stefano.loscalzo@gmail.com>", "Davide Aimar <>", "Gabriele Belluardo <gabriele.belluardo@outlook.it>"]
+authors = ["Stefano Loscalzo <stefano.loscalzo@gmail.com>", "Davide Aimar <davide.aimar99gmail.com>", "Gabriele Belluardo <gabriele.belluardo@outlook.it>"]
 license = "GPL-3.0-or-later"
 
 [tool.poetry.dependencies]

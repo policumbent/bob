@@ -1,0 +1,16 @@
+[tool.poetry]
+name = "accelerometer"
+version = "0.1.0"
+description = ""
+authors = ["Your Name <you@example.com>"]
+
+[tool.poetry.dependencies]
+python = "^3.7"
+smbus = "^1.1.post2"
+paho-mqtt = "^1.6.1"
+mpu6050-raspberrypi = "^1.2"
+bob-core = { git = "https://github.com/policumbent/bob-core", rev = "main" }
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
