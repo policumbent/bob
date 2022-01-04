@@ -4,10 +4,10 @@ from mpu6050 import mpu6050
 from time import time
 # from threading import Lock
 from .raw_csv import RawCsv
-from .common_files.sensor import Sensor
+from core.sensor import Sensor
 from .settings import Settings
-from .common_files.alert import Alert, AlertPriority
-from .common_files.message import Message, MexPriority
+from core.alert import Alert, AlertPriority
+from core.message import Message, MexPriority
 
 axis = ['x', 'y', 'z']
 

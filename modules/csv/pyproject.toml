@@ -1,15 +1,15 @@
 [tool.poetry]
-name = "accelerometer"
+name = "csv"
 version = "0.1.0"
 description = ""
 authors = ["Your Name <you@example.com>"]
 
 [tool.poetry.dependencies]
 python = "^3.8"
-smbus = "^1.1.post2"
 paho-mqtt = "^1.6.1"
-mpu6050-raspberrypi = "^1.2"
 bob-core = { git = "ssh://git@github.com/policumbent/bob-core", branch = "main" }
+
+[tool.poetry.dev-dependencies]
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]

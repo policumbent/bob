@@ -1,5 +1,5 @@
 from .settings import Settings
-from .common_files.bikeData import BikeData
+from core.bikeData import BikeData
 from csv import DictWriter
 from datetime import datetime
 from os import makedirs
