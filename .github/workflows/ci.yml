@@ -40,6 +40,6 @@ jobs:
         uses: pguyot/arm-runner-action@v1
         with:
           commands: |
-            apt-get install -y --no-install-recommends python3-pip && pip3 install poetry
+            apt-get install -y --no-install-recommends python3-pip git && pip3 install poetry
             poetry install --no-dev
             poetry build
