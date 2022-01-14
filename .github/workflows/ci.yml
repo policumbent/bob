@@ -1,0 +1,45 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  ci:
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: [3.7, 3.8]
+        poetry-version: [1.1.12]
+
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - uses: actions/setup-python@v2
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Run image
+        uses: abatilo/actions-poetry@v2.0.0
+        with:
+          poetry-version: ${{ matrix.poetry-version }}
+
+      - name: Install
+        run: poetry install
+
+      - name: Tests
+        run: poetry run pytest --verbose
+
+      - uses: actions/checkout@v2
+
+      - name: Build on arm
+        uses: pguyot/arm-runner-action@v1
+        with:
+          commands: |
+            apt-get install -y --no-install-recommends python3-pip && pip3 install poetry
+            poetry install --no-dev
+            poetry build
