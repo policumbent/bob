@@ -1,5 +1,5 @@
 [Unit]
-Description=BOB
+Description=BOB service tu run the MQTT container with Docker
 After=docker.service
 Requires=docker.service
 
@@ -7,7 +7,7 @@ Requires=docker.service
 User=pi
 Type=simple
 WorkingDirectory=${BOB_ROOT}
-ExecStart=docker-compose up -d
+ExecStart=docker-compose up
 
 [Install]
 WantedBy=multi-user.target

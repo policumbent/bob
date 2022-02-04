@@ -5,7 +5,7 @@ After=multi-user.target
 [Service]
 Type=simple
 Restart=always
-WorkingDirectory=/home/pi/BOB/###
+WorkingDirectory=${BOB_ROOT}/###
 ExecStart=/usr/bin/python3 -m src.main 127.0.0.1
 
 [Install]

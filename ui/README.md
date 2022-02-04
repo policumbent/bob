@@ -11,15 +11,13 @@ CentOS users the package is `systemd-devel`.
 
 
 ```sh
-pip3 install -r requirements.txt
-python3 setup.py install
-sudo ufw allow 5001
-sudo sysdweb
+poetry install
+sudo ufw allow 8080
+poetry run  python3 sysdweb.py -p 8080 -l 0.0.0.0 -c sysdweb.conf
 ```
 to activate as a service 
 ````sh
 sudo cp ./systemd/sysdweb-system.service /etc/systemd/system/sysdweb-system.service
-sudo cp sysdweb.conf /etc/sysdweb.conf
 sudo systemctl enable sysdweb-system
 sudo systemctl start sysdweb-system
 ````
@@ -29,19 +27,17 @@ sudo systemctl start sysdweb-system
 First take a look to `sysdweb.conf` file to configure sysdweb. Is self
 explanatory.
 
-You can place `sysdweb.conf` in `/etc` for system, in user home
-`~/.config/sysdweb/sysdweb.conf` or in same directory where you run sysdweb.
 
 Once you have configured sysdweb, simply run.
 
 ```
-sudo sysdweb
+poetry run python3 sysdweb.py 
 ```
 
 Change listen port and address with `-p` and `-l` or via environment variables.
 
 ```sh
-sudo sysdweb -p 9080 -l 0.0.0.0
+poetry run python3 sysdweb.py -p 8080 -l 0.0.0.0 -c sysdweb.conf
 ```
 
 Current config environment variables are the following.

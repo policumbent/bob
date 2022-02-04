@@ -5,8 +5,8 @@ After=network.target
 Requires=dbus.socket
 
 [Service]
-WorkingDirectory="${BOB_ROOT}/ui"
-ExecStart=poetry run python sysdweb.py -p 8080 -l 0.0.0.0 -c sysdweb.conf
+WorkingDirectory=${BOB_ROOT}/ui
+ExecStart=${BOB_ROOT}/ui/.venv/bin/python3 sysdweb.py -p 8080 -l 0.0.0.0 -c sysdweb.conf
 Restart=on-failure
 
 [Install]

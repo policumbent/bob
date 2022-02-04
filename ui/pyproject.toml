@@ -1,21 +1,21 @@
 [tool.poetry]
-name = "bob"
+name = "bob-ui"
 version = "0.1.0"
-description = ""
+description = "Control bob modules (systemd services) through Web or REST API"
 authors = ["Stefano Loscalzo <stefano.loscalzo@gmail.com>", "Davide Aimar <davide.aimar99gmail.com>", "Gabriele Belluardo <gabriele.belluardo@outlook.it>"]
 license = "GPL-3.0-or-later"
 
 [tool.poetry.dependencies]
+# package deps
 python = "^3.7.3"
-
-# TODO all all modules
-
-# project modules
-accelerometer = { path = "./modules/accelerometer", develop = false }
-csv = { path = "./modules/csv", develop = false }
-ui = { path = "./ui", develop = false }
+bottle = "0.12.19"
+dbus-python = "^1.2.16"
+python-pam = "^1.8.4"
+systemd-python = "^234"
 
 [tool.poetry.dev-dependencies]
+pylint = "^2.12.2"
+autopep8 = "^1.6.0"
 pytest = "^6.2.5"
 
 [build-system]

@@ -6,8 +6,8 @@ After=multi-user.target
 Type=simple
 Restart=on-failure
 User=pi
-WorkingDirectory=/home/pi/BOB/modules/csv
-ExecStart=poetry run python3 -m src.main 127.0.0.1
+WorkingDirectory=${BOB_ROOT}/modules/csv
+ExecStart=${BOB_ROOT}/modules/csv/.venv/bin/python3 -m src.main 127.0.0.1
 
 [Install]
 WantedBy=multi-user.target
