@@ -5,9 +5,10 @@ description = ""
 authors = ["Your Name <you@example.com>"]
 
 [tool.poetry.dependencies]
+bob-core = { git = "ssh://git@github.com/policumbent/bob-core", branch = "main" }
+
 python = "^3.7.3"
 paho-mqtt = "^1.6.1"
-bob-core = { git = "ssh://git@github.com/policumbent/bob-core", branch = "main" }
 
 [tool.poetry.dev-dependencies]
 

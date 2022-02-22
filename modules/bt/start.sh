@@ -9,4 +9,4 @@ echo -e 'power on\ndiscoverable on\npairable on\nquit' | bluetoothctl
 #sudo mount /dev/sda1 /mnt/usb
 
 #cd /home/pi/Policumbent-ant-schermi/
-python3 -m src.main
+./.venv/bin/python3 -m src.main

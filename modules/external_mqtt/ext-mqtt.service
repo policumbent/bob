@@ -1,0 +1,12 @@
+[Unit]
+Description=external mqtt service
+After=multi-user.target
+
+[Service]
+Type=simple
+Restart=always
+WorkingDirectory=${BOB_ROOT}/modules/external_mqtt
+ExecStart=${BOB_ROOT}/modules/external_mqtt/.venv/bin/python3 -m src.main 127.0.0.1
+
+[Install]
+WantedBy=multi-user.target

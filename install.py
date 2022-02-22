@@ -41,7 +41,7 @@ if resp[0] == 'y':
     system('sudo systemctl start splashscreen.service')
 
 
-print('Installare cockpit?')
+print('Installare cockpit? (y/N)')
 resp = input()
 if resp[0] == 'y':
     system('sudo apt install cockpit')

@@ -9,4 +9,4 @@ broker_ip = '127.0.0.1'
 
 
 for module in modules:
-    system(f'cd modules/{module} && python3 -m src.main {broker_ip} &')
+    system(f'cd modules/{module} && ./.venv/bin/python3 -m src.main {broker_ip} &')

@@ -3,8 +3,8 @@ import json
 import sys
 from paho.mqtt.client import Client
 
-from .common_files.alert import Alert
-from .common_files.mqtt import MqttRemote
+from core.alert import Alert
+from core.mqtt import MqttRemote
 from .settings import Settings
 
 

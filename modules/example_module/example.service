@@ -5,8 +5,8 @@ After=multi-user.target
 [Service]
 Type=simple
 Restart=always
-WorkingDirectory=${BOB_ROOT}/###
-ExecStart=/usr/bin/python3 -m src.main 127.0.0.1
+WorkingDirectory=${BOB_ROOT}/modules/example_module
+ExecStart=${BOB_ROOT}/modules/example_module/.venv/bin/python3 -m src.main 127.0.0.1
 
 [Install]
 WantedBy=multi-user.target

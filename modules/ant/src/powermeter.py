@@ -6,8 +6,8 @@ from threading import Thread
 from collections import deque
 
 from .ant.easy.channel import Channel
-from .common_files.sensor import Sensor
-from .common_files.message import Message, MexType, MexPriority
+from core.sensor import Sensor
+from core.message import Message, MexType, MexPriority
 
 # CHANNEL_PERIOD_VAL = 32768/MESSAGE_RATE(HZ)
 # MESSAGE_RATE = 32768/32768 = 32768/8182 = 4HZ

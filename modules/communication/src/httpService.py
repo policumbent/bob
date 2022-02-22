@@ -1,8 +1,8 @@
 from typing import Dict, List
 
-from .common_files.alert import Alert
+from core.alert import Alert
 from .settings import Settings
-from .common_files.weatherData import WeatherData
+from core.weatherData import WeatherData
 import requests
 import json
 

@@ -32,19 +32,21 @@ confirm = input('Vuoi confermare? (Y/n) ')
 if confirm != 'Y' and confirm != 'y':
     print('Operazione annullata')
     exit()
-makedirs(f'./modules/{module_name}/src/common_files', exist_ok=True)
+# makedirs(f'./modules/{module_name}/src/common_files', exist_ok=True)
 # copyfile('modules/example_module/Dockerfile', f'./modules/{module_name}/Dockerfile')
 copyfile('modules/example_module/.gitignore', f'./modules/{module_name}/.gitignore')
+copyfile('modules/example_module/poetry.toml', f'./modules/{module_name}/poetry.toml')
+copyfile('modules/example_module/pyproject.toml', f'./modules/{module_name}/pyproject.toml')
 files = [f for f in listdir('modules/example_module/src') if isfile(join('modules/example_module/src', f))]
 for file in files:
     file_dest = join(f'./modules/{module_name}/src', file)
     file_src = join('modules/example_module/src', file)
     copyfile(file_src, file_dest)
-files = [f for f in listdir('common_files') if isfile(join('common_files', f))]
-for file in files:
-    file_dest = join(f'./modules/{module_name}/src/common_files', file)
-    file_src = join('common_files', file)
-    copyfile(file_src, file_dest)
+# files = [f for f in listdir('common_files') if isfile(join('common_files', f))]
+# for file in files:
+#     file_dest = join(f'./modules/{module_name}/src/common_files', file)
+#     file_src = join('common_files', file)
+#     copyfile(file_src, file_dest)
 # signals_list = ['reset']
 # module_type = 2
 # module_name = 'pippo'

@@ -6,4 +6,4 @@ print("Avaliable modules: ", modules)
 module_name = input('Module name: ')
 
 if module_name in modules:
-    system(f'cd modules/{module_name} && python3 -m src.main {broker_ip}')
+    system(f'cd modules/{module_name} && ./.venv/bin/python3 -m src.main {broker_ip}')

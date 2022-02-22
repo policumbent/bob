@@ -1,11 +1,10 @@
-from threading import Thread
 import sys
 from .ant.easy.channel import Channel
 from .ant.easy.node import Node
 from .heartrate import HeartRate
 from .powermeter import Powermeter
 from .speed import Speed
-from .common_files.message import Message, MexType, MexPriority
+from core.message import Message, MexType, MexPriority
 NETWORK_KEY = [0xb9, 0xa5, 0x21, 0xfb, 0xbd, 0x72, 0xc3, 0x45]
 CHANNEL_TYPE = Channel.Type.BIDIRECTIONAL_RECEIVE
 

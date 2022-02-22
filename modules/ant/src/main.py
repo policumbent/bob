@@ -1,18 +1,15 @@
 from threading import Thread
-from typing import Dict
 
-from .common_files.sensor import Sensor
+from core.mqtt import MqttConsumer
+from core.message import Message
 from .ant_manager import Ant
 import time
 import sys
 import json
-from .common_files.message import Message
 from .heartrate import HeartRate
 from .powermeter import Powermeter
 from .settings import Settings
-from .common_files.mqtt import MqttConsumer
 from .speed import Speed
-from .timer import Timer
 
 settings = Settings({
     'hour_record': False,

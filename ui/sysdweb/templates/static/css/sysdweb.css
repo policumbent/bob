@@ -15,7 +15,7 @@ a:hover {
 }
 
 .table {
-  margin-bottom: 0
+  margin-bottom: 80px;
 }
 
 .table > tbody > tr > td {
