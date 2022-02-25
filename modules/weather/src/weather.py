@@ -8,7 +8,7 @@ import threading
 from threading import Thread
 import time
 
-from .common_files.sensor import Sensor
+from core.sensor import Sensor
 from .settings import Settings
 try:
     from smbus2 import SMBus

@@ -1,5 +1,5 @@
-from .common_files.common_settings import CommonSettings
-from .common_files.message import MexPriority
+from core.common_settings import CommonSettings
+from core.message import MexPriority
 import json
 
 

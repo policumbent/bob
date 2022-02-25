@@ -2,9 +2,9 @@ import time
 import json
 import sys
 from .settings import Settings
-from .common_files.mqtt import MqttConsumer
-from .common_files.message import Message
-from .common_files.alert import Alert
+from core.mqtt import MqttConsumer
+from core.message import Message
+from core.alert import Alert
 from .gear import Gear
 
 settings = Settings(

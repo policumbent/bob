@@ -1,6 +1,6 @@
 from paho.mqtt import client as mqtt
 
-from .common_files.mqtt import Mqtt
+from core.mqtt import Mqtt
 
 
 class MqttMessage(Mqtt):

@@ -2,7 +2,7 @@ import time
 import sys
 import json
 from .settings import Settings
-from .common_files.mqtt import MqttSensor
+from core.mqtt import MqttSensor
 from .gpsinterface import GpsInterface
 
 

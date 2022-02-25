@@ -1,6 +1,6 @@
 import RPi.GPIO as GPIO
 import time
-from .common_files.sensor import Sensor
+from core.sensor import Sensor
 from .settings import Settings
 
 

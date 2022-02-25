@@ -1,3 +1,5 @@
 libopenjp2-7
 libtiff5
 python3-picamera
+libjpeg-dev
+zlib1g-dev

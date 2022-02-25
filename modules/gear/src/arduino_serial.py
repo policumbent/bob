@@ -2,8 +2,8 @@ import json
 import time
 import serial
 # from serial import Serial, serialutil
-from .common_files.message import Message, MexType, MexPriority
-from .common_files.alert import Alert, AlertPriority
+from core.message import Message, MexType, MexPriority
+from core.alert import Alert, AlertPriority
 
 
 class ArduinoSerial:

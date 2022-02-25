@@ -1,7 +1,7 @@
 import time
 import RPi.GPIO as GPIO
-from .common_files.message import Message, MexType, MexPriority
-from .common_files.alert import Alert, AlertPriority
+from core.message import Message, MexType, MexPriority
+from core.alert import Alert, AlertPriority
 
 
 PIN_UP = 17

@@ -3,11 +3,11 @@ from time import sleep
 import json
 from serial import Serial
 from .settings import Settings
-from .common_files.mqtt import MqttConsumer
-from .common_files.alert import Alert
-from .common_files.message import Message
+from core.mqtt import MqttConsumer
+from core.alert import Alert
+from core.message import Message
 from .example_sensor import ExampleSensor
-from .common_files.bikeData import BikeData
+from core.bikeData import BikeData
 
 mqtt: MqttConsumer
 bike_data: BikeData

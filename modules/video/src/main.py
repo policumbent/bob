@@ -1,11 +1,11 @@
 import sys
 import json
 from .settings import Settings
-from .common_files.mqtt import MqttConsumer
-from .common_files.message import Message
-from .common_files.alert import Alert
+from core.mqtt import MqttConsumer
+from core.message import Message
+from core.alert import Alert
 from .video import Video
-from .common_files.bikeData import BikeData
+from core.bikeData import BikeData
 
 settings = Settings({
     'video_record': False,

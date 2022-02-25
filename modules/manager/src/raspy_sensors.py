@@ -1,9 +1,9 @@
 import threading
 from gpiozero import CPUTemperature
-from .common_files.sensor import Sensor
+from core.sensor import Sensor
 from .settings import Settings
-from .common_files.message import Message, MexPriority, MexType
-from .common_files.alert import Alert, AlertPriority
+from core.message import Message, MexPriority, MexType
+from core.alert import Alert, AlertPriority
 
 
 class RaspySensors(Sensor):

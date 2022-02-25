@@ -2,9 +2,9 @@ import sys
 from time import sleep
 import json
 from .settings import Settings
-from .common_files.mqtt import MqttSensor
-from .common_files.alert import Alert
-from .common_files.message import Message
+from core.mqtt import MqttSensor
+from core.alert import Alert
+from core.message import Message
 from .hall_sensor import HallSensor
 
 mqtt: MqttSensor

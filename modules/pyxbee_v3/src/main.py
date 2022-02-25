@@ -2,11 +2,11 @@ import sys
 from time import sleep, time
 import json
 from .settings import Settings
-from .common_files.mqtt import MqttRemote
-from .common_files.alert import Alert
-from .common_files.message import Message
+from core.mqtt import MqttRemote
+from core.alert import Alert
+from core.message import Message
 from .pyxbee_v3 import PyxbeeV3
-from .common_files.bikeData import BikeData
+from core.bikeData import BikeData
 
 mqtt: MqttRemote
 pyxbee_v3: PyxbeeV3

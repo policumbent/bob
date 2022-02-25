@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "externam mqtt"
+name = "external mqtt"
 version = "0.1.0"
 description = ""
 authors = ["Stefano Loscalzo <stefano.loscalzo@gmail.com>", "Davide Aimar <davide.aimar99gmail.com>", "Gabriele Belluardo <gabriele.belluardo@outlook.it>"]

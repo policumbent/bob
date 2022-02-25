@@ -7,7 +7,7 @@ Type=simple
 Restart=always
 User=pi
 WorkingDirectory=${BOB_ROOT}/modules/power_speed_target
-ExecStart=/usr/bin/python3 -m src.main 127.0.0.1
+ExecStart=${BOB_ROOT}/modules/power_speed_target/.venv/bin/python3 -m src.main 127.0.0.1
 
 [Install]
 WantedBy=multi-user.target

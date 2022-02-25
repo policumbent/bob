@@ -2,7 +2,7 @@ import json
 
 from serial import Serial
 from .settings import Settings
-from .common_files.bikeData import BikeData
+from core.bikeData import BikeData
 from datetime import datetime
 
 keys2bike = ["wind_speed", "wind_direction", "temperature", "humidity"]

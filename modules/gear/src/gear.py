@@ -3,8 +3,8 @@ import time
 import json
 
 from enum import IntEnum
-from .common_files.message import Message
-from .common_files.sensor import Sensor
+from core.message import Message
+from core.sensor import Sensor
 from .settings import Settings
 from .arduino_serial import ArduinoSerial
 from pathlib import Path

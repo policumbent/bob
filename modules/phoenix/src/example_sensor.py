@@ -1,4 +1,4 @@
-from .common_files.sensor import Sensor
+from core.sensor import Sensor
 from .settings import Settings
 
 
