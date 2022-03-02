@@ -1,11 +1,16 @@
-# BOB
+![BOB](img/banner.png)
+
+<h3 align="center">Il factotum della bici</h3>
+
 <!-- ALL-CONTRIBUTORS-BADGE:START - Do not remove or modify this section -->
+
 [![All Contributors](https://img.shields.io/badge/all_contributors-4-orange.svg?style=flat-square)](#contributors-)
+
 <!-- ALL-CONTRIBUTORS-BADGE:END -->
 
 ## Componenti
 
-*Work in progress*
+_Work in progress_
 
 Per tutti manca la gestione delle impostazioni
 
@@ -24,7 +29,7 @@ Per tutti manca la gestione delle impostazioni
   - [x] gpio => tasti cambio e combinazioni tasti
   - [x] communication => collegamento con il server http
   - [x] pyxbee_v2 => comunicazione tramite lora
-  - [x] bt => collegamento con l'app bt  **(manca dockerfile)**
+  - [x] bt => collegamento con l'app bt **(manca dockerfile)**
 - messaggi
   - [x] messaggi a schermo
   - [ ] alert su alice
@@ -40,7 +45,7 @@ Per tutti manca la gestione delle impostazioni
   - `alerts/{name}` => Un sensore pubblica un json con il messaggio che vuole mandare `{"text": "Ciao", "priority": 4}`
 - subscribe
   - `new_settings/{name}` => Un sensore effettua la subscribe sulle nuove impostazioni e se arriva un messaggio aggiorna le proprie
-  - `signals` =>  Un sensore effettua la subscribe sui segnali, se arriva un segnale il sensore compie la relativa azione `{"action": "reset"}`
+  - `signals` => Un sensore effettua la subscribe sui segnali, se arriva un segnale il sensore compie la relativa azione `{"action": "reset"}`
 
 ### Sensori (MqttSensor => Estende Mqtt)
 
@@ -76,6 +81,7 @@ Per tutti manca la gestione delle impostazioni
 - [ ] Scrivere tutti i README dei singoli moduli
 - [ ] Gestire le dipendenze con Poetry
 - [ ] Integrare la UI con gli script di startup
+
 ## Contributors ✨
 
 Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/docs/en/emoji-key)):
