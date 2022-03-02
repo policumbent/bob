@@ -12,15 +12,16 @@ if resp[0] == 'y':
         if directory != 'common_files' and directory[0] != '.' and \
                 directory != 'utility' and directory != 'example_module':
             print(f'Installation requirements of {directory}')
-            system(f'python3 -m pip install -r ./modules/{directory}/src/requirements.txt')
+            system(f'cd ./modules/{directory}/ && poetry install')
+            #system(f'python3 -m pip install -r ./modules/{directory}/src/requirements.txt')
             with open(f'./modules/{directory}/package_list.txt') as f:
                 for line in f.readlines():
                     app = line.replace('\n', '')
                     system(f'sudo apt install {app} -y')
-    system('python3 copy_common.py')
+    # system('python3 copy_common.py')
+    # system('sudo pip3 install paho-mqtt pybluez')
 
     system('sudo cp utility/ant-usb-sticks.rules /etc/udev/rules.d/')
-    system('sudo pip3 install paho-mqtt pybluez')
 
 print('Modificare bluez service?')
 resp = input()

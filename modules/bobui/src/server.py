@@ -9,8 +9,8 @@
 from bottle import abort, auth_basic, response, route, run, static_file, template, TEMPLATE_PATH
 from pam import pam
 from socket import gethostname
-from sysdweb.config import checkConfig
-from sysdweb.systemd import systemdBus, Journal
+from .config import checkConfig
+from .systemd import systemdBus, Journal
 
 import os
 

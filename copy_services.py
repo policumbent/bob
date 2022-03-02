@@ -3,7 +3,6 @@ import os
 
 files = glob.glob('./modules/**/*.service')
 files += glob.glob('./utility/*.service')
-files += glob.glob('./ui/*.service')
 dest = '/etc/systemd/system/'
 bob_dir = os.getcwd()
 
