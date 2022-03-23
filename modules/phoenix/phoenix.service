@@ -4,7 +4,7 @@ After=multi-user.target
 
 [Service]
 Type=simple
-Restart=always
+restart=on-failure
 User=pi
 WorkingDirectory=${BOB_ROOT}/modules/phoenix
 ExecStart=${BOB_ROOT}/modules/phoenix/.venv/bin/python3 -m src.main 127.0.0.1

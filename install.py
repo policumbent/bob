@@ -20,7 +20,10 @@ if resp[0].lower() == 'y':
             for line in f.readlines():
                 app = line.replace('\n', '')
                 system(f'sudo apt install {app} -y')
-        system(f'cd ./modules/{directory}/ && poetry install')
+        if directory.__eq__("video"):
+            system(f'cd ./modules/{directory}/ && poetry env use 3.9 && . .venv/bin/activate && export READTHEDOCS=True && poetry install && deactivate')
+        else:
+            system(f'cd ./modules/{directory}/ && poetry install')
         counter += 1
     # system('sudo pip3 install paho-mqtt pybluez')
     system('sudo cp utility/ant-usb-sticks.rules /etc/udev/rules.d/')

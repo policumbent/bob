@@ -4,7 +4,7 @@ After=multi-user.target
 
 [Service]
 Type=simple
-Restart=always
+restart=on-failure
 WorkingDirectory=${BOB_ROOT}/modules/bt
 ExecStart=bash start.sh
 

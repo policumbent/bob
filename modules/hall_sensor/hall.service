@@ -5,7 +5,7 @@ After=multi-user.target
 [Service]
 Type=simple
 User=pi
-Restart=always
+restart=on-failure
 WorkingDirectory=${BOB_ROOT}/modules/hall_sensor
 ExecStart=${BOB_ROOT}/modules/hall_sensor/.venv/bin/python3 -m src.main 127.0.0.1
 

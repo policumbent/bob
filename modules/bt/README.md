@@ -6,7 +6,7 @@ Poetry has a bug installing pybluez dependency, see here: https://github.com/pyt
 Workaround:
 ```
 source .venv/bin/activate
-sudo python3 -m pip install pybluez
+python3 -m pip install pybluez
 ```
 
 ### TODO

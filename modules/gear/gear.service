@@ -4,7 +4,7 @@ After=multi-user.target
 
 [Service]
 Type=simple
-Restart=always
+restart=on-failure
 WorkingDirectory=${BOB_ROOT}/modules/gear
 ExecStart=${BOB_ROOT}/modules/.venv/bin/python3 -m src.main 127.0.0.1
 

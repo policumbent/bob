@@ -5,7 +5,8 @@ description = ""
 authors = ["Your Name <you@example.com>"]
 
 [tool.poetry.dependencies]
-bob-core = { git = "https://github.com/policumbent/bob-core", rev = "main" }
+# bob-core = { git = "https://github.com/policumbent/bob-core", rev = "main" }
+policumbent-bob-core="^0.1.0.post1"
 
 python = "^3.7.3"
 paho-mqtt = "^1.6.1"
