@@ -7,7 +7,7 @@ Type=simple
 restart=on-failure
 User=pi
 WorkingDirectory=${BOB_ROOT}/modules/video
-ExecStart=${BOB_ROOT}/modules/video/.venv/bin/python3 -m src.main 127.0.0.1
+ExecStart=/usr/bin/python3 -m src.main 
 
 [Install]
 WantedBy=multi-user.target
