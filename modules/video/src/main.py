@@ -77,11 +77,14 @@ from asyncio import sleep
 from .camera import Camera
 from .colors import Colors
 
-# TODO: add log functions in bob-core
-def log_err(msg: str):
-    print("[ERR] " + msg)
+data = {"speed": 40, "power": 55}
 
-async def video():
+# TODO: add log functions in bob-core
+def log_err(msg):
+    print(f"[ERR] {msg}")
+
+
+async def try_camera():
     vcam = None
     while vcam is None:
         try:
@@ -89,30 +92,40 @@ async def video():
         except Exception:
             log_err("Camera is not enabled")
             await sleep(1)
-    
-    vcam.start()
-    while True:
-        await vcam.write_on_screen((0, 0), Colors.white, str(data))
-        await vcam.write_on_screen((500, 0), Colors.green, str(data*2))
 
-        await vcam.refresh_screen()
-    
+    return vcam
+
+
+async def video():
+    vcam = await try_camera()
+
+    try:
+        vcam.start()
+        while True:
+            await vcam.write_on_sector((0, 0), Colors.red, str(data["power"]))
+            await vcam.write_on_sector((1, 1), Colors.green, str(data["speed"]))
+
+            await vcam.refresh_screen()
+    except Exception as e:
+        log_err(e)
+
 
 async def mqtt():
     global data
 
     while True:
-        data += 1
+        data["power"] += 10
+        data["speed"] += 100
+
         await sleep(0.5)
 
-data = 0
 
 async def main():
     task_video = asyncio.create_task(video())
     task_mqtt = asyncio.create_task(mqtt())
 
     await asyncio.wait([task_video, task_mqtt])
-    
+
 
 def entry_point():
     asyncio.run(main())
