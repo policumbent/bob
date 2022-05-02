@@ -1,6 +1,5 @@
-# bob service controller
-Control systemd services through Web or REST API\
-Source: https://github.com/ogarcia/sysdweb
+# bob ui
+Control BOB through Web, REST API or a CLI
 
 ## Installation
 
@@ -12,7 +11,6 @@ CentOS users the package is `systemd-devel`.
 
 ```sh
 poetry install
-sudo ufw allow 8080
 poetry run  python3 sysdweb.py -p 8080 -l 0.0.0.0 -c sysdweb.conf
 ```
 to activate as a service 
