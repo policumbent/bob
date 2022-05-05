@@ -1,16 +1,46 @@
-#! /usr/bin/env python
-from typing import List, Optional
+from pathlib import Path
+from typing import List
 
+import os
 import typer
 
 app = typer.Typer()
+bob_root = Path(__file__).parent.parent.parent
+all_modules = os.listdir(bob_root / 'modules')
 
 
 @app.command()
-def install(modules: List[str], python: bool = True, apt: bool = True, verbose: bool = False):
+def module_list():
+    print("List of modules")
+    for module in all_modules:
+        print(module)
+
+
+@app.command()
+def install(modules: List[str], python: bool = True, apt: bool = True, verbose: bool = False, apt_upgrade: bool = True):
+    if apt_upgrade:
+        os.system('sudo apt update && sudo apt upgrade -y')
+    counter = 1
+    if len(modules) == 0:
+        modules = all_modules
     for module in modules:
-        print("Install {} (python={}, apt={}, verbose={})".format(module, python, apt, verbose))
-        # TODO: implement install
+        module_dir = bob_root / 'modules' / module
+        print('**********************************************************')
+        print(f'Installing requirements of {module} [{counter}/{len(modules)}]')
+        print('**********************************************************')
+        if apt:
+            package_file = module_dir / 'package_list.txt'
+            if package_file.exists():
+                with open(package_file) as f:
+                    for line in f.readlines():
+                        dep = line.replace('\n', '')
+                        os.system(f'sudo apt install {dep} -y')
+        if module.__eq__("video"):
+            # TODO: implement video
+            pass
+        else:
+            os.system(f'cd {module_dir} && poetry install')
+        counter += 1
 
 
 @app.command()
