@@ -10,7 +10,7 @@ from bottle import abort, auth_basic, response, route, run, static_file, templat
 from pam import pam
 from socket import gethostname
 from .config import checkConfig
-from lib.systemdlib import systemdBus, Journal
+from .systemdlib import systemdBus, Journal
 
 import os
 
@@ -52,7 +52,7 @@ def get_service_journal(service, lines):
 
 
 @route('/')
-#@auth_basic(login)
+# @auth_basic(login)
 def get_main():
     services = []
     for service in config.sections():
@@ -81,7 +81,7 @@ def get_main():
 
 
 @route('/journal/<service>')
-#@auth_basic(login)
+# @auth_basic(login)
 def get_service_journal_page(service):
     if service in config.sections():
         if get_service_action(service, 'status')['status'] == 'not-found':
@@ -95,31 +95,31 @@ def get_service_journal_page(service):
 
 # Serve static content
 @route('/favicon.ico')
-#@auth_basic(login)
+# @auth_basic(login)
 def get_favicon():
     return static_file('favicon.ico', root=os.path.join(static_path, 'img'))
 
 
 @route('/css/<file>')
-#@auth_basic(login)
+# @auth_basic(login)
 def get_css(file):
     return static_file(file, root=os.path.join(static_path, 'css'))
 
 
 @route('/fonts/<file>')
-#@auth_basic(login)
+# @auth_basic(login)
 def get_fonts(file):
     return static_file(file, root=os.path.join(static_path, 'fonts'))
 
 
 @route('/img/<file>')
-#@auth_basic(login)
+# @auth_basic(login)
 def get_img(file):
     return static_file(file, root=os.path.join(static_path, 'img'))
 
 
 @route('/js/<file>')
-#@auth_basic(login)
+# @auth_basic(login)
 def get_js(file):
     return static_file(file, root=os.path.join(static_path, 'js'))
 

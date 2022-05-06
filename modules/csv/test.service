@@ -1,0 +1,13 @@
+[Unit]
+Description=CSV service
+After=multi-user.target
+
+[Service]
+Type=simple
+Restart=on-failure
+User=pi
+WorkingDirectory=${BOB_ROOT}/modules/csv
+ExecStart=echo ciao
+
+[Install]
+WantedBy=multi-user.target
