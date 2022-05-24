@@ -2,3 +2,4 @@ libopenjp2-7
 libtiff5
 libjpeg-dev
 zlib1g-dev
+python3-venv

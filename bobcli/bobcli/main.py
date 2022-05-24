@@ -11,7 +11,7 @@ import typer
 
 from systemdlib import systemdBus, Journal
 
-app = typer.Typer()
+app = typer.Typer(add_completion=False)
 
 bob_root = Path(__file__).parent.parent.parent
 all_modules = os.listdir(bob_root / 'modules')
@@ -19,9 +19,24 @@ all_modules = os.listdir(bob_root / 'modules')
 
 @app.command()
 def module_list():
+    """
+    List all the available modules
+    """
     typer.secho("List of modules:", bold=True, fg=typer.colors.BLUE)
     for module in all_modules:
         typer.echo(module)
+
+
+@app.command()
+def setup(modules: List[str] = typer.Argument(None, help="List of modules to install, empty for installing all of them")):
+    """
+    Perform all the needed setup and run the specified modules
+    """
+    if modules is None:
+        modules = all_modules
+    install(modules, True, True)
+    copy_services(modules, True, True)
+    start(modules)
 
 
 @app.command()
@@ -29,18 +44,24 @@ def install(
         modules: List[str] = typer.Argument(None, help="List of modules to install, empty for installing all of them"),
         python: bool = typer.Option(True, help="Install python dependencies"),
         apt: bool = typer.Option(True, help="Install apt dependencies")):
+    """
+    Install specified modules dependencies
+    """
     apt_upgrade = typer.confirm('Do you want to run apt update && apt upgrade?')
     if apt_upgrade:
         subprocess.call('sudo apt update && sudo apt upgrade -y', shell=True)
     counter = 1
     if len(modules) == 0:
+        typer.confirm(
+            'Installing all the modules dependencies, this operation can take up to 30 min, do you want to continue?',
+            abort=True)
         modules = all_modules
     if (not python) and (not apt):
         typer.echo("No modules to install, specify at least one of --python or --apt")
         return
     start = time.time()
     for module in modules:
-        if not modules.__contains__(module):
+        if module not in modules:
             typer.echo("Module {} does not exist".format(module))
             continue
         module_dir = bob_root / 'modules' / module
@@ -55,9 +76,12 @@ def install(
                         dep = line.replace('\n', '')
                         subprocess.call(f'sudo apt install -y {dep}', shell=True)
         if python:
-            if module.__eq__("video"):
-                # TODO: implement video
-                pass
+            if module == "video":
+                venv_folder = module_dir / ".venv"
+                print(venv_folder)
+                if not os.path.exists(venv_folder):
+                    subprocess.call(f'cd {module_dir} && python3 -m venv .venv', shell=True)
+                subprocess.call(f'cd {module_dir} && .venv/bin/pip install -r requirements.txt ', shell=True)
             else:
                 subprocess.call(f'cd {module_dir} && poetry install', shell=True)
         counter += 1
@@ -93,6 +117,9 @@ def install(
 
 @app.command()
 def add_module(module_name: str = typer.Argument(..., help="Name of the module to add")):
+    """
+    Add a new module to BOB
+    """
     module_types = ('Sensore', 'Consumatore', 'Remoto')
     typer.echo('Tipologia modulo: ')
     typer.echo('1) Sensore')
@@ -175,6 +202,9 @@ def add_module(module_name: str = typer.Argument(..., help="Name of the module t
 
 @app.command()
 def start(modules: List[str] = typer.Argument(None)):
+    """
+    Start the specified modules with systemd
+    """
     if len(modules) == 0:
         modules = all_modules
     for module in modules:
@@ -193,6 +223,9 @@ def start(modules: List[str] = typer.Argument(None)):
 
 @app.command()
 def stop(modules: List[str] = typer.Argument(None, help="List of modules to stop")):
+    """
+    Stop the specified modules with systemd
+    """
     if len(modules) == 0:
         modules = all_modules
     for module in modules:
@@ -211,6 +244,9 @@ def stop(modules: List[str] = typer.Argument(None, help="List of modules to stop
 
 @app.command()
 def log(module_name: str, length: int = typer.Option(50, help='Number of lines to show')):
+    """
+    Show the last lines of the log of the specified module
+    """
     if module_name not in all_modules:
         typer.secho(f'Module {module_name} does not exist', fg=typer.colors.RED)
         return
@@ -230,6 +266,9 @@ def log(module_name: str, length: int = typer.Option(50, help='Number of lines t
 
 @app.command()
 def enable(modules: List[str] = typer.Argument(None)):
+    """
+    Enable the systemd service for the specified modules
+    """
     if len(modules) == 0:
         modules = all_modules
     for module in modules:
@@ -249,6 +288,9 @@ def enable(modules: List[str] = typer.Argument(None)):
 
 @app.command()
 def disable(modules: List[str] = typer.Argument(None)):
+    """
+    Disable the systemd service for the specified modules
+    """
     if len(modules) == 0:
         modules = all_modules
     for module in modules:
@@ -266,6 +308,9 @@ def disable(modules: List[str] = typer.Argument(None)):
 
 @app.command()
 def copy_services(modules: List[str] = typer.Argument(None), enable: bool = True, y: bool = False):
+    """
+    Copy the systemd service files for the specified modules
+    """
     dest = '/etc/systemd/system/'
     if len(modules) == 0:
         modules = all_modules
@@ -310,6 +355,9 @@ def copy_services(modules: List[str] = typer.Argument(None), enable: bool = True
 
 @app.command()
 def status(modules: List[str] = typer.Argument(None)):
+    """
+    Show the systemd status of the specified modules
+    """
     if len(modules) == 0:
         modules = all_modules
     sdbus = systemdBus()
@@ -341,6 +389,14 @@ def status(modules: List[str] = typer.Argument(None)):
             else:
                 loaded = typer.style(loaded, fg=typer.colors.RED)
             typer.echo(f'\t{unit}: {active}, {enabled}, {loaded}')
+
+
+@app.command()
+def run_mqtt_broker():
+    """
+    Run, with docker, the mqtt broker for the communication between the modules
+    """
+    subprocess.call(f'cd {bob_root} && sudo docker-compose up -d', shell=True)
 
 
 def getModuleServiceFiles(module_name) -> [str]:
