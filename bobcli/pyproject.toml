@@ -1,22 +1,24 @@
 [tool.poetry]
-name = "bob-ui"
+name = "bobcli"
 version = "0.1.0"
-description = "Control bob modules (systemd services) through Web or REST API"
-authors = ["Stefano Loscalzo <stefano.loscalzo@gmail.com>", "Davide Aimar <davide.aimar99gmail.com>", "Gabriele Belluardo <gabriele.belluardo@outlook.it>"]
+description = "Control bob modules (systemd services) through a command line interface."
+authors = ["Davide Aimar <davide.aimar99gmail.com>"]
 license = "GPL-3.0-or-later"
+readme = "README.md"
 
 [tool.poetry.dependencies]
-# package deps
 python = "^3.7.3"
-bottle = "0.12.19"
 dbus-python = "^1.2.16"
-python-pam = "^1.8.4"
 systemd-python = "^234"
+typer = {extras = ["all"], version = "^0.4.1"}
 
 [tool.poetry.dev-dependencies]
 pylint = "^2.12.2"
 autopep8 = "^1.6.0"
 pytest = "^6.2.5"
+
+[tool.poetry.scripts]
+bob = "bobcli.main:app"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]

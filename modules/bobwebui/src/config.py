@@ -12,6 +12,7 @@ import logging
 import os
 import pwd
 
+
 def checkConfig(file=None):
     """
     Parse config and discards errors

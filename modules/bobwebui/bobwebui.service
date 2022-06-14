@@ -5,8 +5,8 @@ After=network.target
 Requires=dbus.socket
 
 [Service]
-WorkingDirectory=${BOB_ROOT}/modules/bobui
-ExecStart=${BOB_ROOT}/modules/bobui/.venv/bin/python3 -m src.main -c src/bobui.conf
+WorkingDirectory=${BOB_ROOT}/modules/bobwebui
+ExecStart=${BOB_ROOT}/modules/bobwebui/.venv/bin/python3 -m src.main -c src/bobwebui.conf
 Restart=on-failure
 
 [Install]

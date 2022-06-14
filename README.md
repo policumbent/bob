@@ -12,6 +12,15 @@ Il factotum della bici
 <!-- ALL-CONTRIBUTORS-BADGE:END -->
 </h3>
 
+* BOB is not a single program, it is a collection of independent modules and tools to manage them.
+* Modules talk to each other through MQTT.
+* Up to now, all the modules are written in Python and are managed by systemd.
+* Every module has its own systemd service, and it's independent of the others.
+
+## CLI
+In order to ease the management of the modules, BOB has a command line interface.\
+Read the [README](bobcli/README.md) to know how to use it.
+
 ## Componenti
 
 _Work in progress_
