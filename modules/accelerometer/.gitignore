@@ -1,2 +1,2 @@
-src/common_files
-data
+.venv
+**/__pycache__/**

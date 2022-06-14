@@ -2,16 +2,23 @@
 name = "accelerometer"
 version = "0.1.0"
 description = ""
-authors = ["Stefano Loscalzo <stefano.loscalzo@gmail.com>", "Davide Aimar <davide.aimar99gmail.com>", "Gabriele Belluardo <gabriele.belluardo@outlook.it>"]
+authors = ["Marta Grassetti <mg.grassetti@gmail.com>", "Gabriele Belluardo <gabriele.belluardo@outlook.it>"]
 license = "GPL-3.0-or-later"
 
-[tool.poetry.dependencies]
-bob-core = { git = "https://github.com/policumbent/bob-core", rev = "main" }
+# needed for custom project structure
+packages = [
+    { include = "src" },
+]
 
-# package deps
+[tool.poetry.scripts]
+dev = "src.main:entry_point"
+
+
+[tool.poetry.dependencies]
 python = "^3.7.3"
+
+policumbent-bob-core = "^0.1.0.post1"
 smbus = "^1.1.post2"
-paho-mqtt = "^1.6.1"
 mpu6050-raspberrypi = "^1.2"
 
 [tool.poetry.dev-dependencies]

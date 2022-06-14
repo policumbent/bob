@@ -1,52 +1,88 @@
-from .accelerometer import Accelerometer
+import asyncio
+from mpu6050 import mpu6050
+from datetime import datetime
+
+import csv
 import time
-import json
-import sys
-from .settings import Settings
-from core.mqtt import MqttSensor
-from core.alert import Alert
-from core.message import Message
-import os
 
-mqtt: MqttSensor
-accelerometer: Accelerometer
+row = None
+fieldnames = ("acc_x", "acc_y", "acc_z", "gyr_x", "gyr_y", "gyr_z")
 
+async def read_data():
+    global row
 
-def send_alert(alert: Alert):
-    mqtt.publish_alert(alert)
+    mpu = mpu6050(0x68)
 
+    a_first = mpu.get_accel_data(g=True)
+    g_first = mpu.get_gyro_data()
 
-def send_message(message: Message):
-    mqtt.publish_message(message)
+    a_off_x = a_first['x']
+    a_off_y = a_first['y']
+    a_off_z = a_first['z']
 
+    g_off_x = g_first['x']
+    g_off_y = g_first['y']
+    g_off_z = g_first['z']
 
-def message_handler(topic: str, message: bytes):
-    if topic == 'signals':
-        accelerometer.signal(message.decode())
-
-
-def start():
-    n = len(sys.argv)
-    if n < 2:
-        print("Total arguments passed:", n)
-        return
-    print('Starting accelerometer')
-    settings = Settings({
-        'accelerometer_local_csv': False
-    }, 'accelerometer')
-    os.system('i2cdetect -y 1')
-    global accelerometer
-    accelerometer = Accelerometer(settings, send_alert, send_message)
-    global mqtt
-    mqtt = MqttSensor(sys.argv[1], 1883, 'accelerometer',
-                      ['accel_set_zero', 'reset'], settings, message_handler)
-    time.sleep(1)
-    accelerometer.signal('accel_set_zero')
     while True:
-        mqtt.publish(json.dumps(accelerometer.export()))
-        # print(accelerometer.export())
-        time.sleep(1)
+        acc = mpu.get_accel_data(g=True)
+        gyr = mpu.get_gyro_data()
+
+        acc['x'] -= a_off_x
+        acc['y'] -= a_off_y
+        acc['z'] -= a_off_z
+
+        gyr['x'] -= g_off_x
+        gyr['y'] -= g_off_y
+        gyr['z'] -= g_off_z
+
+        row = {
+            fieldnames[0]: float(round(float(acc['x']),2)),
+            fieldnames[1]: round(float(acc['y']),2),
+            fieldnames[2]: round(float(acc['z']),2),
+            fieldnames[3]: round(float(gyr['x']),2),
+            fieldnames[4]: round(float(gyr['y']),2),
+            fieldnames[5]: round(float(gyr['z']),2),
+        }
 
 
-if __name__ == '__main__':
-    start()
+        # sleep for 0.1 ms every clicle
+        await asyncio.sleep(0.1 / 1000)
+
+async def write_db():
+    localtime = datetime.now().strftime("%H.%M.%S")
+    print(localtime)
+    
+    curr_row = None
+    with open(f'/home/pi/mpu6050_{localtime}.csv', mode='w', newline="") as file:
+        file_wrote = csv.DictWriter(file, fieldnames=fieldnames, dialect='excel')
+        file_wrote.writeheader()
+
+        start = time.time()
+        while time.time() - start <= 1:
+            if row != curr_row:
+                file_wrote.writerow(row)
+                curr_row = row
+                
+                await asyncio.sleep(0.1 / 1000)
+
+        
+
+
+async def mqtt():
+    pass
+
+
+async def main():
+    acc_task = asyncio.create_task(read_data())
+    db_task = asyncio.create_task(write_db())
+    mqtt_task = asyncio.create_task(mqtt())
+
+    await asyncio.wait([acc_task, db_task, mqtt_task])
+
+def entry_point():
+    asyncio.run(main())
+
+
+if __name__ == "__main__":
+    entry_point()
