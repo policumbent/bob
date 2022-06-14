@@ -171,32 +171,34 @@ def add_module(module_name: str = typer.Argument(..., help="Name of the module t
         file_src = bob_root / 'utility/example_module/src' / file
         copyfile(file_src, file_dest)
 
-    with open(bob_root / 'utility/example_module/src/main.py') as f:
-        main = ''.join(f.readlines())
-        message_handler = ''
-        if module_type == 1:
-            mqtt_init = f"mqtt = MqttSensor(sys.argv[1], 1883, '{module_name}'," \
-                        f" {str(signals_list)}, settings, message_handler)"
-        elif module_type == 2:
-            main = main.replace('MqttSensor', 'MqttConsumer')
-            mqtt_init = f"mqtt = MqttConsumer(sys.argv[1], 1883, '{module_name}', {str(topics_list)}" \
-                        f" {str(signals_list)}, settings, message_handler)"
-            message_handler += f"    try:\n"
-            for topic in topics_list:
-                message_handler += f"        if topic == 'sensors/{topic}':\n"
-                message_handler += f"            # questo è solo un esempio, deserializzo i dizionari\n"
-                message_handler += f"            {topic}_dict: dict = json.loads(message)\n"
-            message_handler += f"    except Exception as e:\n"
-            message_handler += f"        typer.echo(e)\n"
+    # Right now just copy the main.py file, we'll edit it when we define the APIs
+    # with open(bob_root / 'utility/example_module/src/main.py') as f:
+    #     main = ''.join(f.readlines())
+    #     message_handler = ''
+    #     if module_type == 1:
+    #         mqtt_init = f"mqtt = MqttSensor(sys.argv[1], 1883, '{module_name}'," \
+    #                     f" {str(signals_list)}, settings, message_handler)"
+    #     elif module_type == 2:
+    #         main = main.replace('MqttSensor', 'MqttConsumer')
+    #         mqtt_init = f"mqtt = MqttConsumer(sys.argv[1], 1883, '{module_name}', {str(topics_list)}" \
+    #                     f" {str(signals_list)}, settings, message_handler)"
+    #         message_handler += f"    try:\n"
+    #         for topic in topics_list:
+    #             message_handler += f"        if topic == 'sensors/{topic}':\n"
+    #             message_handler += f"            # questo è solo un esempio, deserializzo i dizionari\n"
+    #             message_handler += f"            {topic}_dict: dict = json.loads(message)\n"
+    #         message_handler += f"    except Exception as e:\n"
+    #         message_handler += f"        typer.echo(e)\n"
+    #
+    #     elif module_type == 3:
+    #         main = main.replace('MqttSensor', 'MqttRemote')
+    #         mqtt_init = f"mqtt = MqttRemote(sys.argv[1], 1883, '{module_name}', {str(topics_list)}" \
+    #                     f" {str(signals_list)}, settings, message_handler)"
+    #     main = main.replace('#$$mqtt start$$#', mqtt_init)
+    #     main = main.replace('#$$message handler$$#', message_handler)
+    #     with open(bob_root / f'modules/{module_name}/src/main.py', 'w') as fw:
+    #         fw.write(main)
 
-        elif module_type == 3:
-            main = main.replace('MqttSensor', 'MqttRemote')
-            mqtt_init = f"mqtt = MqttRemote(sys.argv[1], 1883, '{module_name}', {str(topics_list)}" \
-                        f" {str(signals_list)}, settings, message_handler)"
-        main = main.replace('#$$mqtt start$$#', mqtt_init)
-        main = main.replace('#$$message handler$$#', message_handler)
-        with open(bob_root / f'modules/{module_name}/src/main.py', 'w') as fw:
-            fw.write(main)
     typer.echo('Modulo creato')
 
 
