@@ -47,24 +47,6 @@ pycodestyle = ">=2.8.0"
 toml = "*"
 
 [[package]]
-name = "bob-core"
-version = "0.1.0"
-description = "BOB common files"
-category = "main"
-optional = false
-python-versions = "^3.7.3"
-develop = false
-
-[package.dependencies]
-paho-mqtt = "^1.6.1"
-
-[package.source]
-type = "git"
-url = "https://github.com/policumbent/bob-core"
-reference = "main"
-resolved_reference = "28cb019ffc964feaded0bc19dfeacab23daebe0d"
-
-[[package]]
 name = "colorama"
 version = "0.4.4"
 description = "Cross-platform colored terminal text."
@@ -175,6 +157,17 @@ importlib-metadata = {version = ">=0.12", markers = "python_version < \"3.8\""}
 [package.extras]
 dev = ["pre-commit", "tox"]
 testing = ["pytest", "pytest-benchmark"]
+
+[[package]]
+name = "policumbent-bob-core"
+version = "0.1.0.post1"
+description = "BOB common files"
+category = "main"
+optional = false
+python-versions = ">=3.7.3,<4.0.0"
+
+[package.dependencies]
+paho-mqtt = ">=1.6.1,<2.0.0"
 
 [[package]]
 name = "py"
@@ -297,7 +290,7 @@ testing = ["pytest (>=6)", "pytest-checkdocs (>=2.4)", "pytest-flake8", "pytest-
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.7.3"
-content-hash = "273f986d341b8d95658ac61c00e3131f9facdafc6d34acc55a7fb9b3a89b599c"
+content-hash = "c34263781ef9a86c826af3bc4c6ae176d090eef15a0522754e177fa5d72fbac3"
 
 [metadata.files]
 astroid = [
@@ -316,7 +309,6 @@ autopep8 = [
     {file = "autopep8-1.6.0-py2.py3-none-any.whl", hash = "sha256:ed77137193bbac52d029a52c59bec1b0629b5a186c495f1eb21b126ac466083f"},
     {file = "autopep8-1.6.0.tar.gz", hash = "sha256:44f0932855039d2c15c4510d6df665e4730f2b8582704fa48f9c55bd3e17d979"},
 ]
-bob-core = []
 colorama = [
     {file = "colorama-0.4.4-py2.py3-none-any.whl", hash = "sha256:9f47eda37229f68eee03b24b9748937c7dc3868f906e8ba69fbcbdd3bc5dc3e2"},
     {file = "colorama-0.4.4.tar.gz", hash = "sha256:5941b2b48a20143d2267e95b1c2a7603ce057ee39fd88e7329b0c292aa16869b"},
@@ -390,6 +382,10 @@ platformdirs = [
 pluggy = [
     {file = "pluggy-1.0.0-py2.py3-none-any.whl", hash = "sha256:74134bbf457f031a36d68416e1509f34bd5ccc019f0bcc952c7b909d06b37bd3"},
     {file = "pluggy-1.0.0.tar.gz", hash = "sha256:4224373bacce55f955a878bf9cfa763c1e360858e330072059e10bad68531159"},
+]
+policumbent-bob-core = [
+    {file = "policumbent-bob-core-0.1.0.post1.tar.gz", hash = "sha256:bb078cecc11fc053fa247476117262a4a3b14cec733bc73f3f5e75b8fcd2d287"},
+    {file = "policumbent_bob_core-0.1.0.post1-py3-none-any.whl", hash = "sha256:85f2f0ee076341aacf474ac644b6c03dfc22b8b04d38175ac9e7f8e550afaeaf"},
 ]
 py = [
     {file = "py-1.11.0-py2.py3-none-any.whl", hash = "sha256:607c53218732647dff4acdfcd50cb62615cedf612e72d1724fb1a0cc6405b378"},

@@ -13,19 +13,6 @@ from .settings import Settings
 
 
 class Speed(Sensor):
-    def signal(self, value: str):
-        if value == 'reset':
-            self.reset_distance()
-
-    def update_settings(self, settings: Settings):
-        with self._settings_lock:
-            self._settings = settings
-
-    def export(self):
-        return {
-            'speed': round(self.speed, 2),
-            'distance': round(self.distance, 2)
-        }
 
     def __init__(self, send_message, settings: Settings):
         self._speed = 0.0
@@ -49,27 +36,58 @@ class Speed(Sensor):
         self.average_array = deque()
         self.trap_speed = 0
 
-        self._worker = Thread(target=self._run, daemon=True)
-        self._worker.start()
+#        self._worker = Thread(target=self._run, daemon=True)
+#        self._worker.start()
 
-    def _run(self):
+    def signal(self, value: str):
+        if value == 'reset':
+            self.reset_distance()
+
+    def update_settings(self, settings: Settings):
+        with self._settings_lock:
+            self._settings = settings
+
+    def export(self):
+        return {
+            'speed': round(self.speed, 2),
+            'distance': round(self.distance, 2)
+        }
+
+# TOO DANGEROUS TO BE LET ALIVE
+#    def _run(self):
+#        self._state = True
+#        while True:
+#            with self._settings_lock:
+#                if self.newData:
+#                    self.count2 += 1
+#                    # t1 = time.time()
+#                    self.newData = False
+#                    # print('>>> dentro __run')
+#                    self.calculate_speed(self.data)
+#                self.distance_trap = self.settings.run_length +\
+#                    self.settings.trap_length - self.distance
+#                if self.distance > self.settings.run_length and self.distance_trap >= 0:
+#                    self.average_array.append(self.speed)
+#                if self.trap_count == 0:
+#                    self._send_message(Message(self.trap_info, MexPriority.medium, MexType.trap, 1, 1))
+#                self.trap_count = (self.trap_count + 1) % 10
+#            time.sleep(0.1)
+
+    def running(self):
         self._state = True
-        while True:
-            with self._settings_lock:
-                if self.newData:
-                    self.count2 += 1
-                    # t1 = time.time()
-                    self.newData = False
-                    # print('>>> dentro __run')
-                    self.calculate_speed(self.data)
-                self.distance_trap = self.settings.run_length +\
-                    self.settings.trap_length - self.distance
-                if self.distance > self.settings.run_length and self.distance_trap >= 0:
-                    self.average_array.append(self.speed)
-                if self.trap_count == 0:
-                    self._send_message(Message(self.trap_info, MexPriority.medium, MexType.trap, 1, 1))
-                self.trap_count = (self.trap_count + 1) % 10
-            time.sleep(0.1)
+        if self.newData:
+            self.count2 += 1
+            # t1 = time.time()
+            self.newData = False
+            # print('>>> dentro __run')
+            self.calculate_speed(self.data)
+        self.distance_trap = self.settings.run_length +\
+            self.settings.trap_length - self.distance
+        if self.distance > self.settings.run_length and self.distance_trap >= 0:
+            self.average_array.append(self.speed)
+        if self.trap_count == 0:
+            self._send_message(Message(self.trap_info, MexPriority.medium, MexType.trap, 1, 1))
+        self.trap_count = (self.trap_count + 1) % 10
 
     @property
     def speed(self):
