@@ -8,7 +8,7 @@ license = "GPL-3.0-or-later"
 [tool.poetry.dependencies]
 # package deps
 python = "^3.7.3"
-bottle = "0.12.19"
+bottle = "0.12.20"
 dbus-python = "^1.2.16"
 python-pam = "^1.8.4"
 systemd-python = "^234"

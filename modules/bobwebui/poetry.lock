@@ -48,7 +48,7 @@ toml = "*"
 
 [[package]]
 name = "bottle"
-version = "0.12.19"
+version = "0.12.20"
 description = "Fast and simple WSGI-framework for small web-applications."
 category = "main"
 optional = false
@@ -292,7 +292,7 @@ testing = ["pytest (>=6)", "pytest-checkdocs (>=2.4)", "pytest-flake8", "pytest-
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.7.3"
-content-hash = "e84e4ff0d848349a8e3d6dd7f8009b480fe49f6d0ece839fce7ebae7dc70aa8f"
+content-hash = "3220098a1287ae9884321da29cd42fd264ac5b7710127d8d13fe78a2b7c2467d"
 
 [metadata.files]
 astroid = [
@@ -312,8 +312,8 @@ autopep8 = [
     {file = "autopep8-1.6.0.tar.gz", hash = "sha256:44f0932855039d2c15c4510d6df665e4730f2b8582704fa48f9c55bd3e17d979"},
 ]
 bottle = [
-    {file = "bottle-0.12.19-py3-none-any.whl", hash = "sha256:f6b8a34fe9aa406f9813c02990db72ca69ce6a158b5b156d2c41f345016a723d"},
-    {file = "bottle-0.12.19.tar.gz", hash = "sha256:a9d73ffcbc6a1345ca2d7949638db46349f5b2b77dac65d6494d45c23628da2c"},
+    {file = "bottle-0.12.20-py3-none-any.whl", hash = "sha256:3c97e1e955c11e4ad2d73a60cdf83c4f4cf7b8b73c8344fc4b72f985432605cb"},
+    {file = "bottle-0.12.20.tar.gz", hash = "sha256:544023cd2cd6d382ebf9675fa0544d4d20e19d3a13b6932a812d099fb2f6cb84"},
 ]
 colorama = [
     {file = "colorama-0.4.4-py2.py3-none-any.whl", hash = "sha256:9f47eda37229f68eee03b24b9748937c7dc3868f906e8ba69fbcbdd3bc5dc3e2"},
