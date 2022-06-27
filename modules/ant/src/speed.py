@@ -53,7 +53,7 @@ class Speed(Sensor):
             'distance': round(self.distance, 2)
         }
 
-# TOO DANGEROUS TO BE LET ALIVE
+# TOO DANGEROUS TO BE LEFT ALIVE
 #    def _run(self):
 #        self._state = True
 #        while True:
