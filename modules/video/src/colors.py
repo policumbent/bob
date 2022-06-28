@@ -10,6 +10,7 @@ class _Colors:
     @property
     def red(self):
         return (255,0,0)
+        
     @property
     def green(self):
         return (0,255,0)

@@ -101,9 +101,12 @@ async def video():
 
     try:
         vcam.start()
+        # vcam.with_grid()
+        # vcam.with_zoom(10)
+
         while True:
-            await vcam.write_on_sector((0, 0), Colors.red, str(data["power"]))
-            await vcam.write_on_sector((1, 1), Colors.green, str(data["speed"]))
+            # await vcam.write_on_sector((0, 0), Colors.red, str(data["power"]))
+            # await vcam.write_on_sector((1, 1), Colors.green, str(data["speed"]))
 
             await vcam.refresh_screen()
     except Exception as e:

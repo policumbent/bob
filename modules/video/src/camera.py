@@ -14,6 +14,7 @@ class Camera(PiCamera):
         self._img = None
         self._arr = None
         self._draw = None
+        self._grid = None
 
         # screen parameters
         self._screen_dim_x, self._screen_dim_y = screen_dim
@@ -55,7 +56,8 @@ class Camera(PiCamera):
         self._img = Image.fromarray(self._arr)
         self._draw = ImageDraw.Draw(self._img)
 
-        self._write_grid()
+        if self._grid:
+            self._write_grid()
 
     def _write_grid(self):
         """Write grid and show the sectors"""
@@ -101,28 +103,6 @@ class Camera(PiCamera):
 
         return center_x, center_y
 
-    def start(self):
-        self.start_preview()
-
-    async def refresh_screen(self, frame_rate=2):
-        """Refresh screen and create new frame and overlay
-
-        :param frame_rate: number of frame updated in a second [default=10]
-        """
-
-        # instead of using `overlay.update(img.tobytes())` which uses up a lot of memory
-        # we have found more convenient to destroy and recreate the overlay.
-        # to avoid annoying behaviours we create the overlay before destroying it
-        prev = self._overlay
-
-        self._new_overlay()
-        self._new_frame()
-
-        self.remove_overlay(prev)
-
-        # sleep before reiterate
-        await sleep(1 / frame_rate)
-
     async def _write_on_screen(
         self, position: tuple, color: tuple, content: str, padding: tuple, font=None
     ):
@@ -160,7 +140,7 @@ class Camera(PiCamera):
 
         return font
 
-    async def show_center_guide(self, sector: tuple = None):
+    async def _show_center_guide(self, sector: tuple = None):
         """Show a center cros, if `sector` is `None` show the center of the screen
 
         :param sector: sector to write
@@ -176,6 +156,47 @@ class Camera(PiCamera):
 
         self._draw.line((center_x, start_y, center_x, end_y), width=2, fill="white")
         self._draw.line((start_x, center_y, end_x, center_y), width=2, fill="white")
+
+    def with_grid(self):
+        """Show the grid with the sectors"""
+        self._grid = True
+
+    def with_zoom(self, perc: int):
+        """Zoom-in the camera, this is a digialt zoom, so it reduce the FOV and the quality of the image
+        
+        :param perc: zoom in percentage 0-100
+        """
+        perc /= 100
+
+        off = perc / 2
+        roi = 1 - perc
+
+        # zoom api has a tuple (off_x, off_y, roi_h, roi_w)
+        # for maintaing the same screen proportion
+        # they must be the same two by two
+        self.zoom = (off, off, roi, roi)
+
+    def start(self):
+        self.start_preview()
+
+    async def refresh_screen(self, frame_rate=2):
+        """Refresh screen and create new frame and overlay
+
+        :param frame_rate: number of frame updated in a second [default=2]
+        """
+
+        # instead of using `overlay.update(img.tobytes())` which uses up a lot of memory
+        # we have found more convenient to destroy and recreate the overlay.
+        # to avoid annoying behaviours we create the overlay before destroying it
+        prev = self._overlay
+
+        self._new_overlay()
+        self._new_frame()
+
+        self.remove_overlay(prev)
+
+        # sleep before reiterate
+        await sleep(1 / frame_rate)
 
     async def write_on_sector(
         self, sector: tuple, color: tuple, content: str, padding=(0, -15)
@@ -205,5 +226,18 @@ class Camera(PiCamera):
 
         pos = (center_x - content_size_x // 2, center_y - content_size_y // 2)
 
-        await self.show_center_guide(sector)
         await self._write_on_screen(pos, color, content, padding, font)
+
+    # TODO: multisector write for row and column
+    async def write_on_multi_sector(self, sector: tuple, color: tuple, content: str, length: int, direction:int=0 ,padding=(0, -15)):
+        """Write text in multiple screen sectors
+
+        :param sector: tuple to indentify the starting sector, `(0, 0)` is the top left corner sector
+        :param color: color as a rgb tuple
+        :param content: string to write on screen
+        :param length: total number of sectors to write
+        :param direction: `0` to write on the row, `1` to write on the column
+        :param padding: relative padding inside the sector [default=(0, -15)]
+        """
+
+        pass
