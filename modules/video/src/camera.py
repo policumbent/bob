@@ -27,7 +27,6 @@ class Camera(PiCamera):
         )
 
         self._set_parameters()
-        self._new_frame()
 
     def __del__(self):
         self.close()
@@ -165,9 +164,12 @@ class Camera(PiCamera):
 
     def with_zoom(self, perc: int):
         """Zoom-in the camera, this is a digialt zoom, so it reduce the FOV and the quality of the image
-        
-        :param perc: zoom in percentage 0-100
+
+        :param perc: zoom in percentage 0-99
         """
+        if perc < 0 or perc >= 100:
+            return
+
         perc /= 100
 
         off = perc / 2
@@ -179,6 +181,7 @@ class Camera(PiCamera):
         self.zoom = (off, off, roi, roi)
 
     def start(self):
+        self._new_frame()
         self.start_preview()
 
     async def refresh_screen(self, frame_rate=2):
@@ -192,16 +195,17 @@ class Camera(PiCamera):
         # to avoid annoying behaviours we create the overlay before destroying it
         prev = self._overlay
 
-        self._new_overlay()
-        self._new_frame()
+        if prev:
+            self._new_overlay()
+            self._new_frame()
 
-        self.remove_overlay(prev)
+            self.remove_overlay(prev)
 
         # sleep before reiterate
         await sleep(1 / frame_rate)
 
     async def write_on_sector(
-        self, sector: tuple, color: tuple, content: str, padding=(0, -15)
+        self, sector: tuple, color: tuple, content: str or None, padding=(0, -15)
     ):
         """Write text in a screen sector
 
@@ -210,6 +214,9 @@ class Camera(PiCamera):
         :param content: string to write on screen
         :param padding: relative padding inside the sector [default=(0, -15)]
         """
+
+        if content is None:
+            return
 
         # check if the sector exist
         if (
