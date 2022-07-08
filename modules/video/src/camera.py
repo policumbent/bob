@@ -5,6 +5,37 @@ from asyncio import sleep
 from picamera import PiCamera
 from PIL import Image, ImageDraw, ImageFont
 
+from .colors import Colors
+
+
+class OverlayElement:
+    DATA = None
+
+    def __init__(self, position: tuple or list, color: Colors, key_data):
+        self._position = position
+        self._color = color
+        self._key_data = key_data
+
+    @property
+    def position(self):
+        return self._position
+
+    @property
+    def color(self):
+        return self._color
+
+    @property
+    def data(self):
+        if not self.DATA or not isinstance(self.DATA, dict):
+            return None
+
+        data = self.DATA[self._key_data]
+
+        return str(data) if data else None
+
+    def is_multiline(self):
+        return isinstance(self._position, list)
+
 
 class Camera(PiCamera):
     def __init__(self, screen_dim=(1024, 760), sectors=(5, 4)):
@@ -15,6 +46,7 @@ class Camera(PiCamera):
         self._arr = None
         self._draw = None
         self._grid = None
+        self._overlay_element_list = []
 
         # screen parameters
         self._screen_dim_x, self._screen_dim_y = screen_dim
@@ -158,36 +190,10 @@ class Camera(PiCamera):
         self._draw.line((center_x, start_y, center_x, end_y), width=2, fill="white")
         self._draw.line((start_x, center_y, end_x, center_y), width=2, fill="white")
 
-    def with_grid(self):
-        """Show the grid with the sectors"""
-        self._grid = True
-
-    def with_zoom(self, perc: int):
-        """Zoom-in the camera, this is a digialt zoom, so it reduce the FOV and the quality of the image
-
-        :param perc: zoom in percentage 0-99
-        """
-        if perc < 0 or perc >= 100:
-            return
-
-        perc /= 100
-
-        off = perc / 2
-        roi = 1 - perc
-
-        # zoom api has a tuple (off_x, off_y, roi_h, roi_w)
-        # for maintaing the same screen proportion
-        # they must be the same two by two
-        self.zoom = (off, off, roi, roi)
-
-    def start(self):
-        self._new_frame()
-        self.start_preview()
-
-    async def refresh_screen(self, frame_rate=2):
+    async def _refresh_screen(self, update_rate):
         """Refresh screen and create new frame and overlay
 
-        :param frame_rate: number of frame updated in a second [default=2]
+        :param update_rate: number of frame updated in a second
         """
 
         # instead of using `overlay.update(img.tobytes())` which uses up a lot of memory
@@ -202,7 +208,58 @@ class Camera(PiCamera):
             self.remove_overlay(prev)
 
         # sleep before reiterate
-        await sleep(1 / frame_rate)
+        await sleep(1 / update_rate)
+
+    def with_grid(self):
+        """Show the grid with the sectors"""
+
+        self._grid = True
+
+    def with_zoom(self, perc: int):
+        """Zoom-in the camera, this is a digialt zoom, so it reduce the FOV and the quality of the image
+
+        :param perc: zoom in percentage 0-99
+        """
+
+        if perc < 0 or perc >= 100:
+            return
+
+        perc /= 100
+
+        off = perc / 2
+        roi = 1 - perc
+
+        # zoom api has a tuple (off_x, off_y, roi_h, roi_w)
+        # for maintaing the same screen proportion
+        # they must be the same two by two
+        self.zoom = (off, off, roi, roi)
+
+    def with_overlay_data(self, data: dict):
+        """Referance data for the overlay"""
+
+        OverlayElement.DATA = data
+
+    def add_overlay_element(self, element: OverlayElement):
+        """Insert an element in the overlay grid"""
+        
+        self._overlay_element_list.append(element)
+
+    async def start_with_overlay(self, update_rate=2):
+        """Start preview with the overlay
+
+        The data to track must be specified with the function `with_overlay_data`. Inside of this is called a loop to keep updated screen data
+
+        :param update_rate: number of times the overlay data are updated in a second [default=2]
+        """
+
+        self._new_frame()
+        self.start_preview()
+
+        while True:
+            for elem in self._overlay_element_list:
+                await self.write_on_sector(elem.position, elem.color, elem.data)
+
+            await self._refresh_screen(update_rate)
 
     async def write_on_sector(
         self, sector: tuple, color: tuple, content: str or None, padding=(0, -15)
