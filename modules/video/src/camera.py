@@ -7,7 +7,7 @@ from PIL import Image, ImageDraw, ImageFont
 
 
 class Camera(PiCamera):
-    def __init__(self, screen_dim=(1024, 800), sectors=(5, 4)):
+    def __init__(self, screen_dim=(1024, 760), sectors=(5, 4)):
         super().__init__()
 
         self._overlay = None
@@ -41,7 +41,9 @@ class Camera(PiCamera):
         self.video_stabilization = True
 
     def _new_overlay(self):
-        self._overlay = self.add_overlay(self._img.tobytes(), layer=3, alpha=100)
+        self._overlay = self.add_overlay(
+            self._img.tobytes(), format="rgba", layer=3, alpha=100
+        )
 
     def _new_frame(self):
         """Create a new blank frame for the overlay"""
@@ -229,7 +231,15 @@ class Camera(PiCamera):
         await self._write_on_screen(pos, color, content, padding, font)
 
     # TODO: multisector write for row and column
-    async def write_on_multi_sector(self, sector: tuple, color: tuple, content: str, length: int, direction:int=0 ,padding=(0, -15)):
+    async def write_on_multi_sector(
+        self,
+        sector: tuple,
+        color: tuple,
+        content: str,
+        length: int,
+        direction: int = 0,
+        padding=(0, -15),
+    ):
         """Write text in multiple screen sectors
 
         :param sector: tuple to indentify the starting sector, `(0, 0)` is the top left corner sector
