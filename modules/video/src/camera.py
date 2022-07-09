@@ -38,7 +38,7 @@ class OverlayElement:
 
 
 class Camera(PiCamera):
-    def __init__(self, screen_dim=(1024, 760), sectors=(5, 4)):
+    def __init__(self, screen_dim=(1024, 810), sectors=(5, 4)):
         super().__init__()
 
         self._overlay = None
@@ -59,9 +59,6 @@ class Camera(PiCamera):
         )
 
         self._set_parameters()
-
-    def __del__(self):
-        self.close()
 
     def _set_parameters(self):
         # video parameters based on bike's lcd screen
