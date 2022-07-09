@@ -3,6 +3,7 @@ import numpy as np
 
 from asyncio import sleep
 from picamera import PiCamera
+from picamera.exc import PiCameraMMALError as CameraError
 from PIL import Image, ImageDraw, ImageFont
 
 from .colors import Colors
