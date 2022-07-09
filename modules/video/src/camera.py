@@ -11,10 +11,22 @@ from .colors import Colors
 class OverlayElement:
     DATA = None
 
-    def __init__(self, position: tuple or list, color: Colors, key_data):
+    def __init__(
+        self,
+        position: tuple,
+        color: Colors,
+        key_data: str,
+        sectors_length: int = 1,
+        direction="row",
+    ):
         self._position = position
         self._color = color
         self._key_data = key_data
+        self._sectors_length = abs(sectors_length)
+        self._direction = direction
+
+    def __len__(self):
+        return self._sectors_length
 
     @property
     def position(self):
@@ -23,6 +35,10 @@ class OverlayElement:
     @property
     def color(self):
         return self._color
+
+    @property
+    def direction(self):
+        return self._direction == "row"
 
     @property
     def data(self):
@@ -34,11 +50,14 @@ class OverlayElement:
         return str(data) if data else None
 
     def is_multiline(self):
-        return isinstance(self._position, list)
+        return self._sectors_length > 1
+
+    def to_writable(self):
+        return self.position, self.color, self.data
 
 
 class Camera(PiCamera):
-    def __init__(self, screen_dim=(1024, 810), sectors=(5, 4)):
+    def __init__(self, screen_dim=(1024, 760), sectors=(5, 4)):
         super().__init__()
 
         self._overlay = None
@@ -109,7 +128,7 @@ class Camera(PiCamera):
             self._draw.line((0, pos, dim_x, pos), width=2, fill="white")
 
     def _get_sector_pos(self, sector: tuple):
-        """Retrive the absolute star and end position of the section"""
+        """Retrive the absolute start and end position of the sector"""
 
         id_x, id_y = sector
 
@@ -126,12 +145,25 @@ class Camera(PiCamera):
     def _get_sector_center(self, sector: tuple):
         """Retrive the absolute center of the sector"""
 
-        start_x, end_x, start_y, end_y = self._get_sector_pos(sector)
+        return self._get_coord_center(*self._get_sector_pos(sector))
+
+    def _get_coord_center(self, start_x, end_x, start_y, end_y):
+        """Calculate coordinate center"""
 
         center_x = start_x + (end_x - start_x) // 2
         center_y = start_y + (end_y - start_y) // 2
 
         return center_x, center_y
+
+    def _check_sector(self, sector: tuple):
+        """Check if sector exist with current configuration"""
+
+        return (
+            sector[0] < self._sectors_x
+            or sector[1] < self._sectors_y
+            or sector[0] >= 0
+            or sector[1] >= 0
+        )
 
     async def _write_on_screen(
         self, position: tuple, color: tuple, content: str, padding: tuple, font=None
@@ -238,7 +270,7 @@ class Camera(PiCamera):
 
     def add_overlay_element(self, element: OverlayElement):
         """Insert an element in the overlay grid"""
-        
+
         self._overlay_element_list.append(element)
 
     async def start_with_overlay(self, update_rate=2):
@@ -254,7 +286,12 @@ class Camera(PiCamera):
 
         while True:
             for elem in self._overlay_element_list:
-                await self.write_on_sector(elem.position, elem.color, elem.data)
+                if elem.is_multiline():
+                    await self.write_on_multi_sector(
+                        *elem.to_writable(), len(elem), elem.direction
+                    )
+                else:
+                    await self.write_on_sector(*elem.to_writable())
 
             await self._refresh_screen(update_rate)
 
@@ -273,12 +310,7 @@ class Camera(PiCamera):
             return
 
         # check if the sector exist
-        if (
-            sector[0] >= self._sectors_x
-            or sector[1] >= self._sectors_y
-            or sector[0] < 0
-            or sector[1] < 0
-        ):
+        if not self._check_sector(sector):
             return
 
         start_x, end_x, _, _ = self._get_sector_pos(sector)
@@ -291,24 +323,44 @@ class Camera(PiCamera):
 
         await self._write_on_screen(pos, color, content, padding, font)
 
-    # TODO: multisector write for row and column
     async def write_on_multi_sector(
         self,
-        sector: tuple,
+        start_sector: tuple,
         color: tuple,
         content: str,
         length: int,
-        direction: int = 0,
+        direction_row: bool = True,
         padding=(0, -15),
     ):
         """Write text in multiple screen sectors
 
-        :param sector: tuple to indentify the starting sector, `(0, 0)` is the top left corner sector
+        :param start_sector: tuple to indentify the starting sector, `(0, 0)` is the top left corner sector
         :param color: color as a rgb tuple
         :param content: string to write on screen
         :param length: total number of sectors to write
-        :param direction: `0` to write on the row, `1` to write on the column
+        :param direction_row: `True` to write on the row, `False` to write on the column
         :param padding: relative padding inside the sector [default=(0, -15)]
         """
 
-        pass
+        if content is None or length <= 1:
+            return
+
+        if direction_row:
+            end_sector = (start_sector[0] + length - 1, start_sector[1])
+        else:
+            end_sector = (start_sector[0], start_sector[1] + length - 1)
+
+        # check if the sectors exist
+        if not self._check_sector(start_sector) or not self._check_sector(end_sector):
+            return
+
+        start_x, _, start_y, _ = self._get_sector_pos(start_sector)
+        _, end_x, _, end_y = self._get_sector_pos(end_sector)
+        center_x, center_y = self._get_coord_center(start_x, end_x, start_y, end_y)
+
+        font = self._adjust_font(end_x - start_x - padding[0], content)
+        content_size_x, content_size_y = font.getsize(content)
+
+        pos = (center_x - content_size_x // 2, center_y - content_size_y // 2)
+
+        await self._write_on_screen(pos, color, content, padding, font)
