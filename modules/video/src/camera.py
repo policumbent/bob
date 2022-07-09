@@ -58,6 +58,8 @@ class OverlayElement:
 
 
 class Camera(PiCamera):
+    FONT_PATH = "assets/Inconsolata.ttf"
+
     def __init__(self, screen_dim=(1024, 760), sectors=(5, 4)):
         super().__init__()
 
@@ -75,7 +77,8 @@ class Camera(PiCamera):
         # default font for strings overlay
         # size is retrived form the y sector dimension
         self._default_font = ImageFont.truetype(
-            "assets/Inconsolata.ttf", self._screen_dim_y // self._sectors_y - 30
+            self.FONT_PATH,
+            self._screen_dim_y // self._sectors_y - 30,
         )
 
         self._set_parameters()
@@ -199,7 +202,7 @@ class Camera(PiCamera):
 
         font = self._default_font
         while font.getlength(content) >= size:
-            font = ImageFont.truetype("assets/Inconsolata.ttf", font.size - 5)
+            font = ImageFont.truetype(self.FONT_PATH, font.size - 5)
 
         return font
 
