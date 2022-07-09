@@ -1,133 +1,46 @@
-# import sys
-# import json
-# from .settings import Settings
-# from core.mqtt import MqttConsumer
-# from core.message import Message
-# from core.alert import Alert
-# from .video import Video
-# from core.bikeData import BikeData
-
-# settings = Settings({
-#     'video_record': False,
-#     'power_speed_simulator': True,
-#     'track_length': 8000,
-#     'lap_position': True
-# }, 'video')
-# print(settings.default_color_1)
-# mqtt: MqttConsumer
-# bikeData: BikeData = BikeData(
-#     ['ant', 'gps', 'power_speed_target', 'manager', 'gear', 'messages']
-# )
-
-
-# def send_message(message: Message):
-#     mqtt.publish_message(message)
-
-
-# def send_alert(alert: Alert):
-#     mqtt.publish_alert(alert)
-
-
-# def message_handler(topic, message):
-#     if topic == 'signals':
-#         return
-#     try:
-#         json_message = json.loads(message)
-#         if topic == 'sensors/ant':
-#             bikeData.set_ant(json_message)
-#         elif topic == 'sensors/gps':
-#             bikeData.set_gps(json_message)
-#         elif topic == 'sensors/power_speed_target':
-#             bikeData.set_power_speed_target(json_message)
-#         elif topic == 'sensors/manager':
-#             bikeData.set_manager(json_message)
-#         elif topic == 'sensors/gear':
-#             bikeData.set_gear(json_message)
-#         elif topic == 'messages':
-#             bikeData.set_messages(json_message)
-#     except Exception as e:
-#         print(e)
-
-
-# def start():
-#     n = len(sys.argv)
-#     if n < 2:
-#         print("Total arguments passed:", n)
-#         return
-#     print("Mqtt server ip:", sys.argv[1])
-#     print('Starting Video')
-#     settings.load()
-#     global mqtt
-#     mqtt = MqttConsumer(sys.argv[1], 1883, 'video',
-#                         ['ant', 'gps', 'power_speed_target', 'manager', 'gear', 'messages'],
-#                         [], settings, message_handler)
-#     mqtt.subscribe_messages()
-#     Video(bikeData, settings)
-#     #
-#     # while True:
-#     #     time.sleep(1)
-
-
-# if __name__ == '__main__':
-#     start()
-
 import asyncio
 
 from asyncio import sleep
-from .camera import Camera
+from .camera import Camera, OverlayElement
 from .colors import Colors
+from core import log
 
 data = {"speed": 40, "power": 55}
 
-# TODO: add log functions in bob-core
-def log_err(msg):
-    print(f"[ERR] {msg}")
-
-
-async def try_camera():
-    vcam = None
-    while vcam is None:
-        try:
-            vcam = Camera()
-        except Exception:
-            log_err("Camera is not enabled")
-            await sleep(1)
-
-    return vcam
-
-
 async def video():
-    vcam = await try_camera()
+    # main loop of the camera logic
+    while True:
+        try:
+            with Camera() as vcam:
+                vcam.with_grid()
+                vcam.with_zoom(0)
+                vcam.with_overlay_data(data)
 
-    try:
-        vcam.start()
-        # vcam.with_grid()
-        # vcam.with_zoom(10)
+                vcam.add_overlay_element(OverlayElement((0, 0), Colors.red, "power"))
+                vcam.add_overlay_element(OverlayElement((1, 1), Colors.green, "speed"))
 
-        while True:
-            # await vcam.write_on_sector((0, 0), Colors.red, str(data["power"]))
-            # await vcam.write_on_sector((1, 1), Colors.green, str(data["speed"]))
-
-            await vcam.refresh_screen()
-    except Exception as e:
-        log_err(e)
+                await vcam.start_with_overlay()
+        except Exception:
+            log.err("Camera is not enabled")
+            await sleep(1)
 
 
 async def mqtt():
     global data
 
     while True:
-        data["power"] += 10
-        data["speed"] += 100
+        try:
+            data["power"] += 10
+            data["speed"] += 100
 
-        await sleep(0.5)
+            await sleep(0.5)
+        except:
+            pass
 
 
 async def main():
-    task_video = asyncio.create_task(video())
-    task_mqtt = asyncio.create_task(mqtt())
-
-    await asyncio.wait([task_video, task_mqtt])
+    # release async tasks
+    await asyncio.gather(video(), mqtt())
 
 
 def entry_point():
