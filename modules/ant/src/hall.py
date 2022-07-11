@@ -1,25 +1,24 @@
-import threading
 import time
 from core.message import Message, MexType, MexPriority
 from collections import deque
-# from threading import Thread
 
-from core.sensor import Sensor
-
-from .ant.easy.channel import Channel
+from .reader import AntReader, Node, Channel
 
 # CIRCUMFERENCE = 1.450
 from .settings import Settings
 
 
-class Speed(Sensor):
+class Hall(AntReader):
+    _DEVICE_TYPE_ID = 120
 
-    def __init__(self, send_message, settings: Settings):
+    def __init__(self, node: Node, id: int):
+        super().__init__(node, id)
+
         self._speed = 0.0
         self.__time_int = 0
-        self._send_message = send_message
-        self._settings = settings
-        self._settings_lock = threading.Lock()
+        # self._send_message = send_message
+        # self._settings = settings
+        # self._settings_lock = threading.Lock()
         self._state = False
 
         self.count = 0
@@ -36,56 +35,95 @@ class Speed(Sensor):
         self.average_array = deque()
         self.trap_speed = 0
 
-#        self._worker = Thread(target=self._run, daemon=True)
-#        self._worker.start()
+        # inizializzazione del channel ant
+        self._init_channel()
 
-    def signal(self, value: str):
-        if value == 'reset':
-            self.reset_distance()
+    # NOTE: specializzazione metodi astratti di `AntReader`
 
-    def update_settings(self, settings: Settings):
-        with self._settings_lock:
-            self._settings = settings
+    def _init_channel(self):
+        if self._channel is None:
+            self._channel = self._create_channel()
 
-    def export(self):
-        return {
-            'speed': round(self.speed, 2),
-            'distance': round(self.distance, 2)
-        }
+        # callbacks for data
+        self._channel.on_broadcast_data = self._receive_new_data
+        self._channel.on_burst_data = self._receive_new_data
 
-# TOO DANGEROUS TO BE LEFT ALIVE
-#    def _run(self):
-#        self._state = True
-#        while True:
-#            with self._settings_lock:
-#                if self.newData:
-#                    self.count2 += 1
-#                    # t1 = time.time()
-#                    self.newData = False
-#                    # print('>>> dentro __run')
-#                    self.calculate_speed(self.data)
-#                self.distance_trap = self.settings.run_length +\
-#                    self.settings.trap_length - self.distance
-#                if self.distance > self.settings.run_length and self.distance_trap >= 0:
-#                    self.average_array.append(self.speed)
-#                if self.trap_count == 0:
-#                    self._send_message(Message(self.trap_info, MexPriority.medium, MexType.trap, 1, 1))
-#                self.trap_count = (self.trap_count + 1) % 10
-#            time.sleep(0.1)
+        self._channel.set_period(8085)
+        self._channel.set_search_timeout(255)
+        self._channel.set_rf_freq(57)
+
+        # 121 -> DEVICE ID of VEL/CADsensor
+        # Taurus id -> 8142
+
+        # speed_sensor_id = self._settings.speed_sensor_id
+        self._channel.set_id(self._sensor_id, self._DEVICE_TYPE_ID, 0)
+
+        # open channel
+        self._channel.open()
+
+    def _receve_new_data(self, data):
+        self.data = data
+        self.newData = True
+        self.count += 1
+
+    def read_data() -> dict:
+        pass
+
+    # NOTE: metodi propri della classe
+
+    # def signal(self, value: str):
+    #     if value == "reset":
+    #         self.reset_distance()
+
+    # def update_settings(self, settings: Settings):
+    #     with self._settings_lock:
+    #         self._settings = settings
+
+    # def export(self):
+    #     return {"speed": round(self.speed, 2), "distance": round(self.distance, 2)}
+
+    # TODO: DEPRECATE
+    #    def _run(self):
+    #        self._state = True
+    #        while True:
+    #            with self._settings_lock:
+    #                if self.newData:
+    #                    self.count2 += 1
+    #                    # t1 = time.time()
+    #                    self.newData = False
+    #                    # print('>>> dentro __run')
+    #                    self.calculate_speed(self.data)
+    #                self.distance_trap = self.settings.run_length +\
+    #                    self.settings.trap_length - self.distance
+    #                if self.distance > self.settings.run_length and self.distance_trap >= 0:
+    #                    self.average_array.append(self.speed)
+    #                if self.trap_count == 0:
+    #                    self._send_message(Message(self.trap_info, MexPriority.medium, MexType.trap, 1, 1))
+    #                self.trap_count = (self.trap_count + 1) % 10
+    #            time.sleep(0.1)
 
     def running(self):
         self._state = True
+
         if self.newData:
             self.count2 += 1
             # t1 = time.time()
             self.newData = False
             # print('>>> dentro __run')
             self.calculate_speed(self.data)
-        self.distance_trap = self.settings.run_length + self.settings.trap_length - self.distance
+
+        self.distance_trap = (
+            self.settings.run_length + self.settings.trap_length - self.distance
+        )
+
         if self.distance > self.settings.run_length and self.distance_trap >= 0:
             self.average_array.append(self.speed)
+
         if self.trap_count == 0:
-            self._send_message(Message(self.trap_info, MexPriority.medium, MexType.trap, 1, 1))
+            self._send_message(
+                Message(self.trap_info, MexPriority.medium, MexType.trap, 1, 1)
+            )
+
         self.trap_count = (self.trap_count + 1) % 10
 
     @property
@@ -110,11 +148,12 @@ class Speed(Sensor):
     def time_int(self, time_int: int):
         self.__time_int = time_int
 
+    # TODO: DEPRECATE
     def set_channel(self, channel_cad_vel: Channel):
         """
-            Function used to set the channel velocity and cadence
+        Function used to set the channel velocity and cadence
 
-            :param channel_cad_vel = chanel for velocity and cadence
+        :param channel_cad_vel = chanel for velocity and cadence
         """
 
         channel_cad_vel.on_broadcast_data = self.on_data_cadence_speed
@@ -127,12 +166,13 @@ class Speed(Sensor):
         # 121 -> DEVICE ID of VEL/CADsensor
         # Taurus id -> 8142
 
-#        with self._settings_lock:
-#            speed_sensor_id = self._settings.speed_sensor_id
+        #        with self._settings_lock:
+        #            speed_sensor_id = self._settings.speed_sensor_id
 
         speed_sensor_id = self._settings.speed_sensor_id
         channel_cad_vel.set_id(speed_sensor_id, 121, 0)
 
+    # TODO: DEPRECATE
     def on_data_cadence_speed(self, data):
         # print('>>> new speed')
         self.data = data
@@ -141,8 +181,8 @@ class Speed(Sensor):
 
     def calculate_speed(self, data):
         """
-            Computes the speed of the bike by calculating the number of rotations of the wheels.
-            :param data = the data array, used to calculate the speed of the bike
+        Computes the speed of the bike by calculating the number of rotations of the wheels.
+        :param data = the data array, used to calculate the speed of the bike
         """
 
         # if (data[0] == 5):
@@ -169,11 +209,17 @@ class Speed(Sensor):
             event_time += 64 * 1024
         if revolutions < self.lastRevolutions:
             revolutions += 65535
-        self.distance += self.settings.circumference * \
-            (revolutions - self.lastRevolutions)/1000
+        self.distance += (
+            self.settings.circumference * (revolutions - self.lastRevolutions) / 1000
+        )
 
-        self._speed = 3.6 * (revolutions - self.lastRevolutions) * 1.024 * self.settings.circumference / (
-            event_time - self.lastTime)
+        self._speed = (
+            3.6
+            * (revolutions - self.lastRevolutions)
+            * 1.024
+            * self.settings.circumference
+            / (event_time - self.lastTime)
+        )
 
     def get(self):
         if (time.time() - self.lastRxTime) > 5:
@@ -212,9 +258,13 @@ class Speed(Sensor):
         if self.settings.hour_record:
             if self.time_int == 0:
                 return ""
-            return "V_med: " + str(3.6*self.distance/self.time_int)
+            return "V_med: " + str(3.6 * self.distance / self.time_int)
         if self.distance < self.settings.run_length:
-            return "Trappola tra " + str(round(self.settings.run_length - self.distance)) + " metri"
+            return (
+                "Trappola tra "
+                + str(round(self.settings.run_length - self.distance))
+                + " metri"
+            )
         elif self.distance > self.settings.run_length and self.distance_trap >= 0:
             return "Fine trappola tra " + str(round(self.distance_trap)) + " metri"
         else:

@@ -87,106 +87,115 @@
 import asyncio
 import json
 
-from .settings import Settings
-from core.mqtt import MqttConsumer
-from core.message import Message
+from .reader import AntReader, Node
+
+# from .settings import Settings
+# from core.mqtt import MqttConsumer
+# from core.message import Message
+
 from .heartrate import HeartRate
 from .powermeter import Powermeter
-from .speed import Speed
-from .ant_manager import Ant
-
-import sys
-import os
-
-sensors = dict()  # the dictionary contains a list of sensors
+from .hall import Hall
 
 
-def retrieve_settings(abs):
-    flpt = os.path.abspath(abs)
-    with open(flpt, "r") as p:
-        s = json.load(p)
-    return s
+# global data storage
+data = dict()
 
 
-def message_handler(topic, message: bytes):
-    if topic == 'signals':
-        for e in sensors:
-            sensors[e].signal(message)
-    elif topic == 'sensors/manager':
-        try:
-            json_message = json.loads(message)
-            if sensors.__contains__('speed'):
-                sensors['speed'].time_int = int(json_message['time_int'])
-        except Exception as e:
-            print(e)
+# def retrieve_settings(abs):
+#     flpt = os.path.abspath(abs)
+#     with open(flpt, "r") as p:
+#         s = json.load(p)
+#     return s
 
 
-def send_message(mqtt, message: Message):
-    print(message.text)
-    mqtt.publish_message(message)
+# def message_handler(topic, message: bytes):
+#     if topic == 'signals':
+#         for e in sensors:
+#             sensors[e].signal(message)
+#     elif topic == 'sensors/manager':
+#         try:
+#             json_message = json.loads(message)
+#             if sensors.__contains__('speed'):
+#                 sensors['speed'].time_int = int(json_message['time_int'])
+#         except Exception as e:
+#             print(e)
 
 
-def init():
-
-    settings = Settings({
-         'hour_record': False,
-         'run_length': 8046,
-         'trap_length': 200,
-         'hr_sensor_id': 0,
-         'speed_sensor_id': 0,
-         'power_sensor_id': 0,
-         'circumference': 1450,
-         'average_power_time': 3
-     }, "ant")
-
-    try:
-        mqtt = MqttConsumer(sys.argv[1], 1883, 'ant', ['manager'], ['powermeter_calibration', 'reset'], settings,
-                            message_handler)
-        print("Mqtt init at: ", sys.argv[1])
-    except IndexError as e:
-        print(e)
-        sys.exit(-1)
+# def send_message(mqtt, message: Message):
+#     print(message.text)
+#     mqtt.publish_message(message)
 
 
-    heart_rate = HeartRate(settings)
-    speed = Speed(send_message, settings)
-    powermeter = Powermeter(send_message, settings)
-    ant = Ant(send_message, heart_rate, speed, powermeter)
+# def init():
+#     settings = Settings({
+#          'hour_record': False,
+#          'run_length': 8046,
+#          'trap_length': 200,
+#          'hr_sensor_id': 0,
+#          'speed_sensor_id': 0,
+#          'power_sensor_id': 0,
+#          'circumference': 1450,
+#          'average_power_time': 3
+#      }, "ant")
 
-    # Todo: the dictionary contains the data and not the instances of the classes
-    sensors['heart_rate'] = heart_rate
-    sensors['speed'] = speed
-    sensors['powermeter'] = powermeter
+#     try:
+#         mqtt = MqttConsumer(sys.argv[1], 1883, 'ant', ['manager'], ['powermeter_calibration', 'reset'], settings,
+#                             message_handler)
+#         print("Mqtt init at: ", sys.argv[1])
+#     except IndexError as e:
+#         print(e)
+#         sys.exit(-1)
 
-    settings.load()
+
+#     heart_rate = HeartRate(settings)
+#     speed = Speed(send_message, settings)
+#     powermeter = Powermeter(send_message, settings)
+#     ant = Ant(send_message, heart_rate, speed, powermeter)
+
+#     # Todo: the dictionary contains the data and not the instances of the classes
+#     sensors['heart_rate'] = heart_rate
+#     sensors['speed'] = speed
+#     sensors['powermeter'] = powermeter
+
+#     settings.load()
 
 
-async def SpeedLoop():
-    # there should be a get_speed method to read the data
+async def read_data(sensor):
     while True:
-        speed = Speed(send_message, settings)
-        s = speed.get_speed()
-        sensors['speed'].running()
+        data.update(sensor.read_data())
+
         await asyncio.sleep(0.1)
 
 
-async def task2():
-    pass
-
-
-async def task3():
+async def mqtt():
     pass
 
 
 async def main():
+    # TODO: vedere se si può usare la `with` con Node
+    # ant Node
+    node = Node()
+    node.set_network_key(0x00, AntReader.NETWORK_KEY)
 
-    init()
+    # TODO: ricavare gli id dal database di configurazione
+    id_hall = 0
+    id_hr = 0
+    id_pm = 0
 
-    speed_loop = asyncio.create_task(SpeedLoop())
-    task2 = asyncio.create_task(task2())
-    task3 = asyncio.create_task(task3())
+    # sensors
+    hall = Hall(node, id_hall)
+    hr = HeartRate(node, id_hr)
+    pm = Powermeter(node, id_pm)
 
-    await asyncio.wait([speed_loop, task2, task3])
+    # start ant communication and data read
+    node.start()
+
+    # release async tasks
+    await asyncio.gather(read_data(hall), read_data(hr), read_data(pm), mqtt())
+
+    # close on exit
+    node.stop()
 
 
 def entry_point():

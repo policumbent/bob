@@ -18,7 +18,7 @@ python = "^3.7.3"
 
 # package deps
 pyusb = "^1.2.1"
-policumbent-bob-core = "^0.1.0"
+policumbent-bob-core = "^0.2.0"
 
 [tool.poetry.dev-dependencies]
 pylint = "^2.12.2"

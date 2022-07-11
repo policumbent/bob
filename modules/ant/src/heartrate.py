@@ -1,3 +1,4 @@
+from .reader import AntReader, Node
 from .ant.easy.channel import Channel
 import time
 
@@ -5,25 +6,61 @@ from core.sensor import Sensor
 from .settings import Settings
 
 
-class HeartRate(Sensor):
-    def __init__(self, settings: Settings):
+class HeartRate(AntReader):
+    _DEVICE_TYPE_ID = 120
+
+    def __init__(self, node: Node, id: int):
+        super().__init__(node, id)
+
         self._value = -1
         self._state = False
-        self._settings = settings
+        # self._settings = settings
         self._lastRxTime = time.time()
         self._count = 0
 
-    def signal(self, value: str):
+        # inizializzazione del channel ant
+        self._init_channel()
+
+    # NOTE: specializzazione metodi astratti di `AntReader`
+
+    def _init_channel(self):
+        if self._channel is None:
+            self._channel = self._create_channel()
+
+        # callbacks for data
+        self._channel.on_broadcast_data = self._receive_new_data
+        self._channel.on_burst_data = self._receive_new_data
+
+        self._channel.set_period(8070)
+        self._channel.set_search_timeout(255)
+        self._channel.set_rf_freq(57)
+
+        # 69  -> ID DELLA MIA FASCIA CARDIO, METTERE 0 PER TUTTE LE FASCIE
+        # 120 -> DEVICE ID DEL SENSORE DELLA FC
+
+        # hr_sensor_id = self._settings.hr_sensor_id
+        self._channel.set_id(self._sensor_id, self._DEVICE_TYPE_ID, 0)
+
+        # open channel
+        self._channel.open()
+
+    def _receive_new_data(self, data):
+        self._state = True
+        self.value = int(data[7])
+        self._lastRxTime = time.time()
+        self._count += 1
+        # print(self._lastRxTime)
+
+    def read_data() -> dict:
         pass
 
-# TODO: it doesn't publish anymore
-#    def export(self):
-#        return {
-#            'heartrate': self.value
-#        }
+    # NOTE: metodi propri della classe
 
-    def update_settings(self, settings: Settings):
-        pass
+    # def signal(self, value: str):
+    #     pass
+
+    # def update_settings(self, settings: Settings):
+    #     pass
 
     @property
     def state(self):
@@ -39,6 +76,7 @@ class HeartRate(Sensor):
     def value(self, value):
         self._value = value
 
+    # TODO: DEPRECATE
     def set_channel(self, channel_hr: Channel):
         # CANALE FREQUENZA CARDIACA
         channel_hr.on_broadcast_data = self.on_data_heartrate
@@ -51,6 +89,7 @@ class HeartRate(Sensor):
         hr_sensor_id = self._settings.hr_sensor_id
         channel_hr.set_id(hr_sensor_id, 120, 0)
 
+    # TODO: DEPRECATE
     def on_data_heartrate(self, data):
         self._state = True
         self.value = int(data[7])

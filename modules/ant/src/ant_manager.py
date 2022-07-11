@@ -1,11 +1,15 @@
+# NOTE: THIS MUST BE DELETED
+
+
 import sys
 from .ant.easy.channel import Channel
 from .ant.easy.node import Node
 from .heartrate import HeartRate
 from .powermeter import Powermeter
-from .speed import Speed
+from .hall import Speed
 from core.message import Message, MexType, MexPriority
-NETWORK_KEY = [0xb9, 0xa5, 0x21, 0xfb, 0xbd, 0x72, 0xc3, 0x45]
+
+NETWORK_KEY = [0xB9, 0xA5, 0x21, 0xFB, 0xBD, 0x72, 0xC3, 0x45]
 CHANNEL_TYPE = Channel.Type.BIDIRECTIONAL_RECEIVE
 
 
@@ -51,7 +55,9 @@ class Ant:
         # NOTE: Procurare eccezione
         except Exception as e:
             print(e)
-            self.send_mex(Message("ANT NON AVVIATO", MexPriority.high, MexType.default, 5, 30))
+            self.send_mex(
+                Message("ANT NON AVVIATO", MexPriority.high, MexType.default, 5, 30)
+            )
             print("ANT NON AVVIATO")
             sys.exit(-1)
 
