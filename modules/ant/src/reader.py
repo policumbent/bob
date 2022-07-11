@@ -15,7 +15,7 @@ class AntReader(ABC):
         self._sensor_id = sensor_id
 
         if channel_type:
-            self._channel = self._create_channel(type)
+            self._channel = self._create_channel(channel_type)
         
 
     def _create_channel(self, type=_DEFAULT_CHANNEL_TYPE):
