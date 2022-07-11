@@ -122,13 +122,22 @@ def message_handler(topic, message: bytes):
 
 
 def send_message(mqtt, message: Message):
-     print(message.text)
-     mqtt.publish_message(message)
+    print(message.text)
+    mqtt.publish_message(message)
 
 
 def init():
 
-    settings = Settings(retrieve_settings("source/settings.json"), "ant")
+    settings = Settings({
+         'hour_record': False,
+         'run_length': 8046,
+         'trap_length': 200,
+         'hr_sensor_id': 0,
+         'speed_sensor_id': 0,
+         'power_sensor_id': 0,
+         'circumference': 1450,
+         'average_power_time': 3
+     }, "ant")
 
     try:
         mqtt = MqttConsumer(sys.argv[1], 1883, 'ant', ['manager'], ['powermeter_calibration', 'reset'], settings,
@@ -144,6 +153,7 @@ def init():
     powermeter = Powermeter(send_message, settings)
     ant = Ant(send_message, heart_rate, speed, powermeter)
 
+    # Todo: the dictionary contains the data and not the instances of the classes
     sensors['heart_rate'] = heart_rate
     sensors['speed'] = speed
     sensors['powermeter'] = powermeter
@@ -152,7 +162,10 @@ def init():
 
 
 async def SpeedLoop():
+    # there should be a get_speed method to read the data
     while True:
+        speed = Speed(send_message, settings)
+        s = speed.get_speed()
         sensors['speed'].running()
         await asyncio.sleep(0.1)
 
@@ -169,7 +182,7 @@ async def main():
 
     init()
 
-    speed_loop = asyncio.create_task(task1())
+    speed_loop = asyncio.create_task(SpeedLoop())
     task2 = asyncio.create_task(task2())
     task3 = asyncio.create_task(task3())
 

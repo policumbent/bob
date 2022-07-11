@@ -2,7 +2,7 @@ import threading
 import time
 from core.message import Message, MexType, MexPriority
 from collections import deque
-from threading import Thread
+# from threading import Thread
 
 from core.sensor import Sensor
 
@@ -81,8 +81,7 @@ class Speed(Sensor):
             self.newData = False
             # print('>>> dentro __run')
             self.calculate_speed(self.data)
-        self.distance_trap = self.settings.run_length +\
-            self.settings.trap_length - self.distance
+        self.distance_trap = self.settings.run_length + self.settings.trap_length - self.distance
         if self.distance > self.settings.run_length and self.distance_trap >= 0:
             self.average_array.append(self.speed)
         if self.trap_count == 0:
@@ -112,16 +111,26 @@ class Speed(Sensor):
         self.__time_int = time_int
 
     def set_channel(self, channel_cad_vel: Channel):
-        # CANALE CADENZA/VELOCITA'
+        """
+            Function used to set the channel velocity and cadence
+
+            :param channel_cad_vel = chanel for velocity and cadence
+        """
+
         channel_cad_vel.on_broadcast_data = self.on_data_cadence_speed
         channel_cad_vel.on_burst_data = self.on_data_cadence_speed
         channel_cad_vel.set_period(8085)
-        # 240 secondi di attesa di ricevere il segnale dal sensore
+        # 240 seconds to get the signal from the sensor
         channel_cad_vel.set_search_timeout(255)
         channel_cad_vel.set_rf_freq(57)
-        # 121 -> DEVICE ID DEL SENSORE VEL/CAD Taurus id -> 8142
-        with self._settings_lock:
-            speed_sensor_id = self._settings.speed_sensor_id
+
+        # 121 -> DEVICE ID of VEL/CADsensor
+        # Taurus id -> 8142
+
+#        with self._settings_lock:
+#            speed_sensor_id = self._settings.speed_sensor_id
+
+        speed_sensor_id = self._settings.speed_sensor_id
         channel_cad_vel.set_id(speed_sensor_id, 121, 0)
 
     def on_data_cadence_speed(self, data):
@@ -131,8 +140,13 @@ class Speed(Sensor):
         self.count += 1
 
     def calculate_speed(self, data):
+        """
+            Computes the speed of the bike by calculating the number of rotations of the wheels.
+            :param data = the data array, used to calculate the speed of the bike
+        """
+
         # if (data[0] == 5):
-        #     print ("data[0] ==5")
+        #     print ("data[0] == 5")
         #     return
         event_time = data[5] * 256 + data[4]
 
@@ -140,7 +154,7 @@ class Speed(Sensor):
             return
 
         revolutions = data[7] * 256 + data[6]
-        self._speed = self.calc_speed(event_time, revolutions)
+        self.calc_speed(event_time, revolutions)
         # print ("Speed "+ self._speed)
         self.lastRxTime = time.time()
         self.lastTime = event_time
@@ -158,7 +172,7 @@ class Speed(Sensor):
         self.distance += self.settings.circumference * \
             (revolutions - self.lastRevolutions)/1000
 
-        return 3.6 * (revolutions - self.lastRevolutions) * 1.024 * self.settings.circumference / (
+        self._speed = 3.6 * (revolutions - self.lastRevolutions) * 1.024 * self.settings.circumference / (
             event_time - self.lastTime)
 
     def get(self):

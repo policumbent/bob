@@ -16,10 +16,11 @@ class HeartRate(Sensor):
     def signal(self, value: str):
         pass
 
-    def export(self):
-        return {
-            'heartrate': self.value
-        }
+# TODO: it doesn't publish anymore
+#    def export(self):
+#        return {
+#            'heartrate': self.value
+#        }
 
     def update_settings(self, settings: Settings):
         pass
