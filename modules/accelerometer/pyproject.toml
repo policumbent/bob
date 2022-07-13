@@ -18,6 +18,8 @@ dev = "src.main:entry_point"
 python = "^3.7.3"
 
 policumbent-bob-core = "^0.2.0"
+smbus2 = "^0.4.2"
+
 
 [tool.poetry.dev-dependencies]
 pylint = "^2.12.2"
