@@ -112,19 +112,22 @@ class Hall(AntReader):
             # print('>>> dentro __run')
             self.calculate_speed(self.data)
 
-        self.distance_trap = (
-            self.settings.run_length + self.settings.trap_length - self.distance
-        )
 
-        if self.distance > self.settings.run_length and self.distance_trap >= 0:
-            self.average_array.append(self.speed)
+        # TODO: il calcolo della distanza dalla trappolla va fatto direttamente
+        #       nel modulo `video` tramite il dato della distanza percorsa
+        # self.distance_trap = (
+        #     self.settings.run_length + self.settings.trap_length - self.distance
+        # )
 
-        if self.trap_count == 0:
-            self._send_message(
-                Message(self.trap_info, MexPriority.medium, MexType.trap, 1, 1)
-            )
+        # if self.distance > self.settings.run_length and self.distance_trap >= 0:
+        #     self.average_array.append(self.speed)
 
-        self.trap_count = (self.trap_count + 1) % 10
+        # if self.trap_count == 0:
+        #     self._send_message(
+        #         Message(self.trap_info, MexPriority.medium, MexType.trap, 1, 1)
+        #     )
+
+        # self.trap_count = (self.trap_count + 1) % 10
 
     @property
     def speed(self):
