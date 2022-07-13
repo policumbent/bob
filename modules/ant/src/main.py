@@ -97,6 +97,7 @@ from .heartrate import HeartRate
 from .powermeter import Powermeter
 from .hall import Hall
 
+import core
 
 # global data storage
 data = dict()
@@ -172,10 +173,9 @@ async def mqtt():
     pass
 
 
-async def main():
+async def main(node):
     # TODO: vedere se si può usare la `with` con Node
     # ant Node
-    node = Node()
     node.set_network_key(0x00, AntReader.NETWORK_KEY)
 
     # TODO: ricavare gli id dal database di configurazione
@@ -192,14 +192,35 @@ async def main():
     node.start()
 
     # release async tasks
-    await asyncio.gather(read_data(hall), read_data(hr), read_data(pm), mqtt())
+    await asyncio.gather(
+        read_data(hall),
+        read_data(hr),
+        read_data(pm),
+        mqtt(),
+    )
 
     # close on exit
     node.stop()
 
 
 def entry_point():
-    asyncio.run(main())
+    # `Node` class releases a thread so must be
+    # initialized outside the async eventloop
+
+    ant_node = None
+    while not ant_node:
+        import time
+        from .ant.base.driver import DriverNotFound
+
+        try:
+            ant_node = Node()
+        except DriverNotFound:
+            core.log.err("USB not connected")
+            time.sleep(1)
+
+    core.log.info("Success on init ant node")
+
+    asyncio.run(main(ant_node))
 
 
 if __name__ == "__main__":

@@ -16,10 +16,9 @@ class AntReader(ABC):
 
         if channel_type:
             self._channel = self._create_channel(channel_type)
-        
 
     def _create_channel(self, type=_DEFAULT_CHANNEL_TYPE):
-        self._node.new_channel(type)
+        return self._node.new_channel(type)
 
     def __del__(self):
         # self._channel.close()
@@ -30,7 +29,7 @@ class AntReader(ABC):
         pass
 
     @abstractmethod
-    def _receve_new_data(self, data):
+    def _receive_new_data(self, data):
         pass
 
     @abstractmethod

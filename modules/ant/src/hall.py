@@ -61,7 +61,7 @@ class Hall(AntReader):
         # open channel
         self._channel.open()
 
-    def _receve_new_data(self, data):
+    def _receive_new_data(self, data):
         self.data = data
         self.newData = True
         self.count += 1
