@@ -2,9 +2,9 @@ name: CI
 
 on:
   push:
-    branches: [main]
+    branches: [dev-refactoring]
   pull_request:
-    branches: [main]
+    branches: [dev-refactoring]
   workflow_dispatch:
 
 jobs:
@@ -13,7 +13,7 @@ jobs:
       fail-fast: false
       matrix:
         python-version: [3.7, 3.8]
-        poetry-version: [1.1.12]
+        poetry-version: [1.1.14]
 
     runs-on: ubuntu-latest
     steps:
@@ -23,23 +23,12 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
 
-      # - name: Run image
-      #   uses: abatilo/actions-poetry@v2.0.0
-      #   with:
-      #     poetry-version: ${{ matrix.poetry-version }}
-
-      # - name: Install
-      #   run: poetry install
-
-      # - name: Tests
-      #   run: poetry run pytest --verbose
-
-      # - uses: actions/checkout@v2
-
-      # - name: Build on arm
-      #   uses: pguyot/arm-runner-action@v1
-      #   with:
-      #     commands: |
-      #       apt-get install -y --no-install-recommends python3-pip git && pip3 install poetry
-      #       poetry install --no-dev
-      #       poetry build
+      - name: Test module `ant` on arm
+        uses: pguyot/arm-runner-action@v1
+        with:
+          commands: |
+            cd modules/ant
+            apt-get install -y --no-install-recommends python3-dev python3-setuptools python3-wheel python3-pip git $(cat package_list.txt)
+            pip3 install poetry 
+            poetry install
+            poetry run pytest
