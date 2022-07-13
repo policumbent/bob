@@ -2,7 +2,7 @@
 name = "ant"
 version = "0.1.0"
 description = ""
-authors = ["", "Gabriele Belluardo <gabriele.belluardo@outlook.it>"]
+authors = ["Gabriele Belluardo <gabriele.belluardo@outlook.it>"]
 license = "GPL-3.0-or-later"
 
 # needed for custom project structure
