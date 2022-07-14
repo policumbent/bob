@@ -3,6 +3,9 @@ import collections
 import functools
 import operator
 
+import core
+
+
 from .mpu6050 import mpu6050
 from datetime import datetime
 
@@ -92,9 +95,17 @@ async def write_csv():
 
         while True:
             if row != curr_row:
-                file_wrote.writerow(row)
+                # file_wrote.writerow(row)
                 curr_row = dict(row)
-                print(row)
+
+                acc_x = row["acc_x"]
+                acc_y = row["acc_y"]
+                acc_z = row["acc_z"]
+                gyr_x = row["gyr_x"]
+                gyr_y = row["gyr_y"]
+                gyr_z = row["gyr_z"]
+                
+                print(f"acc_x={acc_x:.2f} acc_y={acc_y:.2f} acc_z={acc_z:.2f} gyr_x={gyr_x:.2f} gyr_y={gyr_y:.2f} gyr_z={gyr_z:.2f}")
 
             await asyncio.sleep(0.1 / 1000)
 
@@ -107,19 +118,26 @@ async def write_db():
 
 
 async def main():
-    mpu = mpu6050(0x68)
+    while True:
+        try:
+            mpu = mpu6050(0x68)
 
-    mpu.set_accel_range(mpu.ACCEL_RANGE_2G)
-    mpu.set_gyro_range(mpu.GYRO_RANGE_250DEG)
+            core.log.info("Init sensor")
 
-    off_acc, off_gyr = set_offset(mpu)
+            mpu.set_accel_range(mpu.ACCEL_RANGE_2G)
+            mpu.set_gyro_range(mpu.GYRO_RANGE_250DEG)
 
-    await asyncio.gather(
-        read_acc(mpu, off_acc),
-        read_gyro(mpu, off_gyr),
-        # write_csv(),
-        mqtt(),
-    )
+            off_acc, off_gyr = set_offset(mpu)
+
+            await asyncio.gather(
+                read_acc(mpu, off_acc),
+                read_gyro(mpu, off_gyr),
+                write_csv(),
+                mqtt(),
+            )
+        except OSError:
+            core.log.err("Sensor not found")
+            await asyncio.sleep(.5)
 
 
 def entry_point():
