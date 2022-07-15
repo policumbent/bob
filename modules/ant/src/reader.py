@@ -14,6 +14,9 @@ class AntReader(ABC):
         self._channel = None
         self._sensor_id = sensor_id
 
+        # sensor data
+        self._data = None
+
         if channel_type:
             self._channel = self._create_channel(channel_type)
 
@@ -33,5 +36,5 @@ class AntReader(ABC):
         pass
 
     @abstractmethod
-    def read_data():
+    def read_data(self):
         pass
