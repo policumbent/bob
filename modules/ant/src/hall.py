@@ -7,12 +7,17 @@ from .reader import AntReader, Node, Channel
 # CIRCUMFERENCE = 1.450
 from .settings import Settings
 
+from enum import Enum
+
+class HallType(Enum):
+    speed = 123
+    speed_cadence = 121
 
 class Hall(AntReader):
-    _DEVICE_TYPE_ID = 121
+    def __init__(self, node: Node, sensor_id: int, device_type=HallType.speed):
+        super().__init__(node, sensor_id)
 
-    def __init__(self, node: Node, id: int):
-        super().__init__(node, id)
+        self._DEVICE_TYPE_ID = device_type.value
 
         self._speed = 0.0
         self.__time_int = 0
@@ -48,7 +53,11 @@ class Hall(AntReader):
         self._channel.on_broadcast_data = self._receive_new_data
         self._channel.on_burst_data = self._receive_new_data
 
-        self._channel.set_period(8085)
+        if self._DEVICE_TYPE_ID == HallType.speed:
+            self._channel.set_period(8118)
+        else:
+            self._channel.set_period(8086)
+
         self._channel.set_search_timeout(255)
         self._channel.set_rf_freq(57)
 
@@ -67,6 +76,13 @@ class Hall(AntReader):
         self.count += 1
 
     def read_data(self) -> dict:
+        # TODO: se il sensore ritorna solo la velocità (HallType.speed)
+        #       il dizionario deve essere del tipo: {"speed": ...}
+        #       altrimenti {"speed": ..., "cadence": ...}
+
+        # TODO: ritornare `None` se il sensore non è attivo
+        #       guardare la funzione `_is_active di heartrate`
+
         self._state = True
 
         if self.newData:
@@ -75,8 +91,9 @@ class Hall(AntReader):
             self.newData = False
             # print('>>> dentro __run')
             self.calculate_speed(self.data)
+            self._data = self._speed
 
-        return self._speed
+        return self._data
 
     # NOTE: metodi propri della classe
 

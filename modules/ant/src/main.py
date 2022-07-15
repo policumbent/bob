@@ -85,8 +85,9 @@
 #     start()
 
 import asyncio
-import json
 import threading
+
+from .ant.base.driver import DriverNotFound
 
 from .reader import AntReader, Node
 
@@ -176,28 +177,39 @@ async def mqtt():
     pass
 
 
-async def main(node: Node):
+async def main():    
+    node = None
+    while not node:
+        try:
+            node = Node()
+        except DriverNotFound:
+            core.log.err("USB not connected")
+            await asyncio.sleep(1)
+
+    core.log.info("Init ant node")
+
+
     # TODO: vedere se si può usare la `with` con Node
     # ant Node
     node.set_network_key(0x00, AntReader.NETWORK_KEY)
 
     # TODO: ricavare gli id dal database di configurazione
-    id_hall = 1
-    id_hr = 1
+    id_hall = 0
+    id_hr = 0
     id_pm = 0
 
     # sensors
-    # hall = Hall(node, id_hall)
-    hr = HeartRate(node, id_hr)
+    hall = Hall(node, id_hall)
+    # hr = HeartRate(node, id_hr)
     # pm = Powermeter(node, id_pm)
 
     # start ant communication and data read
-    threading.Thread(target=node.start, name="ant.easy", ).start()
+    threading.Thread(target=node.start, name="ant.easy").start()
 
     # release async tasks
     await asyncio.gather(
-        # read_data(hall),
-        read_data(hr),
+        read_data(hall),
+        # read_data(hr),
         # read_data(pm),
         mqtt(),
     )
@@ -207,23 +219,7 @@ async def main(node: Node):
 
 
 def entry_point():
-    # `Node` class releases a thread so must be
-    # initialized outside the async eventloop
-
-    ant_node = None
-    while not ant_node:
-        import time
-        from .ant.base.driver import DriverNotFound
-
-        try:
-            ant_node = Node()
-        except DriverNotFound:
-            core.log.err("USB not connected")
-            time.sleep(1)
-
-    core.log.info("Success on init ant node")
-
-    asyncio.run(main(ant_node))
+    asyncio.run(main())
 
 
 if __name__ == "__main__":

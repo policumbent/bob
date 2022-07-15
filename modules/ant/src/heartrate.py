@@ -6,8 +6,8 @@ from core import time
 class HeartRate(AntReader):
     _DEVICE_TYPE_ID = 120
 
-    def __init__(self, node: Node, id: int):
-        super().__init__(node, id)
+    def __init__(self, node: Node, sensor_id: int):
+        super().__init__(node, sensor_id)
 
         self._last_data_time = None
 
@@ -50,7 +50,7 @@ class HeartRate(AntReader):
     # NOTE: metodi propri della classe
 
     def _current_time(self):
-        return core.time._unix_time()
+        return time._unix_time()
 
     def _elapsed_time(self):
         return self._current_time() - self._last_data_time
