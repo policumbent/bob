@@ -16,7 +16,7 @@ from .settings import Settings
 
 
 class Powermeter(AntReader):
-    _DEVICE_TYPE_ID = 120
+    _DEVICE_TYPE_ID = 11
 
     def __init__(self, node, id):
         super().__init__(node, id)
