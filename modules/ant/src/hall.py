@@ -9,7 +9,7 @@ from .settings import Settings
 
 
 class Hall(AntReader):
-    _DEVICE_TYPE_ID = 120
+    _DEVICE_TYPE_ID = 121
 
     def __init__(self, node: Node, id: int):
         super().__init__(node, id)
@@ -66,8 +66,17 @@ class Hall(AntReader):
         self.newData = True
         self.count += 1
 
-    def read_data() -> dict:
-        pass
+    def read_data(self) -> dict:
+        self._state = True
+
+        if self.newData:
+            self.count2 += 1
+            # t1 = time.time()
+            self.newData = False
+            # print('>>> dentro __run')
+            self.calculate_speed(self.data)
+
+        return self._speed
 
     # NOTE: metodi propri della classe
 
@@ -160,7 +169,7 @@ class Hall(AntReader):
 
         channel_cad_vel.on_broadcast_data = self.on_data_cadence_speed
         channel_cad_vel.on_burst_data = self.on_data_cadence_speed
-        channel_cad_vel.set_period(8085)
+        channel_cad_vel.set_period(8086)
         # 240 seconds to get the signal from the sensor
         channel_cad_vel.set_search_timeout(255)
         channel_cad_vel.set_rf_freq(57)
@@ -211,15 +220,16 @@ class Hall(AntReader):
             event_time += 64 * 1024
         if revolutions < self.lastRevolutions:
             revolutions += 65535
-        self.distance += (
-            self.settings.circumference * (revolutions - self.lastRevolutions) / 1000
-        )
+
+        # TODO: 2200 mm is the diameter of the wheel, retrive it from config
+
+        self.distance += 2200 * (revolutions - self.lastRevolutions) / 1000
 
         self._speed = (
             3.6
             * (revolutions - self.lastRevolutions)
             * 1.024
-            * self.settings.circumference
+            * 2200
             / (event_time - self.lastTime)
         )
 
