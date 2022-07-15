@@ -1,7 +1,7 @@
 [tool.poetry]
 name = "accelerometer"
 version = "0.1.0"
-description = ""
+description = "Module for accelerometer sensor data"
 authors = ["Marta Grassetti <mg.grassetti@gmail.com>", "Gabriele Belluardo <gabriele.belluardo@outlook.it>"]
 license = "GPL-3.0-or-later"
 
@@ -17,9 +17,9 @@ dev = "src.main:entry_point"
 [tool.poetry.dependencies]
 python = "^3.7.3"
 
-policumbent-bob-core = "^0.1.0.post1"
-smbus = "^1.1.post2"
-mpu6050-raspberrypi = "^1.2"
+policumbent-bob-core = "^0.2.0"
+smbus2 = "^0.4.2"
+
 
 [tool.poetry.dev-dependencies]
 pylint = "^2.12.2"

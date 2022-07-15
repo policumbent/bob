@@ -1,84 +1,144 @@
 import asyncio
-from mpu6050 import mpu6050
+import collections
+import functools
+import operator
+
+import core
+
+
+from .mpu6050 import mpu6050
 from datetime import datetime
 
 import csv
-import time
 
-row = None
+row = dict()
 fieldnames = ("acc_x", "acc_y", "acc_z", "gyr_x", "gyr_y", "gyr_z")
+axis = ("x", "y", "z")
 
-async def read_data():
+
+def set_offset(mpu):
+    # discard the first 100 value
+    for _ in range(100):
+        mpu.get_accel_data(g=True)
+        mpu.get_gyro_data()
+
+    # calculate mean
+
+    acc_buff = []
+    gyr_buff = []
+
+    for _ in range(100):
+        acc_buff.append(mpu.get_accel_data(g=True))
+        gyr_buff.append(mpu.get_gyro_data())
+
+    acc_buff = dict(functools.reduce(operator.add, map(collections.Counter, acc_buff)))
+    offset_acc = {k: round(v / 100, 2) for k, v in acc_buff.items()}
+
+    gyr_buff = dict(functools.reduce(operator.add, map(collections.Counter, gyr_buff)))
+    offset_gyr = {k: round(v / 100, 2) for k, v in gyr_buff.items()}
+
+    # check dict integrity
+    for ax in axis:
+        if not offset_gyr.get(ax):
+            offset_gyr.update({ax: 0})
+
+        if not offset_acc.get(ax):
+            offset_acc.update({ax: 0})
+
+    return offset_acc, offset_gyr
+
+
+async def sub_offset(data: dict, offset: dict):
+    for ax in axis:
+        data[ax] -= offset[ax]
+
+    return data
+
+
+async def read_acc(mpu, offset):
     global row
 
-    mpu = mpu6050(0x68)
-
-    a_first = mpu.get_accel_data(g=True)
-    g_first = mpu.get_gyro_data()
-
-    a_off_x = a_first['x']
-    a_off_y = a_first['y']
-    a_off_z = a_first['z']
-
-    g_off_x = g_first['x']
-    g_off_y = g_first['y']
-    g_off_z = g_first['z']
-
     while True:
-        acc = mpu.get_accel_data(g=True)
-        gyr = mpu.get_gyro_data()
+        data = await sub_offset(mpu.get_accel_data(g=True), offset)
 
-        acc['x'] -= a_off_x
-        acc['y'] -= a_off_y
-        acc['z'] -= a_off_z
-
-        gyr['x'] -= g_off_x
-        gyr['y'] -= g_off_y
-        gyr['z'] -= g_off_z
-
-        row = {
-            fieldnames[0]: float(round(float(acc['x']),2)),
-            fieldnames[1]: round(float(acc['y']),2),
-            fieldnames[2]: round(float(acc['z']),2),
-            fieldnames[3]: round(float(gyr['x']),2),
-            fieldnames[4]: round(float(gyr['y']),2),
-            fieldnames[5]: round(float(gyr['z']),2),
-        }
-
+        # round data to the second decimal and insert into the db row
+        for i, ax in enumerate(axis):
+            row.update({fieldnames[i]: round(float(data[ax]), 2)})
 
         # sleep for 0.1 ms every clicle
         await asyncio.sleep(0.1 / 1000)
 
-async def write_db():
+
+async def read_gyro(mpu, offset):
+    global row
+
+    while True:
+        data = await sub_offset(mpu.get_gyro_data(), offset)
+
+        # round data to the second decimal and insert into the db row
+        for i, ax in enumerate(axis):
+            row.update({fieldnames[i + 3]: round(float(data[ax]), 2)})
+
+        # sleep for 0.1 ms every clicle
+        await asyncio.sleep(0.1 / 1000)
+
+
+# TODO: deprecated in favor of sqlite db
+async def write_csv():
     localtime = datetime.now().strftime("%H.%M.%S")
-    print(localtime)
-    
+
     curr_row = None
-    with open(f'/home/pi/mpu6050_{localtime}.csv', mode='w', newline="") as file:
-        file_wrote = csv.DictWriter(file, fieldnames=fieldnames, dialect='excel')
+
+    with open(f"/home/pi/bob/mpu6050_{localtime}.csv", mode="w", newline="") as file:
+        file_wrote = csv.DictWriter(file, fieldnames=fieldnames, dialect="excel")
         file_wrote.writeheader()
 
-        start = time.time()
-        while time.time() - start <= 1:
+        while True:
             if row != curr_row:
-                file_wrote.writerow(row)
-                curr_row = row
-                
-                await asyncio.sleep(0.1 / 1000)
+                # file_wrote.writerow(row)
+                curr_row = dict(row)
 
-        
+                acc_x = row["acc_x"]
+                acc_y = row["acc_y"]
+                acc_z = row["acc_z"]
+                gyr_x = row["gyr_x"]
+                gyr_y = row["gyr_y"]
+                gyr_z = row["gyr_z"]
+                
+                print(f"acc_x={acc_x:.2f} acc_y={acc_y:.2f} acc_z={acc_z:.2f} gyr_x={gyr_x:.2f} gyr_y={gyr_y:.2f} gyr_z={gyr_z:.2f}")
+
+            await asyncio.sleep(0.1 / 1000)
 
 
 async def mqtt():
     pass
 
+async def write_db():
+    pass
+
 
 async def main():
-    acc_task = asyncio.create_task(read_data())
-    db_task = asyncio.create_task(write_db())
-    mqtt_task = asyncio.create_task(mqtt())
+    while True:
+        try:
+            mpu = mpu6050(0x68)
 
-    await asyncio.wait([acc_task, db_task, mqtt_task])
+            core.log.info("Init sensor")
+
+            mpu.set_accel_range(mpu.ACCEL_RANGE_2G)
+            mpu.set_gyro_range(mpu.GYRO_RANGE_250DEG)
+
+            off_acc, off_gyr = set_offset(mpu)
+
+            await asyncio.gather(
+                read_acc(mpu, off_acc),
+                read_gyro(mpu, off_gyr),
+                write_csv(),
+                mqtt(),
+            )
+        except OSError:
+            core.log.err("Sensor not found")
+            await asyncio.sleep(.5)
+
 
 def entry_point():
     asyncio.run(main())

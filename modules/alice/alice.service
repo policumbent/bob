@@ -1,0 +1,12 @@
+[Unit]
+Description=Mqtt service for alice ipc
+After=multi-user.target
+
+[Service]
+Type=simple
+restart=on-failure
+WorkingDirectory=${BOB_ROOT}/modules/alice
+ExecStart=${BOB_ROOT}/modules/alice/.venv/bin/python3 -m src.main
+
+[Install]
+WantedBy=multi-user.target
