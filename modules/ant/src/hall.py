@@ -2,22 +2,17 @@ import time
 from core.message import Message, MexType, MexPriority
 from collections import deque
 
-from .reader import AntReader, Node, Channel
+from .device import AntDevice, DeviceTypeID, Node, Channel
 
 # CIRCUMFERENCE = 1.450
 from .settings import Settings
 
-from enum import Enum
 
-class HallType(Enum):
-    speed = 123
-    speed_cadence = 121
-
-class Hall(AntReader):
-    def __init__(self, node: Node, sensor_id: int, device_type=HallType.speed):
+class Hall(AntDevice):
+    def __init__(self, node: Node, sensor_id=0, device_type=DeviceTypeID.speed):
         super().__init__(node, sensor_id)
 
-        self._DEVICE_TYPE_ID = device_type.value
+        self._device_type = device_type.value
 
         self._speed = 0.0
         self.__time_int = 0
@@ -53,7 +48,7 @@ class Hall(AntReader):
         self._channel.on_broadcast_data = self._receive_new_data
         self._channel.on_burst_data = self._receive_new_data
 
-        if self._DEVICE_TYPE_ID == HallType.speed:
+        if self._device_type == DeviceTypeID.speed:
             self._channel.set_period(8118)
         else:
             self._channel.set_period(8086)
@@ -65,7 +60,7 @@ class Hall(AntReader):
         # Taurus id -> 8142
 
         # speed_sensor_id = self._settings.speed_sensor_id
-        self._channel.set_id(self._sensor_id, self._DEVICE_TYPE_ID, 0)
+        self._channel.set_id(self._sensor_id, self._device_type, 0)
 
         # open channel
         self._channel.open()
@@ -76,7 +71,7 @@ class Hall(AntReader):
         self.count += 1
 
     def read_data(self) -> dict:
-        # TODO: se il sensore ritorna solo la velocità (HallType.speed)
+        # TODO: se il sensore ritorna solo la velocità (DeviceTypeID.speed)
         #       il dizionario deve essere del tipo: {"speed": ...}
         #       altrimenti {"speed": ..., "cadence": ...}
 
@@ -91,7 +86,7 @@ class Hall(AntReader):
             self.newData = False
             # print('>>> dentro __run')
             self.calculate_speed(self.data)
-            self._data = self._speed
+            self._data = {"speed":self._speed}
 
         return self._data
 
