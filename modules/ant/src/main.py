@@ -86,6 +86,7 @@
 
 import asyncio
 import json
+import threading
 
 from .reader import AntReader, Node
 
@@ -164,7 +165,9 @@ data = dict()
 
 async def read_data(sensor):
     while True:
-        data.update(sensor.read_data())
+        # data.update(sensor.read_data())
+        # print(sensor._sensor_id)
+        print(sensor.read_data())
 
         await asyncio.sleep(0.1)
 
@@ -173,29 +176,29 @@ async def mqtt():
     pass
 
 
-async def main(node):
+async def main(node: Node):
     # TODO: vedere se si può usare la `with` con Node
     # ant Node
     node.set_network_key(0x00, AntReader.NETWORK_KEY)
 
     # TODO: ricavare gli id dal database di configurazione
-    id_hall = 0
-    id_hr = 0
+    id_hall = 1
+    id_hr = 1
     id_pm = 0
 
     # sensors
-    hall = Hall(node, id_hall)
+    # hall = Hall(node, id_hall)
     hr = HeartRate(node, id_hr)
-    pm = Powermeter(node, id_pm)
+    # pm = Powermeter(node, id_pm)
 
     # start ant communication and data read
-    node.start()
+    threading.Thread(target=node.start, name="ant.easy", ).start()
 
     # release async tasks
     await asyncio.gather(
-        read_data(hall),
+        # read_data(hall),
         read_data(hr),
-        read_data(pm),
+        # read_data(pm),
         mqtt(),
     )
 
