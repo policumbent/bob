@@ -176,7 +176,7 @@ class Hall(AntDevice):
             revolutions += 65535
 
         # NOTE: per adesso circonferenza hardcoded (sigh)
-        circumference = 1.450
+        circumference = 1450
 
         # NOTE: per adesso niente distanza (sigh)
 
@@ -186,15 +186,13 @@ class Hall(AntDevice):
         # if self.distance > self.settings.run_length and self.distance_trap >= 0:
         #     self.average_array.append(self.speed)
 
-
-        # TODO: indagare velocità scalata di 1000
         self._speed = (
             3.6
             * (revolutions - self.last_wheel_revolutions)
             * 1.024
             * circumference
             / (event_time - self.last_event_time)
-        )*1000
+        )
 
     def calc_cadence_from_revolutions(self, event_time, revolutions):
         if self.last_event_time == -1:
