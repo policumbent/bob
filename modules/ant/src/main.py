@@ -1,7 +1,7 @@
 import asyncio
 import threading
 
-from core import Mqtt
+import core
 
 from .ant.base.driver import DriverNotFound
 from .device import AntDevice, DeviceTypeID, Node
@@ -25,7 +25,9 @@ async def read_data(sensor):
 
 async def mqtt():
     while True:
-        print(data)
+        if data != dict():
+            print(data)
+
         await asyncio.sleep(0.2)
 
 
@@ -47,12 +49,12 @@ async def main():
     # TODO: ricavare gli id dal database di configurazione
 
     # hall phoenix
-    hall = Hall(node, sensor_id=24363, device_type=DeviceTypeID.speed)
+    hall = Hall(node, sensor_id=1, device_type=DeviceTypeID.speed)
     # hall torella
     # hall = Hall(node, sensor_id=13583, device_type=DeviceTypeID.speed_cadence)
 
-    hr = HeartRate(node)
-    pm = Powermeter(node)
+    # hr = HeartRate(node)
+    # pm = Powermeter(node)
 
     # start ant loop and data read
     threading.Thread(target=node.start, name="ant.easy").start()

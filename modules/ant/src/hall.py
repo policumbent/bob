@@ -5,19 +5,19 @@ from collections import deque
 from .device import AntDevice, DeviceTypeID, Node, Channel
 
 # CIRCUMFERENCE = 1.450
-from .settings import Settings
+# from .settings import Settings
 
 
 class Hall(AntDevice):
     def __init__(self, node: Node, sensor_id=0, device_type=DeviceTypeID.speed):
         super().__init__(node, sensor_id)
 
-        self._device_type = device_type.value
+        self._device_type = device_type
 
         self._speed = 0.0
         self._cadence = 0.0
         self.__time_int = 0
-        self._settings = Settings()
+        # self._settings = Settings()
 
         # self._send_message = send_message
         # self._settings = settings
@@ -55,7 +55,7 @@ class Hall(AntDevice):
 
         if self._device_type == DeviceTypeID.speed:
             self._channel.set_period(8118)
-        elif self._DEVICE_TYPE_ID == DeviceTypeID.speed_cadence:
+        elif self._device_type == DeviceTypeID.speed_cadence:
             self._channel.set_period(8086)
         else:
             raise ValueError("The Type of the device doesn't match the supported ones (123, 121)")
@@ -68,7 +68,7 @@ class Hall(AntDevice):
         # Taurus id -> 8142
 
         # speed_sensor_id = self._settings.speed_sensor_id
-        self._channel.set_id(self._sensor_id, self._device_type, 0)
+        self._channel.set_id(self._sensor_id, self._device_type.value, 0)
 
         # open channel
         self._channel.open()
@@ -88,7 +88,7 @@ class Hall(AntDevice):
 
     def _is_active(self):
         # is false only when no data has been yet received or not for 5s
-        return self.last_data_read and self._elapsed_time() < 5
+        return self.last_data_read and self._elapsed_time() < 10
 
 
     def read_data(self) -> dict:
@@ -102,17 +102,17 @@ class Hall(AntDevice):
             self.newData = False
             # print('>>> dentro __run')
             self.calculate_speed(self.data)
-            if self._DEVICE_TYPE_ID == DeviceTypeID.speed_cadence:
+            if self._device_type == DeviceTypeID.speed_cadence:
                 self.calculate_cadence(self.data)
         elif not self._is_active():
             return None  # if you did not receive data for the last 5s then it is out(unless Newdata is true)
 
-        if self._DEVICE_TYPE_ID == DeviceTypeID.speed:
+        if self._device_type == DeviceTypeID.speed:
             self._data = self._speed
             return {
                     "speed": self._data
                     }
-        elif self._DEVICE_TYPE_ID == DeviceTypeID.speed_cadence:
+        elif self._device_type == DeviceTypeID.speed_cadence:
             self._data = self._speed, self._cadence
             return {
                 "speed": self._data[0],
@@ -123,116 +123,6 @@ class Hall(AntDevice):
         return None
 
     # NOTE: metodi propri della classe
-
-    # def signal(self, value: str):
-    #     if value == "reset":
-    #         self.reset_distance()
-
-    # def update_settings(self, settings: Settings):
-    #     with self._settings_lock:
-    #         self._settings = settings
-
-    # def export(self):
-    #     return {"speed": round(self.speed, 2), "distance": round(self.distance, 2)}
-
-    # TODO: DEPRECATE
-    #    def _run(self):
-    #        self._state = True
-    #        while True:
-    #            with self._settings_lock:
-    #                if self.newData:
-    #                    self.count2 += 1
-    #                    # t1 = time.time()
-    #                    self.newData = False
-    #                    # print('>>> dentro __run')
-    #                    self.calculate_speed(self.data)
-    #                self.distance_trap = self.settings.run_length +\
-    #                    self.settings.trap_length - self.distance
-    #                if self.distance > self.settings.run_length and self.distance_trap >= 0:
-    #                    self.average_array.append(self.speed)
-    #                if self.trap_count == 0:
-    #                    self._send_message(Message(self.trap_info, MexPriority.medium, MexType.trap, 1, 1))
-    #                self.trap_count = (self.trap_count + 1) % 10
-    #            time.sleep(0.1)
-
-    #def running(self):
-    #    self._state = True
-
-    #    if self.newData:
-    #        self.count2 += 1
-    #        # t1 = time.time()
-    #        self.newData = False
-    #        # print('>>> dentro __run')
-    #        self.calculate_speed(self.data)
-
-    #    # TODO: il calcolo della distanza dalla trappolla va fatto direttamente
-    #    #       nel modulo `video` tramite il dato della distanza percorsa
-    #    # self.distance_trap = (
-    #    #     self.settings.run_length + self.settings.trap_length - self.distance
-    #    # )
-
-    #    if self.distance > self.settings.run_length and self.distance_trap >= 0:
-    #        self.average_array.append(self.speed)
-
-    #    # if self.trap_count == 0:
-    #    #     self._send_message(
-    #    #         Message(self.trap_info, MexPriority.medium, MexType.trap, 1, 1)
-    #    #     )
-
-    #    # self.trap_count = (self.trap_count + 1) % 10
-
-    @property
-    def speed(self):
-        if (self._current_time() - self.last_speed_measure_time) > 5:
-            self._speed = 0
-        return self._speed
-
-    @property
-    def settings(self):
-        return self._settings
-
-    @settings.setter
-    def settings(self, s):
-        self._settings = s
-
-    @property
-    def time_int(self) -> int:
-        return self.__time_int
-
-    @time_int.setter
-    def time_int(self, time_int: int):
-        self.__time_int = time_int
-
-    # TODO: DEPRECATE
-    def set_channel(self, channel_cad_vel: Channel):
-        """
-        Function used to set the channel velocity and cadence
-
-        :param channel_cad_vel = chanel for velocity and cadence
-        """
-
-        channel_cad_vel.on_broadcast_data = self.on_data_cadence_speed
-        channel_cad_vel.on_burst_data = self.on_data_cadence_speed
-        channel_cad_vel.set_period(8086)
-        # 240 seconds to get the signal from the sensor
-        channel_cad_vel.set_search_timeout(255)
-        channel_cad_vel.set_rf_freq(57)
-
-        # 121 -> DEVICE ID of VEL/CADsensor
-        # Taurus id -> 8142
-
-        #        with self._settings_lock:
-        #            speed_sensor_id = self._settings.speed_sensor_id
-
-        speed_sensor_id = self._settings.speed_sensor_id
-        channel_cad_vel.set_id(speed_sensor_id, 121, 0)
-
-    # TODO: DEPRECATE
-    def on_data_cadence_speed(self, data):
-        # print('>>> new speed')
-        self.data = data
-        self.newData = True
-        self.count += 1
 
     def calculate_cadence(self, data):
         """
@@ -285,20 +175,26 @@ class Hall(AntDevice):
         if revolutions < self.last_wheel_revolutions:
             revolutions += 65535
 
-        self.distance += self._settings.circumference * (revolutions - self.last_wheel_revolutions) / 1000
+        # NOTE: per adesso circonferenza hardcoded (sigh)
+        circumference = 1.450
+
+        # NOTE: per adesso niente distanza (sigh)
+
+        # self.distance += circumference * (revolutions - self.last_wheel_revolutions) / 1000
 
         # whe must do the check as soon as possible
-        if self.distance > self.settings.run_length and self.distance_trap >= 0:
-            self.average_array.append(self.speed)
+        # if self.distance > self.settings.run_length and self.distance_trap >= 0:
+        #     self.average_array.append(self.speed)
 
 
+        # TODO: indagare velocità scalata di 1000
         self._speed = (
             3.6
             * (revolutions - self.last_wheel_revolutions)
             * 1.024
-            * self._settings.circumference
+            * circumference
             / (event_time - self.last_event_time)
-        )
+        )*1000
 
     def calc_cadence_from_revolutions(self, event_time, revolutions):
         if self.last_event_time == -1:
