@@ -1,17 +1,16 @@
-import time
 from core.message import Message, MexType, MexPriority
+from core import time
 from collections import deque
-
 from .reader import AntReader, Node, Channel
-
-# CIRCUMFERENCE = 1.450
 from .settings import Settings
 
 from enum import Enum
 
+
 class HallType(Enum):
     speed = 123
     speed_cadence = 121
+
 
 class Hall(AntReader):
     def __init__(self, node: Node, sensor_id: int, device_type=HallType.speed):
@@ -20,18 +19,22 @@ class Hall(AntReader):
         self._DEVICE_TYPE_ID = device_type.value
 
         self._speed = 0.0
+        self._cadence = 0.0
         self.__time_int = 0
+        self._settings = Settings()
+
         # self._send_message = send_message
-        # self._settings = settings
         # self._settings_lock = threading.Lock()
         self._state = False
 
         self.count = 0
         self.count2 = 0
         self.trap_count = 0
-        self.lastTime = -1
-        self.lastRevolutions = -1
-        self.lastRxTime = time.time()
+        self.last_wheel_revolutions = -1
+        self.last_pedal_revolutions = -1
+        self.last_event_time = -1  # TIME of the last occurrence of an event registered by sensor
+        self.last_speed_measure_time = self._current_time()  # TIME of last registration of speed
+        self.last_data_read = None
         self.distance = 0
         self.data = None
         self.newData = False
@@ -55,8 +58,11 @@ class Hall(AntReader):
 
         if self._DEVICE_TYPE_ID == HallType.speed:
             self._channel.set_period(8118)
-        else:
+        elif self._DEVICE_TYPE_ID == HallType.speed_cadence:
             self._channel.set_period(8086)
+        else:
+            raise ValueError("The Type of the device doesn't match the supported ones (123, 121)")
+
 
         self._channel.set_search_timeout(255)
         self._channel.set_rf_freq(57)
@@ -71,29 +77,53 @@ class Hall(AntReader):
         self._channel.open()
 
     def _receive_new_data(self, data):
+        # Function used to signal the receiving of new data
         self.data = data
         self.newData = True
         self.count += 1
+        self.last_data_read = self._current_time()
+
+    def _current_time(self):
+        return time._unix_time()
+
+    def _elapsed_time(self):
+        return self._current_time() - self.last_data_read
+
+    def _is_active(self):
+        # is false only when no data has been yet received or not for 5s
+        return self.last_data_read and self._elapsed_time() < 5
+
 
     def read_data(self) -> dict:
-        # TODO: se il sensore ritorna solo la velocità (HallType.speed)
-        #       il dizionario deve essere del tipo: {"speed": ...}
-        #       altrimenti {"speed": ..., "cadence": ...}
-
-        # TODO: ritornare `None` se il sensore non è attivo
-        #       guardare la funzione `_is_active di heartrate`
-
         self._state = True
 
+        # when new data is available, use it to calculate the speed
+        # the speed is calculated periodically in running
         if self.newData:
             self.count2 += 1
             # t1 = time.time()
             self.newData = False
             # print('>>> dentro __run')
             self.calculate_speed(self.data)
-            self._data = self._speed
+            if self._DEVICE_TYPE_ID == HallType.speed_cadence:
+                self.calculate_cadence(self.data)
+        elif not self._is_active():
+            return None  # if you did not receive data for the last 5s then it is out(unless Newdata is true)
 
-        return self._data
+        if self._DEVICE_TYPE_ID == HallType.speed:
+            self._data = self._speed
+            return {
+                    "speed": self._data
+                    }
+        elif self._DEVICE_TYPE_ID == HallType.speed_cadence:
+            self._data = self._speed, self._cadence
+            return {
+                "speed": self._data[0],
+                "cadence": self._data[1]
+            }
+
+        # if the sensor is not recognized then it returns None
+        return None
 
     # NOTE: metodi propri della classe
 
@@ -128,35 +158,35 @@ class Hall(AntReader):
     #                self.trap_count = (self.trap_count + 1) % 10
     #            time.sleep(0.1)
 
-    def running(self):
-        self._state = True
+    #def running(self):
+    #    self._state = True
 
-        if self.newData:
-            self.count2 += 1
-            # t1 = time.time()
-            self.newData = False
-            # print('>>> dentro __run')
-            self.calculate_speed(self.data)
+    #    if self.newData:
+    #        self.count2 += 1
+    #        # t1 = time.time()
+    #        self.newData = False
+    #        # print('>>> dentro __run')
+    #        self.calculate_speed(self.data)
 
-        # TODO: il calcolo della distanza dalla trappolla va fatto direttamente
-        #       nel modulo `video` tramite il dato della distanza percorsa
-        # self.distance_trap = (
-        #     self.settings.run_length + self.settings.trap_length - self.distance
-        # )
+    #    # TODO: il calcolo della distanza dalla trappolla va fatto direttamente
+    #    #       nel modulo `video` tramite il dato della distanza percorsa
+    #    # self.distance_trap = (
+    #    #     self.settings.run_length + self.settings.trap_length - self.distance
+    #    # )
 
-        if self.distance > self.settings.run_length and self.distance_trap >= 0:
-            self.average_array.append(self.speed)
+    #    if self.distance > self.settings.run_length and self.distance_trap >= 0:
+    #        self.average_array.append(self.speed)
 
-        # if self.trap_count == 0:
-        #     self._send_message(
-        #         Message(self.trap_info, MexPriority.medium, MexType.trap, 1, 1)
-        #     )
+    #    # if self.trap_count == 0:
+    #    #     self._send_message(
+    #    #         Message(self.trap_info, MexPriority.medium, MexType.trap, 1, 1)
+    #    #     )
 
-        # self.trap_count = (self.trap_count + 1) % 10
+    #    # self.trap_count = (self.trap_count + 1) % 10
 
     @property
     def speed(self):
-        if (time.time() - self.lastRxTime) > 5:
+        if (self._current_time() - self.last_speed_measure_time) > 5:
             self._speed = 0
         return self._speed
 
@@ -207,6 +237,23 @@ class Hall(AntReader):
         self.newData = True
         self.count += 1
 
+    def calculate_cadence(self, data):
+        """
+        Computes the cadence of the biker by calculating the number of rotations of the pedals.
+        :param data = the data array, used to calculate the speed of the bike
+        """
+        event_time = data[5] * 256 + data[4]
+
+        # hypothetical situation(not actually real)
+        if event_time == self.last_event_time:
+            return
+
+        revolutions_pedal = data[3] * 256 + data[2]
+
+        self.calc_cadence_from_revolutions(event_time, revolutions_pedal)
+        self.last_pedal_revolutions = revolutions_pedal
+
+
     def calculate_speed(self, data):
         """
         Computes the speed of the bike by calculating the number of rotations of the wheels.
@@ -218,40 +265,65 @@ class Hall(AntReader):
         #     return
         event_time = data[5] * 256 + data[4]
 
-        if event_time == self.lastTime:
+        # hypothetical situation(not actually real)
+        if event_time == self.last_event_time:
             return
 
-        revolutions = data[7] * 256 + data[6]
-        self.calc_speed(event_time, revolutions)
+        revolutions_wheel = data[7] * 256 + data[6]
+        self.calc_speed_form_revolutions(event_time, revolutions_wheel)
         # print ("Speed "+ self._speed)
-        self.lastRxTime = time.time()
-        self.lastTime = event_time
-        self.lastRevolutions = revolutions
+        self.last_speed_measure_time = self._current_time()
+        self.last_event_time = event_time
+        self.last_wheel_revolutions = revolutions_wheel
         self.count2 += 1
 
-    def calc_speed(self, event_time, revolutions):
+    def calc_speed_form_revolutions(self, event_time, revolutions):
         # print ("Calcolo vel")
-        if self.lastTime == -1:
+        if self.last_event_time == -1:
             return 0
-        if event_time < self.lastTime:
-            event_time += 64 * 1024
-        if revolutions < self.lastRevolutions:
+
+        # these checks manage sensor register overflow (16 bits = 65535 states)
+        if event_time < self.last_event_time:
+            event_time += 65536
+        if revolutions < self.last_wheel_revolutions:
             revolutions += 65535
 
-        # TODO: 2200 mm is the diameter of the wheel, retrive it from config
+        self.distance += self._settings.circumference * (revolutions - self.last_wheel_revolutions) / 1000
 
-        self.distance += 2200 * (revolutions - self.lastRevolutions) / 1000
+        # whe must do the check as soon as possible
+        if self.distance > self.settings.run_length and self.distance_trap >= 0:
+            self.average_array.append(self.speed)
+
 
         self._speed = (
             3.6
-            * (revolutions - self.lastRevolutions)
+            * (revolutions - self.last_wheel_revolutions)
             * 1.024
-            * 2200
-            / (event_time - self.lastTime)
+            * self._settings.circumference
+            / (event_time - self.last_event_time)
         )
 
+    def calc_cadence_from_revolutions(self, event_time, revolutions):
+        if self.last_event_time == -1:
+            return 0
+
+        # these checks manage sensor register overflow (16 bits = 65535 states)
+        if event_time < self.last_event_time:
+            event_time += 65536
+        if revolutions < self.last_wheel_revolutions:
+            revolutions += 65535
+
+        self._cadence = (
+            3.6
+            * (revolutions - self.last_wheel_revolutions)
+            * 1.024
+            * 350  # self._settings.pedal_circumference. Now I have considered 175mm pedal length
+            / (event_time - self.last_event_time)
+        )
+
+
     def get(self):
-        if (time.time() - self.lastRxTime) > 5:
+        if (self._current_time() - self.last_speed_measure_time) > 5:
             self._speed = 0
         return str(round(self._speed, 1))
 
