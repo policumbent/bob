@@ -2,7 +2,7 @@ import time
 
 from collections import deque
 
-from .reader import AntReader
+from .device import AntDevice, DeviceTypeID
 from .ant.easy.channel import Channel
 
 # from core.message import Message, MexType, MexPriority
@@ -15,11 +15,11 @@ from .ant.easy.channel import Channel
 from .settings import Settings
 
 
-class Powermeter(AntReader):
-    _DEVICE_TYPE_ID = 11
+class Powermeter(AntDevice):
+    def __init__(self, node, sensor_id=0, device_type=DeviceTypeID.powermeter):
+        super().__init__(node, sensor_id)
 
-    def __init__(self, node, id):
-        super().__init__(node, id)
+        self._device_type_id = device_type.value
 
         # lunghezza_vettore_media = settings.average_power_time * 4
         # lunghezza_vettore_media_1s = 4
@@ -79,7 +79,7 @@ class Powermeter(AntReader):
 
         # 11 -> DEVICE ID DEL MISURATORE || 30636 -> id misuratore taurus
         # powermeter_id = self._settings.power_sensor_id
-        self._channel.set_id(self._sensor_id, self._DEVICE_TYPE_ID, 0)
+        self._channel.set_id(self._sensor_id, self._device_type_id, 0)
 
         # open channel
         self._channel.open()

@@ -1,20 +1,21 @@
-from .reader import AntReader, Node
+from .device import AntDevice, DeviceTypeID, Node
 
 from core import time
 
 
-class HeartRate(AntReader):
-    _DEVICE_TYPE_ID = 120
-
-    def __init__(self, node: Node, sensor_id: int):
+class HeartRate(AntDevice):
+    def __init__(
+        self, node: Node, sensor_id = 0, device_type=DeviceTypeID.heartrate
+    ):
         super().__init__(node, sensor_id)
 
+        self._device_type_id = device_type.value
         self._last_data_time = None
 
         # inizializzazione del channel ant
         self._init_channel()
 
-    # NOTE: specializzazione metodi astratti di `AntReader`
+    # NOTE: specializzazione metodi astratti di `AntDevice`
 
     def _init_channel(self):
         if self._channel is None:
@@ -32,7 +33,7 @@ class HeartRate(AntReader):
         # 120 -> DEVICE ID DEL SENSORE DELLA FC
 
         # hr_sensor_id = self._settings.hr_sensor_id
-        self._channel.set_id(self._sensor_id, self._DEVICE_TYPE_ID, 0)
+        self._channel.set_id(self._sensor_id, self._device_type_id, 0)
 
         # open channel
         self._channel.open()

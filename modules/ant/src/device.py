@@ -1,12 +1,21 @@
 from abc import ABC, abstractmethod
+from enum import Enum
 
 from .ant.easy.channel import Channel
 from .ant.easy.node import Node
 
+
 _DEFAULT_CHANNEL_TYPE = Channel.Type.BIDIRECTIONAL_RECEIVE
 
 
-class AntReader(ABC):
+class DeviceTypeID(Enum):
+    powermeter = 11
+    heartrate = 120
+    speed = 123
+    speed_cadence = 121
+
+
+class AntDevice(ABC):
     NETWORK_KEY = [0xB9, 0xA5, 0x21, 0xFB, 0xBD, 0x72, 0xC3, 0x45]
 
     def __init__(self, node: Node, sensor_id=None, channel_type=None) -> None:

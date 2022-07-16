@@ -1,22 +1,18 @@
 from core.message import Message, MexType, MexPriority
 from core import time
 from collections import deque
-from .reader import AntReader, Node, Channel
+
+from .device import AntDevice, DeviceTypeID, Node, Channel
+
+# CIRCUMFERENCE = 1.450
 from .settings import Settings
 
-from enum import Enum
 
-
-class HallType(Enum):
-    speed = 123
-    speed_cadence = 121
-
-
-class Hall(AntReader):
-    def __init__(self, node: Node, sensor_id: int, device_type=HallType.speed):
+class Hall(AntDevice):
+    def __init__(self, node: Node, sensor_id=0, device_type=DeviceTypeID.speed):
         super().__init__(node, sensor_id)
 
-        self._DEVICE_TYPE_ID = device_type.value
+        self._device_type = device_type.value
 
         self._speed = 0.0
         self._cadence = 0.0
@@ -24,6 +20,7 @@ class Hall(AntReader):
         self._settings = Settings()
 
         # self._send_message = send_message
+        # self._settings = settings
         # self._settings_lock = threading.Lock()
         self._state = False
 
@@ -56,9 +53,9 @@ class Hall(AntReader):
         self._channel.on_broadcast_data = self._receive_new_data
         self._channel.on_burst_data = self._receive_new_data
 
-        if self._DEVICE_TYPE_ID == HallType.speed:
+        if self._device_type == DeviceTypeID.speed:
             self._channel.set_period(8118)
-        elif self._DEVICE_TYPE_ID == HallType.speed_cadence:
+        elif self._DEVICE_TYPE_ID == DeviceTypeID.speed_cadence:
             self._channel.set_period(8086)
         else:
             raise ValueError("The Type of the device doesn't match the supported ones (123, 121)")
@@ -71,7 +68,7 @@ class Hall(AntReader):
         # Taurus id -> 8142
 
         # speed_sensor_id = self._settings.speed_sensor_id
-        self._channel.set_id(self._sensor_id, self._DEVICE_TYPE_ID, 0)
+        self._channel.set_id(self._sensor_id, self._device_type, 0)
 
         # open channel
         self._channel.open()
@@ -105,17 +102,17 @@ class Hall(AntReader):
             self.newData = False
             # print('>>> dentro __run')
             self.calculate_speed(self.data)
-            if self._DEVICE_TYPE_ID == HallType.speed_cadence:
+            if self._DEVICE_TYPE_ID == DeviceTypeID.speed_cadence:
                 self.calculate_cadence(self.data)
         elif not self._is_active():
             return None  # if you did not receive data for the last 5s then it is out(unless Newdata is true)
 
-        if self._DEVICE_TYPE_ID == HallType.speed:
+        if self._DEVICE_TYPE_ID == DeviceTypeID.speed:
             self._data = self._speed
             return {
                     "speed": self._data
                     }
-        elif self._DEVICE_TYPE_ID == HallType.speed_cadence:
+        elif self._DEVICE_TYPE_ID == DeviceTypeID.speed_cadence:
             self._data = self._speed, self._cadence
             return {
                 "speed": self._data[0],
