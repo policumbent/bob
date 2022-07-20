@@ -60,7 +60,14 @@ class OverlayElement:
 class Camera(PiCamera):
     FONT_PATH = "assets/Inconsolata.ttf"
 
-    def __init__(self, screen_dim=(1024, 760), sectors=(5, 4), rotation=180, framerate=40):
+    def __init__(
+        self,
+        screen_dim=(1024, 760),
+        sectors=(5, 4),
+        framerate=40,
+        video_rotation=0,
+        overlay_rotation=0,
+    ):
         super().__init__()
 
         self._overlay = None
@@ -81,19 +88,21 @@ class Camera(PiCamera):
             self._screen_dim_y // self._sectors_y - 30,
         )
 
-        self._set_parameters(rotation, framerate)
-
-    def _set_parameters(self, rotation, framerate):
         # video parameters based on bike's lcd screen
-        self.resolution = (self._screen_dim_x, self._screen_dim_y)
         self.framerate = framerate
-        self.rotation = rotation
+        self.rotation = video_rotation
+        self.overlay_rotation = overlay_rotation
+        self.resolution = (self._screen_dim_x, self._screen_dim_y)
 
         self.video_stabilization = True
 
     def _new_overlay(self):
         self._overlay = self.add_overlay(
-            self._img.tobytes(), format="rgba", layer=3, alpha=100
+            self._img.tobytes(),
+            format="rgba",
+            layer=3,
+            alpha=100,
+            rotation=self.overlay_rotation,
         )
 
     def _new_frame(self):
