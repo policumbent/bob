@@ -1,18 +1,14 @@
 version: '3'
 
 services:
-
-  mqtt-broker:
-    image: eclipse-mosquitto:1.6.14
-    container_name: mqtt-broker
-    environment:
-      - TZ=Europe/Rome
-    networks:
-      - poli
+  mosquitto:
+    image: eclipse-mosquitto
+    network_mode: host
+    container_name: mosquitto
+    volumes:
+      - ./mosquitto:/mosquitto
+    # environment:
+    #   - TZ=Europe/Rome
     ports:
       - 1883:1883
     restart: always
-
-networks:
-  poli:
-    external: false
