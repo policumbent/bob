@@ -33,42 +33,40 @@ async def mqtt():
 
 async def main():
     node = None
+
     while not node:
         try:
-            node = Node()
+            node = Node(0x00, AntDevice.NETWORK_KEY)
         except DriverNotFound:
             core.log.err("USB not connected")
             await asyncio.sleep(1)
 
     core.log.info("Init ant node")
 
-    # TODO: vedere se si può usare la `with` con Node
+    # 'with' statement can be used in the same thread on which the instance of the class was instantiated
     # ant Node
-    node.set_network_key(0x00, AntDevice.NETWORK_KEY)
 
-    # TODO: ricavare gli id dal database di configurazione
+    with node:
+        # TODO: ricavare gli id dal database di configurazione
 
-    # hall phoenix
-    hall = Hall(node, sensor_id=1, device_type=DeviceTypeID.speed)
-    # hall torella
-    # hall = Hall(node, sensor_id=13583, device_type=DeviceTypeID.speed_cadence)
+        # hall phoenix
+        hall = Hall(node, sensor_id=1, device_type=DeviceTypeID.speed)
+        # hall torella
+        # hall = Hall(node, sensor_id=13583, device_type=DeviceTypeID.speed_cadence)
 
-    # hr = HeartRate(node)
-    # pm = Powermeter(node)
+        hr = HeartRate(node, sensor_id=2, device_type=DeviceTypeID.heartrate)   # Todo: check id
+        pm = Powermeter(node, sensor_id=3, device_type=DeviceTypeID.heartrate)  # Todo: check id
 
-    # start ant loop and data read
-    threading.Thread(target=node.start, name="ant.easy").start()
+        # start ant loop and data read
+        threading.Thread(target=node.start, name="ant.easy").start()
 
-    # release async tasks
-    await asyncio.gather(
-        read_data(hall),
-        # read_data(hr),
-        # read_data(pm),
-        mqtt(),
-    )
-
-    # close on exit
-    node.stop()
+        # release async tasks
+        await asyncio.gather(
+            read_data(hall),
+            read_data(hr),
+            read_data(pm),
+            mqtt(),
+        )
 
 
 def entry_point():

@@ -20,7 +20,7 @@ _logger = logging.getLogger("ant.easy.node")
 
 
 class Node:
-    def __init__(self):
+    def __init__(self, network=None, key=None):
 
         self._responses_cond = threading.Condition()
         self._responses = collections.deque()
@@ -28,6 +28,9 @@ class Node:
         self._events = collections.deque()
 
         self._datas = queue.Queue()
+
+        self._network = network
+        self._key = key
 
         self.channels = {}
 
@@ -37,6 +40,21 @@ class Node:
 
         self._worker_thread = threading.Thread(target=self._worker, name="ant.easy")
         self._worker_thread.start()
+
+
+    def __enter__(self):
+        if self._network and self._key:
+            self.set_network_key(self._network, self._key)
+            return self
+        else:
+            raise KeyError(f"Invalid argument type. Key({self._key}) or network({self._network}) not initialized")
+
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        # In this block of code no exception handling is performed so the exceptions are propagated
+        if exc_type:
+            print(f"Exception occurred of type {exc_type}: {exc_val}, {exc_tb}")
+        self.stop()
 
     def new_channel(self, ctype, network_number=0x00):
         size = len(self.channels)

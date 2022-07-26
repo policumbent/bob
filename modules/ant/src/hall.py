@@ -32,7 +32,7 @@ class Hall(AntDevice):
         self.last_event_time = -1  # TIME of the last occurrence of an event registered by sensor
         self.last_speed_measure_time = self._current_time()  # TIME of last registration of speed
         self.last_data_read = None
-        self.distance = 0
+        self._distance = 0
         self.data = None
         self.newData = False
         self.distance_to_go = 0
@@ -80,6 +80,7 @@ class Hall(AntDevice):
         self.count += 1
         self.last_data_read = self._current_time()
 
+
     def _current_time(self):
         return time._unix_time()
 
@@ -96,52 +97,68 @@ class Hall(AntDevice):
 
         # when new data is available, use it to calculate the speed
         # the speed is calculated periodically in running
+
+        if not self._is_active():
+            return None
+
         if self.newData:
-            self.count2 += 1
-            # t1 = time.time()
             self.newData = False
-            # print('>>> dentro __run')
-            self.calculate_speed(self.data)
-            if self._device_type == DeviceTypeID.speed_cadence:
-                self.calculate_cadence(self.data)
-        elif not self._is_active():
-            return None  # if you did not receive data for the last 5s then it is out(unless Newdata is true)
+            self.count2 += 1
+            speed, distance = self._calculate_speed_distance()
+        else:
+            # it is useless to recompute them
+            speed, distance = self._speed, self._distance
 
         if self._device_type == DeviceTypeID.speed:
-            self._data = self._speed
             return {
-                    "speed": self._data
-                    }
+                "speed": speed,
+                "distance": distance
+            }
         elif self._device_type == DeviceTypeID.speed_cadence:
-            self._data = self._speed, self._cadence
+
+            if self.newData:
+                cadence = self._calculate_cadence()
+            else:
+                cadence = self._cadence
+
             return {
-                "speed": self._data[0],
-                "cadence": self._data[1]
+                "speed": speed,
+                "cadence": cadence,
+                "distance": distance
             }
 
         # if the sensor is not recognized then it returns None
         return None
 
+
+        # if self.newData:
+        #     self.count2 += 1
+        #     # t1 = time.time()
+        #     self.newData = False
+        #     # print('>>> dentro __run')
+        #     speed = self._calculate_speed()
+        #     if self._device_type == DeviceTypeID.speed_cadence:
+        #         cadence = self._calculate_cadence()
+#
+        # if self._device_type == DeviceTypeID.speed:
+        #     self._data = self._speed
+        #     return {
+        #             "speed": self._data
+        #             }
+        # elif self._device_type == DeviceTypeID.speed_cadence:
+        #     self._data = self._speed, self._cadence
+        #     return {
+        #         "speed": self._data[0],
+        #         "cadence": self._data[1]
+        #     }
+
+        # # if the sensor is not recognized then it returns None
+        # return None
+
     # NOTE: metodi propri della classe
 
-    def calculate_cadence(self, data):
-        """
-        Computes the cadence of the biker by calculating the number of rotations of the pedals.
-        :param data = the data array, used to calculate the speed of the bike
-        """
-        event_time = data[5] * 256 + data[4]
 
-        # hypothetical situation(not actually real)
-        if event_time == self.last_event_time:
-            return
-
-        revolutions_pedal = data[3] * 256 + data[2]
-
-        self.calc_cadence_from_revolutions(event_time, revolutions_pedal)
-        self.last_pedal_revolutions = revolutions_pedal
-
-
-    def calculate_speed(self, data):
+    def _calculate_speed_distance(self):
         """
         Computes the speed of the bike by calculating the number of rotations of the wheels.
         :param data = the data array, used to calculate the speed of the bike
@@ -150,21 +167,24 @@ class Hall(AntDevice):
         # if (data[0] == 5):
         #     print ("data[0] == 5")
         #     return
-        event_time = data[5] * 256 + data[4]
+        event_time = self.data[5] * 256 + self.data[4]
 
         # hypothetical situation(not actually real)
         if event_time == self.last_event_time:
             return
 
-        revolutions_wheel = data[7] * 256 + data[6]
-        self.calc_speed_form_revolutions(event_time, revolutions_wheel)
+        revolutions_wheel = self.data[7] * 256 + self.data[6]
+        speed = self._calc_speed_form_revolutions(event_time, revolutions_wheel)
         # print ("Speed "+ self._speed)
         self.last_speed_measure_time = self._current_time()
         self.last_event_time = event_time
         self.last_wheel_revolutions = revolutions_wheel
         self.count2 += 1
 
-    def calc_speed_form_revolutions(self, event_time, revolutions):
+        return speed
+
+
+    def _calc_speed_form_revolutions(self, event_time, revolutions):
         # print ("Calcolo vel")
         if self.last_event_time == -1:
             return 0
@@ -178,14 +198,13 @@ class Hall(AntDevice):
         # NOTE: per adesso circonferenza hardcoded (sigh)
         circumference = 1450
 
-        # NOTE: per adesso niente distanza (sigh)
-
-        # self.distance += circumference * (revolutions - self.last_wheel_revolutions) / 1000
+        self._distance += circumference * (revolutions - self.last_wheel_revolutions) / 1000
 
         # whe must do the check as soon as possible
         # if self.distance > self.settings.run_length and self.distance_trap >= 0:
         #     self.average_array.append(self.speed)
 
+        # the interval variables are maintained for calculation purposes
         self._speed = (
             3.6
             * (revolutions - self.last_wheel_revolutions)
@@ -194,7 +213,28 @@ class Hall(AntDevice):
             / (event_time - self.last_event_time)
         )
 
-    def calc_cadence_from_revolutions(self, event_time, revolutions):
+        return self._speed, self._distance
+
+    def _calculate_cadence(self):
+        """
+        Computes the cadence of the biker by calculating the number of rotations of the pedals.
+        :param data = the data array, used to calculate the speed of the bike
+        """
+        event_time = self.data[5] * 256 + self.data[4]
+
+        # hypothetical situation(not actually real)
+        if event_time == self.last_event_time:
+            return
+
+        revolutions_pedal = self.data[3] * 256 + self.data[2]
+
+        cadence = self._calc_cadence_from_revolutions(event_time, revolutions_pedal)
+        self.last_pedal_revolutions = revolutions_pedal
+
+        return cadence
+
+
+    def _calc_cadence_from_revolutions(self, event_time, revolutions):
         if self.last_event_time == -1:
             return 0
 
@@ -204,6 +244,7 @@ class Hall(AntDevice):
         if revolutions < self.last_wheel_revolutions:
             revolutions += 65535
 
+        # the interval variables are maintained for calculation purposes
         self._cadence = (
             3.6
             * (revolutions - self.last_wheel_revolutions)
@@ -212,6 +253,8 @@ class Hall(AntDevice):
             / (event_time - self.last_event_time)
         )
 
+        return self._cadence
+
 
     def get(self):
         if (self._current_time() - self.last_speed_measure_time) > 5:
@@ -219,10 +262,10 @@ class Hall(AntDevice):
         return str(round(self._speed, 1))
 
     def get_distance(self):
-        return str(round(self.distance / 1000, 2))
+        return str(round(self._distance / 1000, 2))
 
     def set_distance(self, distance):
-        self.distance = distance
+        self._distance = distance
 
     def get_count(self):
         return self.count
@@ -231,7 +274,7 @@ class Hall(AntDevice):
         return str(self.count)
 
     def reset_distance(self):
-        self.distance = 0
+        self._distance = 0
         self.average_array.clear()
         self.trap_speed = 0
 
@@ -250,14 +293,14 @@ class Hall(AntDevice):
         if self.settings.hour_record:
             if self.time_int == 0:
                 return ""
-            return "V_med: " + str(3.6 * self.distance / self.time_int)
-        if self.distance < self.settings.run_length:
+            return "V_med: " + str(3.6 * self._distance / self.time_int)
+        if self._distance < self.settings.run_length:
             return (
                 "Trappola tra "
-                + str(round(self.settings.run_length - self.distance))
+                + str(round(self.settings.run_length - self._distance))
                 + " metri"
             )
-        elif self.distance > self.settings.run_length and self.distance_trap >= 0:
+        elif self._distance > self.settings.run_length and self.distance_trap >= 0:
             return "Fine trappola tra " + str(round(self.distance_trap)) + " metri"
         else:
             return "Velocità media trappola: " + str(self.get_trap_speed())

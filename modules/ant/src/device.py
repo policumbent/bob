@@ -24,7 +24,7 @@ class AntDevice(ABC):
         self._sensor_id = sensor_id
 
         # sensor data
-        self._data = None
+        self._heartrate = None
 
         if channel_type:
             self._channel = self._create_channel(channel_type)

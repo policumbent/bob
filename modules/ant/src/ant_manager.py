@@ -1,6 +1,5 @@
 # NOTE: THIS MUST BE DELETED
 
-
 import sys
 from .ant.easy.channel import Channel
 from .ant.easy.node import Node
