@@ -60,18 +60,18 @@ class Ant:
             self._worker_thread.join()
 
     def _on_broadcast(self, message):
-        self._events.put(('event', (message._heartrate[0],
-                                    Message.Code.EVENT_RX_BROADCAST, message._heartrate[1:])))
+        self._events.put(('event', (message._data[0],
+                                    Message.Code.EVENT_RX_BROADCAST, message._data[1:])))
 
     def _on_acknowledge(self, message):
-        self._events.put(('event', (message._heartrate[0],
-                                    Message.Code.EVENT_RX_ACKNOWLEDGED, message._heartrate[1:])))
+        self._events.put(('event', (message._data[0],
+                                    Message.Code.EVENT_RX_ACKNOWLEDGED, message._data[1:])))
 
     def _on_burst_data(self, message):
 
-        sequence = message._heartrate[0] >> 5
-        channel = message._heartrate[0] & 0b00011111
-        data = message._heartrate[1:]
+        sequence = message._data[0] >> 5
+        channel = message._data[0] & 0b00011111
+        data = message._data[1:]
 
         # First sequence
         if sequence == 0:
@@ -101,13 +101,13 @@ class Ant:
                 # Only do callbacks for new data. Resent data only indicates
                 # a new channel timeslot.
                 if not (message._id == Message.ID.BROADCAST_DATA
-                        and message._heartrate == self._last_data):
+                        and message._data == self._last_data):
 
                     # Notifications
                     if message._id in [Message.ID.STARTUP_MESSAGE,
                                        Message.ID.SERIAL_ERROR_MESSAGE]:
                         self._events.put(('response', (None, message._id,
-                                                       message._heartrate)))
+                                                       message._data)))
 
                     # #TODO_ fare qualcosa
                     # elif message._id == Message.ID.EVENT_CHANNEL_CLOSED:
@@ -117,17 +117,17 @@ class Ant:
                                          Message.ID.RESPONSE_CAPABILITIES,
                                          Message.ID.RESPONSE_SERIAL_NUMBER]:
                         self._events.put(('response', (None, message._id,
-                                                       message._heartrate)))
+                                                       message._data)))
                     # Response (channel)
                     elif message._id in [Message.ID.RESPONSE_CHANNEL_STATUS,
                                          Message.ID.RESPONSE_CHANNEL_ID]:
-                        self._events.put(('response', (message._heartrate[0],
-                                                       message._id, message._heartrate[1:])))
+                        self._events.put(('response', (message._data[0],
+                                                       message._id, message._data[1:])))
                     # Response (other)
                     elif (message._id == Message.ID.RESPONSE_CHANNEL
-                          and message._heartrate[1] != 0x01):
-                        self._events.put(('response', (message._heartrate[0],
-                                                       message._heartrate[1], message._heartrate[2:])))
+                          and message._data[1] != 0x01):
+                        self._events.put(('response', (message._data[0],
+                                                       message._data[1], message._data[2:])))
                     # Channel event
                     elif message._id == Message.ID.BROADCAST_DATA:
                         self._on_broadcast(message)
@@ -137,8 +137,8 @@ class Ant:
                         self._on_burst_data(message)
                     elif message._id == Message.ID.RESPONSE_CHANNEL:
                         _logger.debug("Got channel event, %r", message)
-                        self._events.put(('event', (message._heartrate[0],
-                                                    message._heartrate[1], message._heartrate[2:])))
+                        self._events.put(('event', (message._data[0],
+                                                    message._data[1], message._data[2:])))
                     else:
                         _logger.warning("Got unknown message, %r", message)
                 else:
@@ -162,7 +162,7 @@ class Ant:
                 #             _logger.debug(" - no messages in queue")
                 #         self._message_queue_cond.release()
 
-                self._last_data = message._heartrate
+                self._last_data = message._data
 
             except usb.USBError as e:
                 _logger.warning("%s, %r", type(e), e.args)
