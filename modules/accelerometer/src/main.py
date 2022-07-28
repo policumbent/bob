@@ -2,14 +2,11 @@ import asyncio
 import collections
 import functools
 import operator
-
-import core
-
+import os 
 
 from .mpu6050 import mpu6050
 from datetime import datetime
-
-import csv
+from core import Database, log, time
 
 row = dict()
 fieldnames = ("acc_x", "acc_y", "acc_z", "gyr_x", "gyr_y", "gyr_z")
@@ -85,6 +82,8 @@ async def read_gyro(mpu, offset):
 
 # TODO: deprecated in favor of sqlite db
 async def write_csv():
+    import csv
+
     localtime = datetime.now().strftime("%H.%M.%S")
 
     curr_row = None
@@ -110,11 +109,22 @@ async def write_csv():
             await asyncio.sleep(0.1 / 1000)
 
 
-async def mqtt():
-    pass
-
 async def write_db():
-    pass
+    db_path = os.getenv("DATABASE_PATH") or "~/bob/database.db"
+
+    db = Database(table="accelerometer", path=db_path, max_pending=10_000)
+
+    curr_row = None
+
+    while True:
+        if row != curr_row:
+            row.update({"timestamp": time.human_timestamp()})
+            
+            db.insert_data(row)
+            
+            curr_row = dict(row)
+
+        await asyncio.sleep(0.1 / 1000)
 
 
 async def main():
@@ -122,7 +132,7 @@ async def main():
         try:
             mpu = mpu6050(0x68)
 
-            core.log.info("Init sensor")
+            log.info("Init sensor")
 
             mpu.set_accel_range(mpu.ACCEL_RANGE_2G)
             mpu.set_gyro_range(mpu.GYRO_RANGE_250DEG)
@@ -132,11 +142,11 @@ async def main():
             await asyncio.gather(
                 read_acc(mpu, off_acc),
                 read_gyro(mpu, off_gyr),
-                write_csv(),
-                mqtt(),
+                # write_csv(),
+                write_db()
             )
         except OSError:
-            core.log.err("Sensor not found")
+            log.err("Sensor not found")
             await asyncio.sleep(.5)
 
 

@@ -35,8 +35,6 @@ async def video():
 
 
 async def mqtt():
-    global data
-
     while True:
         try:
             data["power"] += 10
