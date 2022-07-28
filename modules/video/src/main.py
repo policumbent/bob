@@ -1,11 +1,13 @@
 import asyncio
+import os
 
 from asyncio import sleep
 from .camera import Camera, OverlayElement, CameraError
 from .colors import Colors
 
-from core import log, Mqtt
+from core import log, Mqtt, Database
 from core.mqtt import Message
+
 
 # global data storage
 data = dict()
@@ -17,13 +19,18 @@ sensors = ["ant/speed", "ant/cadence", "ant/power", "ant/heartrate", "gear"]
 async def video():
     # main loop of the camera logic
 
+    db_path = os.getenv("DATABASE_PATH") or "~/bob/database.db"
+    config = Database(path=db_path).config("video")
+    
     while True:
         try:
             with Camera() as vcam:
                 log.info("Camera is running")
 
-                vcam.with_grid()
-                vcam.with_zoom(0)
+                vcam.with_grid(config.get("grid") or False)
+                vcam.with_zoom(config.get("zoom") or 0)
+
+                # data overlay
                 vcam.with_overlay_data(data)
 
                 vcam.add_overlay_element(
@@ -70,7 +77,7 @@ async def mqtt():
 
 async def main():
     # release async tasks
-    await asyncio.gather(mqtt(), video())
+    await asyncio.gather(video(), mqtt())
 
 
 def entry_point():

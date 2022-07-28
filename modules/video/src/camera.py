@@ -256,10 +256,10 @@ class Camera(PiCamera):
         # sleep before reiterate
         await sleep(1 / update_rate)
 
-    def with_grid(self):
+    def with_grid(self, value=False):
         """Show the grid with the sectors"""
 
-        self._grid = True
+        self._grid = value
 
     def with_zoom(self, perc: int):
         """Zoom-in the camera, this is a digialt zoom, so it reduce the FOV and the quality of the image
