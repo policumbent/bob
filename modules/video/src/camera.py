@@ -43,7 +43,11 @@ class OverlayElement:
 
     @property
     def data(self):
-        if not self.DATA or not isinstance(self.DATA, dict):
+        if (
+            not self.DATA
+            or not isinstance(self.DATA, dict)
+            or not self._key_data in self.DATA.keys()
+        ):
             return None
 
         data = self.DATA[self._key_data]
@@ -118,6 +122,9 @@ class Camera(PiCamera):
         self._img = Image.fromarray(self._arr)
         self._draw = ImageDraw.Draw(self._img)
 
+        if not self._overlay:
+            self._new_overlay()
+
         if self._grid:
             self._write_grid()
 
@@ -189,9 +196,6 @@ class Camera(PiCamera):
         :param padding: relative padding inside the sector
         :param font: raw font paramenter
         """
-
-        if self._overlay is None:
-            self._new_overlay()
 
         if font is None:
             font = self._default_font
