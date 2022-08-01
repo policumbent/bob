@@ -1,7 +1,9 @@
 import asyncio
 import threading
+import logging
 
-import core
+from core import log
+
 
 from .ant.base.driver import DriverNotFound
 from .device import AntDevice, DeviceTypeID, Node
@@ -10,15 +12,16 @@ from .powermeter import Powermeter
 from .hall import Hall
 
 
+# disable all logging for the ant library
+logging.disable(logging.WARNING)
+
 # global data storage
 data = dict()
 
 
 async def read_data(sensor):
     while True:
-        s_data = sensor.read_data()
-        if s_data:
-            data.update(s_data)
+        data.update(sensor.read_data())
 
         await asyncio.sleep(0.1)
 
@@ -32,41 +35,37 @@ async def mqtt():
 
 
 async def main():
-    node = None
-
-    while not node:
+    while True:
         try:
-            node = Node(0x00, AntDevice.NETWORK_KEY)
+            with Node(0x00, AntDevice.NETWORK_KEY) as node:
+                # TODO: ricavare gli id dal database di configurazione
+
+                # hall phoenix
+                # hall = Hall(node, sensor_id=1, device_type=DeviceTypeID.speed)
+                # hall torella
+                hall = Hall(node, sensor_id=1, device_type=DeviceTypeID.speed_cadence)
+
+                # hr = HeartRate(
+                #     node, sensor_id=2, device_type=DeviceTypeID.heartrate
+                # )  # Todo: check id
+                # pm = Powermeter(
+                #     node, sensor_id=3, device_type=DeviceTypeID.heartrate
+                # )  # Todo: check id
+
+                # start ant loop and data read
+                threading.Thread(target=node.start, name="ant.easy").start()
+
+                # release async tasks
+                await asyncio.gather(
+                    read_data(hall),
+                    # read_data(hr),
+                    # read_data(pm),
+                    mqtt(),
+                )
         except DriverNotFound:
-            core.log.err("USB not connected")
+            log.err("USB not connected")
+        finally:
             await asyncio.sleep(1)
-
-    core.log.info("Init ant node")
-
-    # 'with' statement can be used in the same thread on which the instance of the class was instantiated
-    # ant Node
-
-    with node:
-        # TODO: ricavare gli id dal database di configurazione
-
-        # hall phoenix
-        hall = Hall(node, sensor_id=1, device_type=DeviceTypeID.speed)
-        # hall torella
-        # hall = Hall(node, sensor_id=13583, device_type=DeviceTypeID.speed_cadence)
-
-        hr = HeartRate(node, sensor_id=2, device_type=DeviceTypeID.heartrate)   # Todo: check id
-        pm = Powermeter(node, sensor_id=3, device_type=DeviceTypeID.heartrate)  # Todo: check id
-
-        # start ant loop and data read
-        threading.Thread(target=node.start, name="ant.easy").start()
-
-        # release async tasks
-        await asyncio.gather(
-            read_data(hall),
-            read_data(hr),
-            read_data(pm),
-            mqtt(),
-        )
 
 
 def entry_point():

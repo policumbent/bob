@@ -1,11 +1,6 @@
-from core.message import Message, MexType, MexPriority
 from core import time
-from collections import deque
 
-from .device import AntDevice, DeviceTypeID, Node, Channel
-
-# CIRCUMFERENCE = 1.450
-# from .settings import Settings
+from .device import AntDevice, DeviceTypeID, Node
 
 
 class Hall(AntDevice):
@@ -14,31 +9,35 @@ class Hall(AntDevice):
 
         self._device_type = device_type
 
-        self._speed = 0.0
-        self._cadence = 0.0
-        self.__time_int = 0
-        # self._settings = Settings()
+        self._payload = None
+        self._received_data = False
+        self._last_data_read = None
 
-        # self._send_message = send_message
-        # self._settings = settings
-        # self._settings_lock = threading.Lock()
-        self._state = False
+        # TODO: add correnct circumference
+        self._circumference = 1450
+        self._cadence_circumference = 350
 
-        self.count = 0
-        self.count2 = 0
-        self.trap_count = 0
-        self.last_wheel_revolutions = -1
-        self.last_pedal_revolutions = -1
-        self.last_event_time = -1  # TIME of the last occurrence of an event registered by sensor
-        self.last_speed_measure_time = self._current_time()  # TIME of last registration of speed
-        self.last_data_read = None
+        # data store
+        self._speed = 0
+        self._cadence = 0
         self._distance = 0
-        self.data = None
-        self.newData = False
-        self.distance_to_go = 0
-        self.distance_trap = 0
-        self.average_array = deque()
-        self.trap_speed = 0
+        self._overall_distance = 0
+
+        # dict for return data
+        self._data = {"speed": None, "distance": None, "cadence": None}
+
+        # attribute for data calculation
+        self._last_speed_event_time = None
+        self._current_speed_event_time = None
+
+        self._last_cadence_event_time = 0
+        self._current_cadence_event_time = 0
+
+        self._last_speed_revolutions = None
+        self._current_speed_revolutions = None
+
+        self._last_cadence_revolutions = None
+        self._current_cadence_revolutions = None
 
         # inizializzazione del channel ant
         self._init_channel()
@@ -58,77 +57,72 @@ class Hall(AntDevice):
         elif self._device_type == DeviceTypeID.speed_cadence:
             self._channel.set_period(8086)
         else:
-            raise ValueError("The Type of the device doesn't match the supported ones (123, 121)")
-
+            raise ValueError(
+                "The Type of the device doesn't match the supported ones (123, 121)"
+            )
 
         self._channel.set_search_timeout(255)
         self._channel.set_rf_freq(57)
-
-        # 121 -> DEVICE ID of VEL/CADsensor
-        # Taurus id -> 8142
-
-        # speed_sensor_id = self._settings.speed_sensor_id
         self._channel.set_id(self._sensor_id, self._device_type.value, 0)
 
         # open channel
         self._channel.open()
 
     def _receive_new_data(self, data):
-        # Function used to signal the receiving of new data
-        self.data = data
-        self.newData = True
-        self.count += 1
-        self.last_data_read = self._current_time()
+        # callback for ant data
+
+        self._payload = data
+        self._received_data = True
+        self._last_data_read = self._current_time()
 
 
     def _current_time(self):
         return time._unix_time()
 
     def _elapsed_time(self):
-        return self._current_time() - self.last_data_read
+        return self._current_time() - self._last_data_read
 
     def _is_active(self):
         # is false only when no data has been yet received or not for 5s
-        return self.last_data_read and self._elapsed_time() < 10
-
+        return self._last_data_read and self._elapsed_time() < 5
 
     def read_data(self) -> dict:
-        self._state = True
-
-        # when new data is available, use it to calculate the speed
-        # the speed is calculated periodically in running
-
         if not self._is_active():
-            return None
+            self._speed = 0
+            self._cadence = 0
+            self._distance = 0
+            self._overall_distance = 0
 
-        if self.newData:
-            self.newData = False
-            self.count2 += 1
-            speed, distance = self._calculate_speed_distance()
-        else:
-            # it is useless to recompute them
-            speed, distance = self._speed, self._distance
+        elif self._received_data:
+            self._received_data = False
 
-        if self._device_type == DeviceTypeID.speed:
-            return {
-                "speed": speed,
-                "distance": distance
-            }
-        elif self._device_type == DeviceTypeID.speed_cadence:
+            # freeze current reference
+            self._current_speed_event_time = self._get_speed_event_time()
+            self._current_speed_revolutions = self._get_speed_revolutions()
+            self._current_cadence_event_time = self._get_cadence_event_time()
+            self._current_cadence_revolutions = self._get_cadence_revolutions()
 
-            if self.newData:
-                cadence = self._calculate_cadence()
-            else:
-                cadence = self._cadence
+            self._speed = self.calculate_speed() or self._speed
+            self._cadence = self.calculate_cadence() or self._cadence
+            self._distance = self.calculate_distance() or 0
 
-            return {
-                "speed": speed,
-                "cadence": cadence,
-                "distance": distance
-            }
+            self._overall_distance = round(self._overall_distance + self._distance, 4)
 
-        # if the sensor is not recognized then it returns None
-        return None
+            # update last reference
+            self._last_speed_event_time = self._current_speed_event_time
+            self._last_speed_revolutions = self._current_speed_revolutions
+            self._last_cadence_event_time = self._current_cadence_event_time
+            self._last_cadence_revolutions = self._current_cadence_revolutions
+
+            # print(self._speed, self._overall_distance, self._cadence)
+
+        self._data = {
+            "speed": self._speed,
+            "distance": self._overall_distance,
+            "cadence": self._cadence,
+        }
+
+        return self._data
 
 
         # if self.newData:
@@ -157,150 +151,117 @@ class Hall(AntDevice):
 
     # NOTE: metodi propri della classe
 
+    def _get_cadence_event_time(self):
+        return self._payload[1] * 256 + self._payload[0]
 
-    def _calculate_speed_distance(self):
-        """
-        Computes the speed of the bike by calculating the number of rotations of the wheels.
-        :param data = the data array, used to calculate the speed of the bike
-        """
+    def _get_cadence_revolutions(self):
+        return self._payload[3] * 256 + self._payload[2]
 
-        # if (data[0] == 5):
-        #     print ("data[0] == 5")
-        #     return
-        event_time = self.data[5] * 256 + self.data[4]
+    def _get_speed_event_time(self):
+        return self._payload[5] * 256 + self._payload[4]
 
-        # hypothetical situation(not actually real)
-        if event_time == self.last_event_time:
-            return
+    def _get_speed_revolutions(self):
+        return self._payload[7] * 256 + self._payload[6]
 
-        revolutions_wheel = self.data[7] * 256 + self.data[6]
-        speed = self._calc_speed_form_revolutions(event_time, revolutions_wheel)
-        # print ("Speed "+ self._speed)
-        self.last_speed_measure_time = self._current_time()
-        self.last_event_time = event_time
-        self.last_wheel_revolutions = revolutions_wheel
-        self.count2 += 1
+    def _check_speed_register_overflow(self):
+        if self._current_speed_event_time < self._last_speed_event_time:
+            self._last_speed_event_time = self._current_speed_event_time
 
-        return speed
+        if self._current_speed_revolutions < self._last_speed_revolutions:
+            self._last_speed_revolutions = self._current_speed_revolutions
 
+    def _check_cadence_register_overflow(self):
+        if self._current_cadence_event_time < self._last_cadence_event_time:
+            self._last_cadence_event_time = self._current_cadence_event_time
 
-    def _calc_speed_form_revolutions(self, event_time, revolutions):
-        # print ("Calcolo vel")
-        if self.last_event_time == -1:
-            return 0
+        if self._current_cadence_revolutions < self._last_cadence_revolutions:
+            self._last_cadence_revolutions = self._current_cadence_revolutions
 
-        # these checks manage sensor register overflow (16 bits = 65535 states)
-        if event_time < self.last_event_time:
-            event_time += 65536
-        if revolutions < self.last_wheel_revolutions:
-            revolutions += 65535
+    def calculate_cadence(self):
+        if (
+            self._last_cadence_event_time is None
+            or self._last_cadence_revolutions is None
+        ):
+            return None
 
-        # NOTE: per adesso circonferenza hardcoded (sigh)
-        circumference = 1450
+        self._check_cadence_register_overflow()
 
-        self._distance += circumference * (revolutions - self.last_wheel_revolutions) / 1000
+        if self._current_cadence_event_time == self._last_cadence_event_time:
+            return None
 
-        # whe must do the check as soon as possible
-        # if self.distance > self.settings.run_length and self.distance_trap >= 0:
-        #     self.average_array.append(self.speed)
-
-        # the interval variables are maintained for calculation purposes
-        self._speed = (
-            3.6
-            * (revolutions - self.last_wheel_revolutions)
-            * 1.024
-            * circumference
-            / (event_time - self.last_event_time)
+        return round(
+            60
+            * (self._current_cadence_revolutions - self._last_cadence_revolutions)
+            * 1024
+            / (self._current_cadence_event_time - self._last_cadence_event_time),
+            4,
         )
 
-        return self._speed, self._distance
+        # TODO: check this formula
+        # return round(
+        #     3.6
+        #     * (self._current_cadence_revolutions - self._last_cadence_revolutions)
+        #     * 1.024
+        #     * self._cadence_circumference
+        #     / (self._current_cadence_event_time - self._last_cadence_event_time),
+        #     4,
+        # )
 
-    def _calculate_cadence(self):
-        """
-        Computes the cadence of the biker by calculating the number of rotations of the pedals.
-        :param data = the data array, used to calculate the speed of the bike
-        """
-        event_time = self.data[5] * 256 + self.data[4]
+    def calculate_speed(self):
+        if self._last_speed_event_time is None or self._last_speed_revolutions is None:
+            return None
 
-        # hypothetical situation(not actually real)
-        if event_time == self.last_event_time:
-            return
+        self._check_speed_register_overflow()
 
-        revolutions_pedal = self.data[3] * 256 + self.data[2]
+        if self._current_speed_event_time == self._last_speed_event_time:
+            return None
 
-        cadence = self._calc_cadence_from_revolutions(event_time, revolutions_pedal)
-        self.last_pedal_revolutions = revolutions_pedal
-
-        return cadence
-
-
-    def _calc_cadence_from_revolutions(self, event_time, revolutions):
-        if self.last_event_time == -1:
-            return 0
-
-        # these checks manage sensor register overflow (16 bits = 65535 states)
-        if event_time < self.last_event_time:
-            event_time += 65536
-        if revolutions < self.last_wheel_revolutions:
-            revolutions += 65535
-
-        # the interval variables are maintained for calculation purposes
-        self._cadence = (
+        return round(
             3.6
-            * (revolutions - self.last_wheel_revolutions)
+            * (self._current_speed_revolutions - self._last_speed_revolutions)
             * 1.024
-            * 350  # self._settings.pedal_circumference. Now I have considered 175mm pedal length
-            / (event_time - self.last_event_time)
+            * self._circumference
+            / (self._current_speed_event_time - self._last_speed_event_time),
+            4,
         )
 
-        return self._cadence
+    def calculate_distance(self):
+        # distance calculation depends on speed
+        if self._last_speed_revolutions is None or self._last_speed_revolutions is None:
+            return None
 
+        self._check_speed_register_overflow()
 
-    def get(self):
-        if (self._current_time() - self.last_speed_measure_time) > 5:
-            self._speed = 0
-        return str(round(self._speed, 1))
+        return round(
+            self._circumference
+            * (self._current_speed_revolutions - self._last_speed_revolutions)
+            / 1000,
+            2,
+        )
 
-    def get_distance(self):
-        return str(round(self._distance / 1000, 2))
+    # def get_trap_speed(self):
+    #     if self.trap_speed == 0:
+    #         s = 0
+    #         for elem in self.average_array:
+    #             s += elem
+    #         if len(self.average_array) > 0:
+    #             self.trap_speed = s / len(self.average_array)
+    #     return str(round(self.trap_speed, 2))
 
-    def set_distance(self, distance):
-        self._distance = distance
-
-    def get_count(self):
-        return self.count
-
-    def get_count_string(self):
-        return str(self.count)
-
-    def reset_distance(self):
-        self._distance = 0
-        self.average_array.clear()
-        self.trap_speed = 0
-
-    def get_trap_speed(self):
-        if self.trap_speed == 0:
-            s = 0
-            for elem in self.average_array:
-                s += elem
-            if len(self.average_array) > 0:
-                self.trap_speed = s / len(self.average_array)
-        return str(round(self.trap_speed, 2))
-
-    @property
-    def trap_info(self):
-        # per il record dell'ora
-        if self.settings.hour_record:
-            if self.time_int == 0:
-                return ""
-            return "V_med: " + str(3.6 * self._distance / self.time_int)
-        if self._distance < self.settings.run_length:
-            return (
-                "Trappola tra "
-                + str(round(self.settings.run_length - self._distance))
-                + " metri"
-            )
-        elif self._distance > self.settings.run_length and self.distance_trap >= 0:
-            return "Fine trappola tra " + str(round(self.distance_trap)) + " metri"
-        else:
-            return "Velocità media trappola: " + str(self.get_trap_speed())
+    # @property
+    # def trap_info(self):
+    #     # per il record dell'ora
+    #     if self.settings.hour_record:
+    #         if self.time_int == 0:
+    #             return ""
+    #         return "V_med: " + str(3.6 * self.distance / self.time_int)
+    #     if self.distance < self.settings.run_length:
+    #         return (
+    #             "Trappola tra "
+    #             + str(round(self.settings.run_length - self.distance))
+    #             + " metri"
+    #         )
+    #     elif self.distance > self.settings.run_length and self.distance_trap >= 0:
+    #         return "Fine trappola tra " + str(round(self.distance_trap)) + " metri"
+    #     else:
+    #         return "Velocità media trappola: " + str(self.get_trap_speed())
