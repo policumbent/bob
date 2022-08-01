@@ -23,9 +23,6 @@ class Hall(AntDevice):
         self._distance = 0
         self._overall_distance = 0
 
-        # dict for return data
-        self._data = {"speed": None, "distance": None, "cadence": None}
-
         # attribute for data calculation
         self._last_speed_event_time = None
         self._current_speed_event_time = None
@@ -75,7 +72,6 @@ class Hall(AntDevice):
         self._received_data = True
         self._last_data_read = self._current_time()
 
-
     def _current_time(self):
         return time._unix_time()
 
@@ -103,10 +99,11 @@ class Hall(AntDevice):
             self._current_cadence_revolutions = self._get_cadence_revolutions()
 
             self._speed = self.calculate_speed() or self._speed
-            self._cadence = self.calculate_cadence() or self._cadence
             self._distance = self.calculate_distance() or 0
-
             self._overall_distance = round(self._overall_distance + self._distance, 4)
+
+            if self._device_type is DeviceTypeID.speed_cadence:
+                self._cadence = self.calculate_cadence() or self._cadence
 
             # update last reference
             self._last_speed_event_time = self._current_speed_event_time
@@ -116,38 +113,11 @@ class Hall(AntDevice):
 
             # print(self._speed, self._overall_distance, self._cadence)
 
-        self._data = {
+        return {
             "speed": self._speed,
             "distance": self._overall_distance,
             "cadence": self._cadence,
         }
-
-        return self._data
-
-
-        # if self.newData:
-        #     self.count2 += 1
-        #     # t1 = time.time()
-        #     self.newData = False
-        #     # print('>>> dentro __run')
-        #     speed = self._calculate_speed()
-        #     if self._device_type == DeviceTypeID.speed_cadence:
-        #         cadence = self._calculate_cadence()
-#
-        # if self._device_type == DeviceTypeID.speed:
-        #     self._data = self._speed
-        #     return {
-        #             "speed": self._data
-        #             }
-        # elif self._device_type == DeviceTypeID.speed_cadence:
-        #     self._data = self._speed, self._cadence
-        #     return {
-        #         "speed": self._data[0],
-        #         "cadence": self._data[1]
-        #     }
-
-        # # if the sensor is not recognized then it returns None
-        # return None
 
     # NOTE: metodi propri della classe
 

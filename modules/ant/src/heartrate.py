@@ -42,7 +42,7 @@ class HeartRate(AntDevice):
 
     def read_data(self) -> dict:
         if not self._is_active():
-            return None
+            self._heartrate = 0
 
         return {"heartrate": self._heartrate}
 
@@ -50,7 +50,6 @@ class HeartRate(AntDevice):
 
     def _current_time(self):
         return time._unix_time()
-
 
     def _elapsed_time(self):
         return self._current_time() - self._last_data_time
