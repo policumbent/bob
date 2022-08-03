@@ -16,12 +16,8 @@ data = dict()
 sensors = ["ant/speed", "ant/cadence", "ant/power", "ant/heartrate", "gear"]
 
 
-async def video():
+async def video(config):
     # main loop of the camera logic
-
-    db_path = os.getenv("DATABASE_PATH") or "~/bob/database.db"
-    config = Database(path=db_path).config("video")
-    
     while True:
         try:
             with Camera() as vcam:
@@ -57,7 +53,7 @@ async def video():
             await sleep(1)
 
 
-async def mqtt():
+async def mqtt(config):
     while True:
         try:
             # will connect to the mosquitto server broker on the local docker
@@ -76,8 +72,14 @@ async def mqtt():
 
 
 async def main():
+    # retrive configurations from db
+    home_path = os.getenv("HOME")
+    db_path = os.getenv("DATABASE_PATH") or f"{home_path}/bob/database.db"
+
+    config = Database(path=db_path).config("video")
+
     # release async tasks
-    await asyncio.gather(video(), mqtt())
+    await asyncio.gather(video(config), mqtt(config))
 
 
 def entry_point():
