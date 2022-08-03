@@ -1,8 +1,9 @@
+import os
 import operator
 import numpy as np
 
 from asyncio import sleep
-from picamera import PiCamera
+from picamera import PiCamera, Color as CamColor
 from picamera.exc import PiCameraMMALError as CameraError
 from PIL import Image, ImageDraw, ImageFont
 
@@ -74,12 +75,14 @@ class Camera(PiCamera):
     ):
         super().__init__()
 
-        self._overlay = None
         self._img = None
         self._arr = None
         self._draw = None
         self._grid = None
+        self._overlay = None
         self._overlay_element_list = []
+
+        self._recording = False
 
         # screen parameters
         self._screen_dim_x, self._screen_dim_y = screen_dim
@@ -285,6 +288,12 @@ class Camera(PiCamera):
 
         OverlayElement.DATA = data
 
+    def with_recording(
+        self, recording=False, path: str = os.getenv("HOME"), filename: str = "video"
+    ):
+        self._recording = recording
+        self._file_recording = f"{path}/onboard_{filename}"
+
     def add_overlay_element(self, element: OverlayElement):
         """Insert an element in the overlay grid"""
 
@@ -300,6 +309,13 @@ class Camera(PiCamera):
 
         self._new_frame()
         self.start_preview()
+
+        if self._recording:
+            try:
+                os.makedirs(path, exist_ok=True)
+                self.start_recording(self._file_recording, format="mjpeg")
+            except:
+                pass
 
         while True:
             for elem in self._overlay_element_list:

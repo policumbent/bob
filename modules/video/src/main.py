@@ -5,7 +5,7 @@ from asyncio import sleep
 from .camera import Camera, OverlayElement, CameraError
 from .colors import Colors
 
-from core import log, Mqtt, Database
+from core import log, Mqtt, Database, time
 from core.mqtt import Message
 
 
@@ -25,6 +25,11 @@ async def video(config):
 
                 vcam.with_grid(config.get("grid") or False)
                 vcam.with_zoom(config.get("zoom") or 0)
+                vcam.with_recording(
+                    config.get("recording") or False,
+                    path=config.get("recording_path") or "/home/pi/bob/onboard_video",
+                    filename=time.human_timestamp()[:-4],
+                )
 
                 # data overlay
                 vcam.with_overlay_data(data)
@@ -53,7 +58,7 @@ async def video(config):
             await sleep(1)
 
 
-async def mqtt(config):
+async def mqtt(_):
     while True:
         try:
             # will connect to the mosquitto server broker on the local docker
