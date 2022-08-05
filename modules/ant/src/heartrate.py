@@ -1,73 +1,58 @@
-from .ant.easy.channel import Channel
-import time
+from .device import AntDevice, DeviceTypeID, Node
 
-from core.sensor import Sensor
-from .settings import Settings
+from core import time
 
 
-class HeartRate(Sensor):
-    def __init__(self, settings: Settings):
-        self._value = -1
-        self._state = False
-        self._settings = settings
-        self._lastRxTime = time.time()
-        self._count = 0
+class HeartRate(AntDevice):
+    def __init__(self, node: Node, sensor_id=0, device_type=DeviceTypeID.heartrate):
+        super().__init__(node, sensor_id)
 
-    def signal(self, value: str):
-        pass
+        self._device_type_id = device_type.value
+        self._last_data_time = None
 
-    def export(self):
-        return {
-            'heartrate': self.value
-        }
+        # inizializzazione del channel ant
+        self._init_channel()
 
-    def update_settings(self, settings: Settings):
-        pass
+    # NOTE: specializzazione metodi astratti di `AntDevice`
 
-    @property
-    def state(self):
-        return self._state
+    def _init_channel(self):
+        if self._channel is None:
+            self._channel = self._create_channel()
 
-    @property
-    def value(self):
-        if (time.time() - self._lastRxTime) > 5:
-            self._value = 0
-        return self._value
+        # callbacks for data
+        self._channel.on_broadcast_data = self._receive_new_data
+        self._channel.on_burst_data = self._receive_new_data
 
-    @value.setter
-    def value(self, value):
-        self._value = value
+        self._channel.set_period(8070)
+        self._channel.set_search_timeout(255)
+        self._channel.set_rf_freq(57)
 
-    def set_channel(self, channel_hr: Channel):
-        # CANALE FREQUENZA CARDIACA
-        channel_hr.on_broadcast_data = self.on_data_heartrate
-        channel_hr.on_burst_data = self.on_data_heartrate
-        channel_hr.set_period(8070)
-        channel_hr.set_search_timeout(255)
-        channel_hr.set_rf_freq(57)
         # 69  -> ID DELLA MIA FASCIA CARDIO, METTERE 0 PER TUTTE LE FASCIE
         # 120 -> DEVICE ID DEL SENSORE DELLA FC
-        hr_sensor_id = self._settings.hr_sensor_id
-        channel_hr.set_id(hr_sensor_id, 120, 0)
 
-    def on_data_heartrate(self, data):
-        self._state = True
-        self.value = int(data[7])
-        self._lastRxTime = time.time()
-        self._count += 1
-        print(self._lastRxTime)
+        # hr_sensor_id = self._settings.hr_sensor_id
+        self._channel.set_id(self._sensor_id, self._device_type_id, 0)
 
-    def get(self):
-        if (time.time() - self._lastRxTime) > 5:
-            self.value = str(0)
-        return self.value
+        # open channel
+        self._channel.open()
 
-    @property
-    def count(self):
-        return self._count
+    def _receive_new_data(self, data):
+        self._heartrate = data[7]
+        self._last_data_time = self._current_time()
 
-    def get_count_string(self):
-        return str(self._count)
+    def read_data(self) -> dict:
+        if not self._is_active():
+            self._heartrate = 0
 
-    def get_last_rx_time(self):
-        return self._lastRxTime
+        return {"heartrate": self._heartrate}
+
+    # NOTE: metodi propri della classe
+
+    def _current_time(self):
+        return time._unix_time()
+
+    def _elapsed_time(self):
+        return self._current_time() - self._last_data_time
+
+    def _is_active(self):
+        return self._last_data_time and self._elapsed_time() < 5

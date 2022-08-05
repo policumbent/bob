@@ -1,13 +1,15 @@
-import logging
-import threading
+# TODO: Refactor this class 
+
+
+
 import time
 
-from threading import Thread
 from collections import deque
 
+from .device import AntDevice, DeviceTypeID
 from .ant.easy.channel import Channel
-from core.sensor import Sensor
-from core.message import Message, MexType, MexPriority
+
+# from core.message import Message, MexType, MexPriority
 
 # CHANNEL_PERIOD_VAL = 32768/MESSAGE_RATE(HZ)
 # MESSAGE_RATE = 32768/32768 = 32768/8182 = 4HZ
@@ -16,35 +18,21 @@ from core.message import Message, MexType, MexPriority
 # POTENZA MEDIA: 1s -> 4 || 3s -> 12 || 5s -> 20 || 10s --> 40 (impostare il valore desiderato)
 from .settings import Settings
 
-_logger = logging.getLogger("powermeter")
 
+class Powermeter(AntDevice):
+    def __init__(self, node, sensor_id=0, device_type=DeviceTypeID.powermeter):
+        super().__init__(node, sensor_id)
 
-class Powermeter(Sensor):
-    def signal(self, value: str):
-        if value == 'calibrate_powermeter':
-            self.calibration = True
+        self._device_type_id = device_type.value
 
-    def export(self):
-        return {
-            'average_power': self.getAverage(),
-            # 'power': self.value,
-            '1s_power': self.get_average_1s(),
-            'cadence': self.cadence
-        }
-
-    def update_settings(self, settings: Settings):
-        # todo: settings e gestire la calibrazione
-        pass
-
-    def __init__(self, send_message, settings: Settings):
-        lunghezza_vettore_media = settings.average_power_time * 4
-        lunghezza_vettore_media_1s = 4
+        # lunghezza_vettore_media = settings.average_power_time * 4
+        # lunghezza_vettore_media_1s = 4
 
         self._power: int = 0
         self._calibration_value = 0
         self._calibration = False
         self._state = False
-        self._settings = settings
+        # self._settings = settings
 
         self.count = 0
         self.count2 = 0
@@ -54,9 +42,10 @@ class Powermeter(Sensor):
         self.timeStampP = 0
         self.eventCountP = 0
         self.torqueTicksStampP = 0
+
         # self.offset = 500  # 495
         self.calibration_count = 0
-        self.send_message = send_message
+        # self.send_message = send_message
         self.lastRxTime = time.time()
         self.newData = False
         self.data = None
@@ -66,39 +55,95 @@ class Powermeter(Sensor):
         self.count3 = 1
         self.lastAverageTime = 0
         self.lastAverageTime1s = 0
-        self.average_array = deque(lunghezza_vettore_media * [0])
-        self.average_array_1s = deque(lunghezza_vettore_media_1s * [0])
+        # self.average_array = deque(lunghezza_vettore_media * [0])
+        # self.average_array_1s = deque(lunghezza_vettore_media_1s * [0])
         self._last_rx = time.time()
 
-        self._calibration_lock = threading.Lock()
-        self._worker_thread = Thread(target=self._run, daemon=True)
-        self._worker_thread.start()
+        # self._calibration_lock = threading.Lock()
+        # self._worker_thread = Thread(target=self._run, daemon=True)
+        # self._worker_thread.start()
 
-    def _run(self):
-        self._state = True
-        while True:
-            if self.newData:
-                self.count2 += 1
-                self.newData = False
-                self.calculatePower(self.data)
+        # inizializzazione del channel ant
+        self._init_channel()
 
-            if (time.time() - self.lastRxTime) > 4:
-                self._power = 0
-                self.count3 = 1
-                # print(self.count3)
-            self.calculate_average_power()
-            self.calculateAveragePower1s()
+    # NOTE: specializzazione metodi astratti di `AntReader`
 
-            if self.calibration:
-                self.calibration_count = 10
-                self.calibration = False
+    def _init_channel(self):
+        if self._channel is None:
+            self._channel = self._create_channel()
 
-            time.sleep(0.1)
+        # callbacks for data
+        self._channel.on_broadcast_data = self._receive_new_data
+        self._channel.on_burst_data = self._receive_new_data
 
-        # print("AVERAGE: ", self.getAverage())
-        # print("POW1S: ", self.get_average_1s_str())
-        # print("POW3S: ", self.getAverage())
-        # print("POWER: ", self.get())
+        # PROVARE VARI PERIODI E VEDERE COSA SUCCEDE --> INZIALe 8085
+        self._channel.set_period(8182)
+        self._channel.set_search_timeout(255)
+        self._channel.set_rf_freq(57)
+
+        # 11 -> DEVICE ID DEL MISURATORE || 30636 -> id misuratore taurus
+        # powermeter_id = self._settings.power_sensor_id
+        self._channel.set_id(self._sensor_id, self._device_type_id, 0)
+
+        # open channel
+        self._channel.open()
+
+    def _receive_new_data(self, data):
+        # t1 = time.time()
+        self.data = data
+        self.newData = True
+        self.count += 1
+        self._last_rx = time.time()
+        # t2 = time.time()
+        # print("Tempo acquisizione: " + str(t2 - t1))
+
+    def read_data() -> dict:
+        pass
+
+    # NOTE: metodi propri della classe
+
+    # TODO: DEPRECATE
+    # def _run(self):
+    #     self._state = True
+    #     while True:
+    #         if self.newData:
+    #             self.count2 += 1
+    #             self.newData = False
+    #             self.calculatePower(self.data)
+
+    #         if (time.time() - self.lastRxTime) > 4:
+    #             self._power = 0
+    #             self.count3 = 1
+    #             # print(self.count3)
+    #         self.calculate_average_power()
+    #         self.calculateAveragePower1s()
+
+    #         if self.calibration:
+    #             self.calibration_count = 10
+    #             self.calibration = False
+
+    #         time.sleep(0.1)
+
+    # print("AVERAGE: ", self.getAverage())
+    # print("POW1S: ", self.get_average_1s_str())
+    # print("POW3S: ", self.getAverage())
+    # print("POWER: ", self.get())
+
+    # def signal(self, value: str):
+    #     if value == 'calibrate_powermeter':
+    #         self.calibration = True
+
+    # def export(self):
+    #     return {
+    #         'average_power': self.getAverage(),
+    #         # 'power': self.value,
+    #         '1s_power': self.get_average_1s(),
+    #         'cadence': self.cadence
+    #     }
+
+    # def update_settings(self, settings: Settings):
+    #     # todo: settings e gestire la calibrazione
+    #     pass
 
     @property
     def value(self):
@@ -126,6 +171,7 @@ class Powermeter(Sensor):
         with self._calibration_lock:
             self._calibration = value
 
+    # TODO: DEPRECATE
     def set_channel(self, channel_powermeter: Channel):
         # CANALE POTENZA
         channel_powermeter.on_broadcast_data = self.on_data_power
@@ -138,6 +184,7 @@ class Powermeter(Sensor):
         powermeter_id = self._settings.power_sensor_id
         channel_powermeter.set_id(powermeter_id, 11, 0)
 
+    # TODO: DEPRECATE
     def on_data_power(self, data):
         # t1 = time.time()
         self.data = data
@@ -191,8 +238,8 @@ class Powermeter(Sensor):
                 # non avrò dati aggiornati a schermo per la calibrazione, bisogna inventarsi qualcosa
                 # self.mex.set("Calibrazione tra " +
                 #              str(self.calibrazione) + "pacchetti", 3, 1)
-                self.send_message(Message("NON TOCCARE - " + str(self._calibration_value),
-                                          MexPriority.medium, MexType.default, 1, 1))
+                # self.send_message(Message("NON TOCCARE - " + str(self._calibration_value),
+                #                           MexPriority.medium, MexType.default, 1, 1))
                 self.calibration_count -= 1
                 return
 
@@ -200,8 +247,8 @@ class Powermeter(Sensor):
                 # todo: verificare che lo shift riporti un risultato giusto pure qui
                 self._calibration_value = (data[6] << 8) + data[7]
                 # print("CALIBRAZIONE ", self._calibration_value)
-                self.send_message(Message("Calibrato a " + str(self._calibration_value),
-                                          MexPriority.medium, MexType.default, 5, 10))
+                # self.send_message(Message("Calibrato a " + str(self._calibration_value),
+                #                           MexPriority.medium, MexType.default, 5, 10))
                 #                state.update("calibration_value": offset)
                 #                 Settings.save()
                 #                 Settings.settings_request = True
@@ -250,11 +297,12 @@ class Powermeter(Sensor):
             if torqueTicks < 0:
                 torqueTicks += 65536
 
-            torqueFrequency = (1 / (elapsedTime / torqueTicks)
-                               ) - self._calibration_value
+            torqueFrequency = (
+                1 / (elapsedTime / torqueTicks)
+            ) - self._calibration_value
             #    torqueFrequency = 1
             #    print ("Slope: " + str(slope))
-            torque = (torqueFrequency / (slope / 10.0))
+            torque = torqueFrequency / (slope / 10.0)
             #    print ("torque: " + str(torque))
             power = torque * cadence * 3.1415 / 30
             # print ("deltaTime: " + str(deltaTime))

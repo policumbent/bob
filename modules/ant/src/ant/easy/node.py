@@ -19,15 +19,17 @@ from ..easy.filter import wait_for_event, wait_for_response, wait_for_special
 _logger = logging.getLogger("ant.easy.node")
 
 
-class Node():
-    def __init__(self):
-
+class Node:
+    def __init__(self, network=None, key=None):
         self._responses_cond = threading.Condition()
         self._responses = collections.deque()
         self._event_cond = threading.Condition()
         self._events = collections.deque()
 
         self._datas = queue.Queue()
+
+        self._network = network
+        self._key = key
 
         self.channels = {}
 
@@ -37,6 +39,18 @@ class Node():
 
         self._worker_thread = threading.Thread(target=self._worker, name="ant.easy")
         self._worker_thread.start()
+
+    def __enter__(self):
+        if self._network is None or self._key is None:
+            raise KeyError
+
+        self.set_network_key(self._network, self._key)
+
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        # In this block of code no exception handling is performed so the exceptions are propagated
+        self.stop()
 
     def new_channel(self, ctype, network_number=0x00):
         size = len(self.channels)
@@ -72,9 +86,9 @@ class Node():
 
     def _worker_event(self, channel, event, data):
         if event == Message.Code.EVENT_RX_BURST_PACKET:
-            self._datas.put(('burst', channel, data))
+            self._datas.put(("burst", channel, data))
         elif event == Message.Code.EVENT_RX_BROADCAST:
-            self._datas.put(('broadcast', channel, data))
+            self._datas.put(("broadcast", channel, data))
         else:
             self._event_cond.acquire()
             self._events.append((channel, event, data))
@@ -94,9 +108,9 @@ class Node():
                 (data_type, channel, data) = self._datas.get(True, 1.0)
                 self._datas.task_done()
 
-                if data_type == 'broadcast':
+                if data_type == "broadcast":
                     self.channels[channel].on_broadcast_data(data)
-                elif data_type == 'burst':
+                elif data_type == "burst":
                     self.channels[channel].on_burst_data(data)
                 else:
                     _logger.warning("Unknown data type '%s': %r", data_type, data)
@@ -112,5 +126,3 @@ class Node():
             self._running = False
             self.ant.stop()
             self._worker_thread.join()
-
-

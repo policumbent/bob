@@ -1,85 +1,91 @@
-from threading import Thread
+import asyncio
+import threading
+import logging
+import os
 
-from core.mqtt import MqttConsumer
-from core.message import Message
-from .ant_manager import Ant
-import time
-import sys
-import json
+from core import log, Mqtt, Database
+
+
+from .ant.base.driver import DriverNotFound
+from .device import AntDevice, DeviceTypeID, Node
 from .heartrate import HeartRate
-from .powermeter import Powermeter
-from .settings import Settings
-from .speed import Speed
+from .hall import Hall
 
-settings = Settings({
-    'hour_record': False,
-    'run_length': 8046,
-    'trap_length': 200,
-    'hr_sensor_id': 0,
-    'speed_sensor_id': 0,
-    'power_sensor_id': 0,
-    'circumference': 1450,
-    'average_power_time': 3
-}, 'ant')
-mqtt: MqttConsumer
-sensors: dict = dict()
+# from .powermeter import Powermeter
+
+# disable all logging for the ant library
+logging.disable(logging.WARNING)
+
+# global data storage
+data = dict()
 
 
-def message_handler(topic, message: bytes):
-    if topic == 'signals':
-        for e in sensors:
-            sensors[e].signal(message)
-        return
-    try:
-        if topic == 'sensors/manager':
-            json_message = json.loads(message)
-            if sensors.__contains__('speed'):
-                sensors['speed'].time_int = int(json_message['time_int'])
-    except Exception as e:
-        print(e)
-
-
-def send_message(message: Message):
-    print(message.text)
-    mqtt.publish_message(message)
-
-
-def loop():
+async def read_data(sensor):
     while True:
-        v = dict()
-        for e in sensors:
-            v.update(sensors[e].export())
-        # # v.update(timer.export())
-        # v.update(hr.export())
-        # v.update(speed.export())
-        # v.update(powermeter.export())
-        print(v)
-        mqtt.publish(json.dumps(v))
-        time.sleep(1)
+        data.update(sensor.read_data())
+
+        await asyncio.sleep(0.1)
 
 
-def start():
-    n = len(sys.argv)
-    if n < 2:
-        print("Total arguments passed:", n)
-        return
-    print("Mqtt server ip:", sys.argv[1])
-    print('Starting ANT')
-    settings.load()
-    print(settings.values)
-    # sensors['timer'] = Timer()
-    sensors['hr'] = HeartRate(settings)
-    sensors['speed'] = Speed(send_message, settings)
-    sensors['powermeter'] = Powermeter(send_message, settings)
-    worker_thread = Thread(
-        target=loop,
-        daemon=True)
-    worker_thread.start()
-    Ant(send_message, sensors['hr'], sensors['speed'], sensors['powermeter'])
+async def mqtt():
+    while True:
+        try:
+            async with Mqtt() as client:
+                while True:
+                    for key, value in data.items():
+                        await client.sensor_publish(f"ant/{key}", value)
+                    await asyncio.sleep(0.2)
+        except Exception as e:
+            log.err(e)
+        finally:
+            await asyncio.sleep(1)
 
 
-mqtt = MqttConsumer(sys.argv[1], 1883, 'ant', ['manager'], ['powermeter_calibration', 'reset'],
-                    settings, message_handler)
+async def main():
+    while True:
+        try:
+            # retrive configurations from db
+            home_path = os.getenv("HOME")
+            db_path = os.getenv("DATABASE_PATH") or f"{home_path}/bob/database.db"
 
-if __name__ == '__main__':
-    start()
+            config = Database(path=db_path).config("ant")
+
+            bike = config.get("name")
+            hall_id = config.get(f"{bike}_hall_id")
+            hall_type = config.get(f"{bike}_hall_type")
+            hr_id = config.get(f"{bike}_hr_id")
+
+            with Node(0x00, AntDevice.NETWORK_KEY) as node:
+                hall = Hall(
+                    node, sensor_id=hall_id, device_type=DeviceTypeID(hall_type)
+                )
+                hr = HeartRate(
+                    node, sensor_id=hr_id, device_type=DeviceTypeID.heartrate
+                )
+
+                # pm = Powermeter(
+                #     node, sensor_id=3, device_type=DeviceTypeID.heartrate
+                # )
+
+                # start ant loop and data read
+                threading.Thread(target=node.start, name="ant.easy").start()
+
+                # release async tasks
+                await asyncio.gather(
+                    read_data(hall),
+                    read_data(hr),
+                    # read_data(pm),
+                    mqtt(),
+                )
+        except DriverNotFound:
+            log.err("USB not connected")
+        finally:
+            await asyncio.sleep(1)
+
+
+def entry_point():
+    asyncio.run(main())
+
+
+if __name__ == "__main__":
+    entry_point()
