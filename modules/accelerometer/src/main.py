@@ -2,7 +2,7 @@ import asyncio
 import collections
 import functools
 import operator
-import os 
+import os
 
 from .mpu6050 import mpu6050
 from datetime import datetime
@@ -103,25 +103,27 @@ async def write_csv():
                 gyr_x = row["gyr_x"]
                 gyr_y = row["gyr_y"]
                 gyr_z = row["gyr_z"]
-                
-                print(f"acc_x={acc_x:.2f} acc_y={acc_y:.2f} acc_z={acc_z:.2f} gyr_x={gyr_x:.2f} gyr_y={gyr_y:.2f} gyr_z={gyr_z:.2f}")
+
+                print(
+                    f"acc_x={acc_x:.2f} acc_y={acc_y:.2f} acc_z={acc_z:.2f} gyr_x={gyr_x:.2f} gyr_y={gyr_y:.2f} gyr_z={gyr_z:.2f}"
+                )
 
             await asyncio.sleep(0.1 / 1000)
 
 
 async def write_db():
-    db_path = os.getenv("DATABASE_PATH") or "~/bob/database.db"
+    db_path = os.getenv("DATABASE_PATH") or "/home/pi/bob/database.db"
 
-    db = Database(table="accelerometer", path=db_path, max_pending=10_000)
+    db = Database(table="accelerometer", path=db_path, max_pending=1)
 
     curr_row = None
 
     while True:
         if row != curr_row:
-            row.update({"timestamp": time.human_timestamp()})
-            
-            db.insert_data(row)
-            
+            data = [time.human_timestamp(), *list(row.values())]
+
+            db.insert("accelerometer", data)
+
             curr_row = dict(row)
 
         await asyncio.sleep(0.1 / 1000)
@@ -143,11 +145,11 @@ async def main():
                 read_acc(mpu, off_acc),
                 read_gyro(mpu, off_gyr),
                 # write_csv(),
-                write_db()
+                write_db(),
             )
         except OSError:
             log.err("Sensor not found")
-            await asyncio.sleep(.5)
+            await asyncio.sleep(0.5)
 
 
 def entry_point():
