@@ -2,7 +2,7 @@ import asyncio
 import collections
 import functools
 import operator
-import os 
+import os
 
 from .mpu6050 import mpu6050
 from datetime import datetime
@@ -11,6 +11,20 @@ from core import Database, log, time
 row = dict()
 fieldnames = ("acc_x", "acc_y", "acc_z", "gyr_x", "gyr_y", "gyr_z")
 axis = ("x", "y", "z")
+
+
+def read_saved_offset():
+    try:
+        with open("offset") as file:
+            return eval(file.readline()), eval(file.readline())
+    except:
+        return None, None
+
+
+def save_offset(off_acc, off_gyr):
+    with open("offset", "w") as file:
+        file.write(off_acc)
+        file.write(off_gyr)
 
 
 def set_offset(mpu):
@@ -81,7 +95,7 @@ async def read_gyro(mpu, offset):
 
 
 # TODO: deprecated in favor of sqlite db
-async def write_csv():
+async def _write_csv():
     import csv
 
     localtime = datetime.now().strftime("%H.%M.%S")
@@ -103,8 +117,10 @@ async def write_csv():
                 gyr_x = row["gyr_x"]
                 gyr_y = row["gyr_y"]
                 gyr_z = row["gyr_z"]
-                
-                print(f"acc_x={acc_x:.2f} acc_y={acc_y:.2f} acc_z={acc_z:.2f} gyr_x={gyr_x:.2f} gyr_y={gyr_y:.2f} gyr_z={gyr_z:.2f}")
+
+                print(
+                    f"acc_x={acc_x:.2f} acc_y={acc_y:.2f} acc_z={acc_z:.2f} gyr_x={gyr_x:.2f} gyr_y={gyr_y:.2f} gyr_z={gyr_z:.2f}"
+                )
 
             await asyncio.sleep(0.1 / 1000)
 
@@ -119,9 +135,7 @@ async def write_db():
     while True:
         if row != curr_row:
             row.update({"timestamp": time.human_timestamp()})
-            
             db.insert_data(row)
-            
             curr_row = dict(row)
 
         await asyncio.sleep(0.1 / 1000)
@@ -137,17 +151,23 @@ async def main():
             mpu.set_accel_range(mpu.ACCEL_RANGE_2G)
             mpu.set_gyro_range(mpu.GYRO_RANGE_250DEG)
 
-            off_acc, off_gyr = set_offset(mpu)
+            # read offset
+            off_acc, off_gyr = read_saved_offset()
+
+            # calculate offset and save
+            if off_acc is None or off_gyr is None:
+                off_acc, off_gyr = set_offset(mpu)
+                save_offset(off_acc, off_gyr)
 
             await asyncio.gather(
                 read_acc(mpu, off_acc),
                 read_gyro(mpu, off_gyr),
-                # write_csv(),
-                write_db()
+                # _write_csv(),
+                write_db(),
             )
         except OSError:
             log.err("Sensor not found")
-            await asyncio.sleep(.5)
+            await asyncio.sleep(0.5)
 
 
 def entry_point():
