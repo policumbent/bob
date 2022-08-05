@@ -111,8 +111,6 @@ class Hall(AntDevice):
             self._last_cadence_event_time = self._current_cadence_event_time
             self._last_cadence_revolutions = self._current_cadence_revolutions
 
-            # print(self._speed, self._overall_distance, self._cadence)
-
         return {
             "speed": self._speed,
             "distance": self._overall_distance,

@@ -13,7 +13,7 @@ from core.mqtt import Message
 data = dict()
 
 # mqtt sensors to read
-sensors = ["ant/speed", "ant/cadence", "ant/power", "ant/heartrate", "gear"]
+sensors = ["ant/speed", "ant/distance", "ant/power", "ant/heartrate", "gear"]
 
 
 async def video(config):
@@ -35,18 +35,18 @@ async def video(config):
                 vcam.with_overlay_data(data)
 
                 vcam.add_overlay_element(
-                    OverlayElement((0, 0), Colors.black, "ant/speed")
+                    OverlayElement((0, 0), Colors.black, sensors[0])
                 )
                 vcam.add_overlay_element(
-                    OverlayElement((4, 0), Colors.blue, "ant/power")
+                    OverlayElement((4, 3), Colors.white, sensors[1])
                 )
                 vcam.add_overlay_element(
-                    OverlayElement((0, 3), Colors.red, "ant/heartrate")
+                    OverlayElement((4, 0), Colors.blue, sensors[2])
                 )
+                vcam.add_overlay_element(OverlayElement((0, 3), Colors.red, sensors[3]))
                 vcam.add_overlay_element(
-                    OverlayElement((4, 3), Colors.white, "ant/cadence")
+                    OverlayElement((2, 3), Colors.white, sensors[4])
                 )
-                vcam.add_overlay_element(OverlayElement((2, 3), Colors.white, "gear"))
 
                 await vcam.start_with_overlay()
 
@@ -62,14 +62,13 @@ async def mqtt(_):
     while True:
         try:
             # will connect to the mosquitto server broker on the local docker
-
             async with Mqtt() as client:
                 message_loop = await client.sensor_subscribe(sensors)
                 async with message_loop as messages:
                     async for msg in messages:
                         msg = Message(msg)
 
-                        data.update({msg.sensor: msg.value})
+                        data.update({msg.sensor: round(msg.value)})
         except Exception as e:
             log.err(f"MQTT: {e}")
         finally:

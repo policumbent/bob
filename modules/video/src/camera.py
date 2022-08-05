@@ -51,9 +51,9 @@ class OverlayElement:
         ):
             return None
 
-        data = self.DATA[self._key_data]
+        data = self.DATA.get(self._key_data)
 
-        return str(data) if data else None
+        return str(data)
 
     def is_multiline(self):
         return self._sectors_length > 1
@@ -312,7 +312,7 @@ class Camera(PiCamera):
 
         if self._recording:
             try:
-                os.makedirs(path, exist_ok=True)
+                os.makedirs(self._file_recording, exist_ok=True)
                 self.start_recording(self._file_recording, format="mjpeg")
             except:
                 pass
