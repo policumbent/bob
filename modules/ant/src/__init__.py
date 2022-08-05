@@ -1,6 +1,7 @@
 __all__ = [
     "hall",
-    "powermeter",
+    # "powermeter",
     "heartrate",
-    "device"
+    "device",
+    "main"
 ]
