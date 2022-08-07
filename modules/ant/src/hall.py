@@ -27,8 +27,8 @@ class Hall(AntDevice):
         self._last_speed_event_time = None
         self._current_speed_event_time = None
 
-        self._last_cadence_event_time = 0
-        self._current_cadence_event_time = 0
+        self._last_cadence_event_time = None
+        self._current_cadence_event_time = None
 
         self._last_speed_revolutions = None
         self._current_speed_revolutions = None

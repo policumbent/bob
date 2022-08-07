@@ -13,39 +13,73 @@ from core.mqtt import Message
 data = dict()
 
 # mqtt sensors to read
-sensors = ["ant/speed", "ant/distance", "ant/power", "ant/heartrate", "gear"]
+sensors = [
+    "ant/speed",
+    "ant/distance",
+    "ant/power",
+    "ant/heartrate",
+    "ant/cadence",
+    "gear",
+]
 
 
 async def video(config):
     # main loop of the camera logic
     while True:
         try:
-            with Camera() as vcam:
+
+            # configuration params
+            
+            video = config.get("video_rotation") or 0
+            overlay = config.get("overlay_rotation") or video
+
+            grid = config.get("grid") or False
+            zoom = config.get("zoom") or 0
+
+            recording = config.get("recording") or False
+            recording_path = (
+                config.get("recording_path") or "/home/pi/bob/onboard_video"
+            )
+
+
+            with Camera(video_rotation=video, overlay_rotation=overlay) as vcam:
                 log.info("Camera is running")
 
-                vcam.with_grid(config.get("grid") or False)
-                vcam.with_zoom(config.get("zoom") or 0)
+                vcam.with_grid(grid)
+                vcam.with_zoom(zoom)
                 vcam.with_recording(
-                    config.get("recording") or False,
-                    path=config.get("recording_path") or "/home/pi/bob/onboard_video",
+                    recording,
+                    path=recording_path,
                     filename=time.human_timestamp()[:-4],
                 )
 
                 # data overlay
                 vcam.with_overlay_data(data)
 
+                # velocità altro a sx
                 vcam.add_overlay_element(
                     OverlayElement((0, 0), Colors.black, sensors[0])
                 )
+                
+                # distanza basso a dx
                 vcam.add_overlay_element(
                     OverlayElement((4, 3), Colors.white, sensors[1])
                 )
+
+                # potenza alto a dx
                 vcam.add_overlay_element(
                     OverlayElement((4, 0), Colors.blue, sensors[2])
                 )
+
+                # battito basso a sx
                 vcam.add_overlay_element(OverlayElement((0, 3), Colors.red, sensors[3]))
+
+                # cadenza ??
+                vcam.add_overlay_element(OverlayElement((4, 2), Colors.red, sensors[4]))
+                
+                # marcia basso centro
                 vcam.add_overlay_element(
-                    OverlayElement((2, 3), Colors.white, sensors[4])
+                    OverlayElement((2, 3), Colors.white, sensors[5])
                 )
 
                 await vcam.start_with_overlay()
