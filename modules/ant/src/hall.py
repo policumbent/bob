@@ -9,10 +9,6 @@ class Hall(AntDevice):
 
         self._device_type = device_type
 
-        self._payload = None
-        self._received_data = False
-        self._last_data_read = None
-
         # TODO: add correnct circumference
         self._circumference = 1450
         self._cadence_circumference = 350
@@ -39,7 +35,7 @@ class Hall(AntDevice):
         # inizializzazione del channel ant
         self._init_channel()
 
-    # NOTE: specializzazione metodi astratti di `AntReader`
+    # Specializzazione metodi astratti di `AntReader`
 
     def _init_channel(self):
         if self._channel is None:
@@ -71,16 +67,6 @@ class Hall(AntDevice):
         self._payload = data
         self._received_data = True
         self._last_data_read = self._current_time()
-
-    def _current_time(self):
-        return time._unix_time()
-
-    def _elapsed_time(self):
-        return self._current_time() - self._last_data_read
-
-    def _is_active(self):
-        # is false only when no data has been yet received or not for 5s
-        return self._last_data_read and self._elapsed_time() < 5
 
     def read_data(self) -> dict:
         if not self._is_active():
@@ -117,7 +103,7 @@ class Hall(AntDevice):
             "cadence": self._cadence,
         }
 
-    # NOTE: metodi propri della classe
+    # Metodi propri della classe
 
     def _get_cadence_event_time(self):
         return self._payload[1] * 256 + self._payload[0]

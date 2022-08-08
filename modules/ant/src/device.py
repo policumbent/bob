@@ -4,6 +4,8 @@ from enum import Enum
 from .ant.easy.channel import Channel
 from .ant.easy.node import Node
 
+from core import time
+
 
 _DEFAULT_CHANNEL_TYPE = Channel.Type.BIDIRECTIONAL_RECEIVE
 
@@ -24,17 +26,28 @@ class AntDevice(ABC):
         self._sensor_id = sensor_id
 
         # sensor data
-        self._data: dict = None
+        self._payload = None
+        self._received_data = False
+        self._last_data_read = None
 
         if channel_type:
             self._channel = self._create_channel(channel_type)
 
-    def _create_channel(self, type=_DEFAULT_CHANNEL_TYPE):
-        return self._node.new_channel(type)
-
     def __del__(self):
         # self._channel.close()
         pass
+
+    def _create_channel(self, type=_DEFAULT_CHANNEL_TYPE):
+        return self._node.new_channel(type)
+
+    def _current_time(self):
+        return time._unix_time()
+
+    def _elapsed_time(self):
+        return self._current_time() - self._last_data_read
+
+    def _is_active(self, time_sec=5):
+        return self._last_data_read and self._elapsed_time() < time_sec
 
     @abstractmethod
     def _init_channel(self):

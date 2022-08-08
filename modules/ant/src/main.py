@@ -58,7 +58,7 @@ async def write_db(db):
 
             if row != curr_row:
                 row.update({"timestamp": time.human_timestamp()})
-                
+
                 db.insert("ant", list(row.values()))
 
                 curr_row = dict(row)
@@ -79,6 +79,13 @@ async def main():
             config = db.config("ant")
 
             bike = config.get("name")
+
+            # nested dictionary config
+            #
+            # hall_id = config.get(bike).get("hall_id")
+            # hall_type = config.get(bike).get("hall_type")
+            # hr_id = config.get(bike).get("hr_id")
+
             hall_id = config.get(f"{bike}_hall_id")
             hall_type = config.get(f"{bike}_hall_type")
             hr_id = config.get(f"{bike}_hr_id")
@@ -91,9 +98,7 @@ async def main():
                     node, sensor_id=hr_id, device_type=DeviceTypeID.heartrate
                 )
 
-                # pm = Powermeter(
-                #     node, sensor_id=3, device_type=DeviceTypeID.heartrate
-                # )
+                # pm = Powermeter(node, sensor_id=2, device_type=DeviceTypeID.powermeter)
 
                 # start ant loop and data read
                 threading.Thread(target=node.start, name="ant.easy").start()
