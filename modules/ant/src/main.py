@@ -8,10 +8,10 @@ from core import log, Mqtt, Database, time
 
 from .ant.base.driver import DriverNotFound
 from .device import AntDevice, DeviceTypeID, Node
+
 from .heartrate import HeartRate
 from .hall import Hall
-
-# from .powermeter import Powermeter
+from .powermeter import Powermeter
 
 # disable all logging for the ant library
 logging.disable(logging.WARNING)
@@ -34,7 +34,7 @@ async def mqtt():
                 while True:
                     for key, value in data.items():
                         await client.sensor_publish(f"ant/{key}", value)
-                    await asyncio.sleep(0.2)
+                    await asyncio.sleep(0.1)
         except Exception as e:
             log.err(e)
         finally:
@@ -92,13 +92,13 @@ async def main():
 
             with Node(0x00, AntDevice.NETWORK_KEY) as node:
                 hall = Hall(
-                    node, sensor_id=hall_id, device_type=DeviceTypeID(hall_type)
+                    node,
+                    sensor_id=hall_id,
+                    device_type=DeviceTypeID(hall_type),
                 )
-                hr = HeartRate(
-                    node, sensor_id=hr_id, device_type=DeviceTypeID.heartrate
-                )
+                hr = HeartRate(node, sensor_id=hr_id)
 
-                # pm = Powermeter(node, sensor_id=2, device_type=DeviceTypeID.powermeter)
+                pm = Powermeter(node, sensor_id=42941)
 
                 # start ant loop and data read
                 threading.Thread(target=node.start, name="ant.easy").start()
@@ -107,7 +107,7 @@ async def main():
                 await asyncio.gather(
                     read_data(hall),
                     read_data(hr),
-                    # read_data(pm),
+                    read_data(pm),
                     mqtt(),
                     write_db(db),
                 )

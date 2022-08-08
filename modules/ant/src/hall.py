@@ -4,10 +4,17 @@ from .device import AntDevice, DeviceTypeID, Node
 
 
 class Hall(AntDevice):
-    def __init__(self, node: Node, sensor_id=0, device_type=DeviceTypeID.speed):
+    def __init__(
+        self,
+        node: Node,
+        sensor_id=0,
+        device_type=DeviceTypeID.speed,
+        disable_cadence=True,
+    ):
         super().__init__(node, sensor_id)
 
         self._device_type = device_type
+        self._disable_cadence = disable_cadence
 
         # TODO: add correnct circumference
         self._circumference = 1450
@@ -88,7 +95,7 @@ class Hall(AntDevice):
             self._distance = self.calculate_distance() or 0
             self._overall_distance = round(self._overall_distance + self._distance, 4)
 
-            if self._device_type is DeviceTypeID.speed_cadence:
+            if self._device_type is DeviceTypeID.speed_cadence and self._disable_cadence:
                 self._cadence = self.calculate_cadence() or self._cadence
 
             # update last reference
