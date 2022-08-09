@@ -1,6 +1,8 @@
-from enum import Enum, auto
+from enum import Enum
+from collections import deque
 
 from .device import AntDevice, DeviceTypeID
+
 
 class MessageType(Enum):
     calibration = 0x1
@@ -10,7 +12,7 @@ class MessageType(Enum):
     torque_at_wheel = 0x11
     torque_at_crank = 0x12
     pedal_smoothness = 0x13
-    freq_message = 0x20
+    crank_torque_freq = 0x20
     right_force_angle = 0xE0
     left_force_angle = 0xE1
     pedal_position = 0xE2
@@ -36,8 +38,12 @@ class Powermeter(AntDevice):
         self._last_message_type = None
 
         # data store
+        self._power_buffer = deque(maxlen=5)
         self._power = 0
         self._cadence = 0
+
+        # attribute for data calculation
+        self._offset = 0
 
         # lunghezza_vettore_media = settings.average_power_time * 4
         # lunghezza_vettore_media_1s = 4
@@ -111,13 +117,37 @@ class Powermeter(AntDevice):
         if not self._is_active(10):
             self._power = 0
             self._cadence = 0
+
         elif self._received_data and self._last_message_type is MessageType.power_only:
-            self._power = self._get_power()
-            self._cadence = self._get_cadence()
+            self._cadence = self._get_instant_cadence()
+            self._power_buffer.append(self._get_instant_power())
+
+            # if buffer is full enaugh calculate average value of power
+            if self._is_buffer_full():
+                self._power = round(
+                    sum((self._power_buffer)) / self._power_buffer.maxlen, 4
+                )
+
+            # TODO: provare con srm cerberus
+            # print(self._get_accumulated_power())
+
+        elif (
+            self._received_data
+            and self._last_message_type is MessageType.crank_torque_freq
+        ):
+            # TODO: aggiungere calcolo con crack torque frequency (CTF)
+            pass
+
+        elif self._received_data and self._last_message_type is MessageType.calibration:
+            self._offset = self._get_offset()
+            # print(self._offset)
 
         return {"power": self._power, "cadence": self._cadence}
 
     # Metodi propri della classe
+
+    def _is_buffer_full(self):
+        return len(self._power_buffer) == self._power_buffer.maxlen
 
     def _get_message_type(self):
         try:
@@ -125,23 +155,32 @@ class Powermeter(AntDevice):
         except:
             return MessageType.other
 
-    # def _get_event(self):
-    #     return self._payload[1]
+    # Metodi per MessageType.calibration
 
-    # def _get_wheel_ticks(self):
-    #     return self._payload[2]
+    def _get_offset(self):
+        return self._combine_bin(self._payload[7], self._payload[6])
 
-    def _get_cadence(self):
+    # Metodi per MessageType.power_only
+
+    def _get_instant_cadence(self):
         return self._payload[3]
 
-    # def _get_wheel_period(self):
-    #     return self._payload[5] * 265 + self._payload[4]
+    def _get_accumulated_power(self):
+        return self._combine_bin(self._payload[4], self._payload[5])
 
-    # def _get_accumulated_torque(self):
-    #     return self._payload[7] * 265 + self._payload[6]
+    def _get_instant_power(self):
+        return self._combine_bin(self._payload[6], self._payload[7])
 
-    def _get_power(self):
-        return self._payload[7] * 265 + self._payload[6]
+    # Metodi per MessageType.crank_toruqe_freq
+
+    def _get_slope(self):
+        return self._combine_bin(self._payload[3], self._payload[2])
+
+    def _get_timestamp(self):
+        return self._combine_bin(self._payload[5], self._payload[6])
+
+    def _get_torque_ticks_stamp(self):
+        return self._combine_bin(self._payload[7], self._payload[6])
 
     #########
 
