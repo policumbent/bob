@@ -95,7 +95,10 @@ class Hall(AntDevice):
             self._distance = self.calculate_distance() or 0
             self._overall_distance = round(self._overall_distance + self._distance, 4)
 
-            if self._device_type is DeviceTypeID.speed_cadence and self._disable_cadence:
+            if (
+                self._device_type is DeviceTypeID.speed_cadence
+                and self._disable_cadence
+            ):
                 self._cadence = self.calculate_cadence() or self._cadence
 
             # update last reference
@@ -113,16 +116,16 @@ class Hall(AntDevice):
     # Metodi propri della classe
 
     def _get_cadence_event_time(self):
-        return self._payload[1] * 256 + self._payload[0]
+        return self._combine_bin(self._payload[0], self._payload[1])
 
     def _get_cadence_revolutions(self):
-        return self._payload[3] * 256 + self._payload[2]
+        return self._combine_bin(self._payload[2], self._payload[3])
 
     def _get_speed_event_time(self):
-        return self._payload[5] * 256 + self._payload[4]
+        return self._combine_bin(self._payload[4], self._payload[5])
 
     def _get_speed_revolutions(self):
-        return self._payload[7] * 256 + self._payload[6]
+        return self._combine_bin(self._payload[6], self._payload[7])
 
     def _check_speed_register_overflow(self):
         if self._current_speed_event_time < self._last_speed_event_time:

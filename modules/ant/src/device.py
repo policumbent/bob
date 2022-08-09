@@ -49,6 +49,9 @@ class AntDevice(ABC):
     def _is_active(self, time_sec=5):
         return self._last_data_read and self._elapsed_time() < time_sec
 
+    def _combine_bin(self, lsb, msb):
+        return lsb + (msb << 8)
+
     @abstractmethod
     def _init_channel(self):
         pass

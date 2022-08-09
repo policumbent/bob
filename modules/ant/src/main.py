@@ -113,6 +113,8 @@ async def main():
                 )
         except DriverNotFound:
             log.err("USB not connected")
+        except Exception as e:
+            log.err(e)
         finally:
             await asyncio.sleep(1)
 
