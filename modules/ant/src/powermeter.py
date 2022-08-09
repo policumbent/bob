@@ -38,12 +38,14 @@ class Powermeter(AntDevice):
         self._last_message_type = None
 
         # data store
-        self._power_buffer = deque(maxlen=5)
         self._power = 0
         self._cadence = 0
 
         # attribute for data calculation
         self._offset = 0
+
+        self._power_buffer = deque(maxlen=5)
+        self._offset_buffer = deque(maxlen=10)
 
         # lunghezza_vettore_media = settings.average_power_time * 4
         # lunghezza_vettore_media_1s = 4
@@ -117,13 +119,14 @@ class Powermeter(AntDevice):
         if not self._is_active(10):
             self._power = 0
             self._cadence = 0
+            self._offset = 0
 
         elif self._received_data and self._last_message_type is MessageType.power_only:
             self._cadence = self._get_instant_cadence()
             self._power_buffer.append(self._get_instant_power())
 
             # if buffer is full enaugh calculate average value of power
-            if self._is_buffer_full():
+            if self._is_buffer_full(self._power_buffer):
                 self._power = round(
                     sum((self._power_buffer)) / self._power_buffer.maxlen, 4
                 )
@@ -139,15 +142,24 @@ class Powermeter(AntDevice):
             pass
 
         elif self._received_data and self._last_message_type is MessageType.calibration:
-            self._offset = self._get_offset()
+            self._offset_buffer.append(self._get_offset())
+
+            if self._is_buffer_full(self._offset_buffer):
+                self._offset = round(
+                    sum((self._offset_buffer)) / self._offset_buffer.maxlen
+                )
+
             # print(self._offset)
 
         return {"power": self._power, "cadence": self._cadence}
 
     # Metodi propri della classe
 
-    def _is_buffer_full(self):
-        return len(self._power_buffer) == self._power_buffer.maxlen
+    def _is_buffer_full(self, buffer: deque):
+        if buffer.maxlen is None:
+            return False
+
+        return len(buffer) == buffer.maxlen
 
     def _get_message_type(self):
         try:
