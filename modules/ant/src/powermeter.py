@@ -1,5 +1,6 @@
 from enum import Enum
 from collections import deque
+from math import pi
 
 from .device import AntDevice, DeviceTypeID
 
@@ -33,6 +34,7 @@ class Powermeter(AntDevice):
     def __init__(self, node, sensor_id=0, device_type=DeviceTypeID.powermeter):
         super().__init__(node, sensor_id)
 
+        # device type
         self._device_type_id = device_type.value
 
         self._last_message_type = None
@@ -43,6 +45,23 @@ class Powermeter(AntDevice):
 
         # attribute for data calculation
         self._offset = 0
+
+        self._slope = 0
+        self._torque = 0.0
+
+        self._torque_frequency = 0.0
+        self._torque_ticks = 0
+        self._previous_torque_ticks_stamp = 0
+        self._current_torque_ticks_stamp = 0
+
+        self._cadence_period = 0.0
+        self._previous_rotations_count = 0
+        self._current_rotations_count = 0
+
+        self._elapsed_time_interval = 0
+        self._last_rx_time = None
+        self._current_rx_time = None
+
 
         self._power_buffer = deque(maxlen=5)
         self._offset_buffer = deque(maxlen=10)
@@ -134,19 +153,18 @@ class Powermeter(AntDevice):
             # TODO: provare con srm cerberus
             # print(self._get_accumulated_power())
 
-        elif (
-            self._received_data
-            and self._last_message_type is MessageType.crank_torque_freq
-        ):
-            # TODO: aggiungere calcolo con crack torque frequency (CTF)
-            pass
+        elif self._received_data and self._last_message_type is MessageType.crank_torque_freq:
+
+
+            self._cadence_period = self.calculate_cadence_period()
+
 
         elif self._received_data and self._last_message_type is MessageType.calibration:
             self._offset_buffer.append(self._get_offset())
 
             if self._is_buffer_full(self._offset_buffer):
                 self._offset = round(
-                    sum((self._offset_buffer)) / self._offset_buffer.maxlen
+                    sum(self._offset_buffer) / self._offset_buffer.maxlen
                 )
 
             # print(self._offset)
@@ -183,7 +201,7 @@ class Powermeter(AntDevice):
     def _get_instant_power(self):
         return self._combine_bin(self._payload[6], self._payload[7])
 
-    # Metodi per MessageType.crank_toruqe_freq
+    # Metodi per MessageType.crank_torque_freq
 
     def _get_slope(self):
         return self._combine_bin(self._payload[3], self._payload[2])
@@ -195,6 +213,32 @@ class Powermeter(AntDevice):
         return self._combine_bin(self._payload[7], self._payload[6])
 
     #########
+
+    def calculate_cadence_period(self):
+        return (self._current_rx_time - self._last_rx_time) / (
+                    self._current_rotations_count - self._previous_rotations_count) * 0.0005
+
+    def calculate_cadence(self):
+        return round(60 / self._cadence_period)
+
+    def calculate_elapsed_time(self):
+        if self._last_rx_time is None:
+            return 0
+        return (self._current_rx_time - self._last_rx_time) * 0.0005
+
+    def calculate_power(self):
+        return self._torque * self._cadence * pi / 30
+
+    def calculate_torque_ticks(self):
+        return self._current_torque_ticks_stamp - self._previous_torque_ticks_stamp
+
+    def calculate_torque_frequency(self):
+        return self._torque_ticks / self._elapsed_time_interval - self._offset
+
+    def calculate_torque(self):
+        return self._torque_frequency * 10 / self._slope
+
+
 
     # TODO: DEPRECATE
     # def _run(self):
