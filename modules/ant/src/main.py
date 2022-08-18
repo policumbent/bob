@@ -40,6 +40,18 @@ async def mqtt():
         finally:
             await asyncio.sleep(1)
 
+async def mqtt_remote(url, port, username, password, bike):
+    while True:
+        try:
+            async with Mqtt(url, port, username, password) as client:
+                while True:
+                    await client.remote_sensor_publish(bike, "ant", data)
+                    await asyncio.sleep(0.1)
+        except Exception as e:
+            log.err(e)
+        finally:
+            await asyncio.sleep(1)
+
 
 async def write_db(db):
     curr_row = None
@@ -80,6 +92,10 @@ async def main():
 
             bike = config.get("name")
 
+            server_url = config.get("server_url")
+            server_port = config.get("server_port")
+            server_username = config.get("server_username")         
+            server_password = config.get("server_password")
             # nested dictionary config
             #
             # hall_id = config.get(bike).get("hall_id")
@@ -109,6 +125,7 @@ async def main():
                     read_data(hr),
                     read_data(pm),
                     mqtt(),
+                    mqtt_remote(server_url, server_port, server_username, server_password, bike),
                     write_db(db),
                 )
         except DriverNotFound:
