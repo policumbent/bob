@@ -75,7 +75,7 @@ async def video(config):
                 vcam.add_overlay_element(OverlayElement((0, 3), Colors.red, sensors[3]))
 
                 # cadenza ??
-                vcam.add_overlay_element(OverlayElement((4, 2), Colors.red, sensors[4]))
+                vcam.add_overlay_element(OverlayElement((4, 2), Colors.green, sensors[4]))
                 
                 # marcia basso centro
                 vcam.add_overlay_element(

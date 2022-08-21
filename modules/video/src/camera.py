@@ -67,7 +67,7 @@ class Camera(PiCamera):
 
     def __init__(
         self,
-        screen_dim=(1024, 760),
+        screen_dim=(1024, 820),
         sectors=(5, 4),
         framerate=40,
         video_rotation=0,
