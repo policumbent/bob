@@ -58,24 +58,24 @@ async def video(config):
 
                 # velocità altro a sx
                 vcam.add_overlay_element(
-                    OverlayElement((0, 0), Colors.black, sensors[0])
+                    OverlayElement((0, 0), Colors.black, sensors[0], "kph")
                 )
                 
                 # distanza basso a dx
                 vcam.add_overlay_element(
-                    OverlayElement((4, 3), Colors.white, sensors[1])
+                    OverlayElement((4, 3), Colors.white, sensors[1], "m")
                 )
 
                 # potenza alto a dx
                 vcam.add_overlay_element(
-                    OverlayElement((4, 0), Colors.blue, sensors[2])
+                    OverlayElement((4, 0), Colors.blue, sensors[2], "W")
                 )
 
                 # battito basso a sx
-                vcam.add_overlay_element(OverlayElement((0, 3), Colors.red, sensors[3]))
+                vcam.add_overlay_element(OverlayElement((0, 3), Colors.red, sensors[3], "bpm"))
 
                 # cadenza ??
-                vcam.add_overlay_element(OverlayElement((4, 2), Colors.green, sensors[4]))
+                vcam.add_overlay_element(OverlayElement((4, 2), Colors.green, sensors[4], "rpm"))
                 
                 # marcia basso centro
                 vcam.add_overlay_element(

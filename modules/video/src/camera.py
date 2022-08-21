@@ -18,6 +18,7 @@ class OverlayElement:
         position: tuple,
         color: Colors,
         key_data: str,
+        unit=None, 
         sectors_length: int = 1,
         direction="row",
     ):
@@ -26,6 +27,13 @@ class OverlayElement:
         self._key_data = key_data
         self._sectors_length = abs(sectors_length)
         self._direction = direction
+        self._unit = unit
+
+    def __str__(self) -> str:
+        if self._unit:
+            return f"{self.data} {self._unit}"
+        
+        return self.data
 
     def __len__(self):
         return self._sectors_length
@@ -54,12 +62,12 @@ class OverlayElement:
         data = self.DATA.get(self._key_data)
 
         return str(data)
-
+    
     def is_multiline(self):
         return self._sectors_length > 1
 
     def to_writable(self):
-        return self.position, self.color, self.data
+        return self.position, self.color, str(self)
 
 
 class Camera(PiCamera):
