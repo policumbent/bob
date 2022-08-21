@@ -79,16 +79,9 @@ async def main():
             config = db.config("ant")
 
             bike = config.get("name")
-
-            # nested dictionary config
-            #
-            # hall_id = config.get(bike).get("hall_id")
-            # hall_type = config.get(bike).get("hall_type")
-            # hr_id = config.get(bike).get("hr_id")
-
-            hall_id = config.get(f"{bike}_hall_id")
-            hall_type = config.get(f"{bike}_hall_type")
-            hr_id = config.get(f"{bike}_hr_id")
+            hall_id = config.get(bike).get("hall_id")
+            hall_type = config.get(bike).get("hall_type")
+            hr_id = config.get(bike).get("hr_id")
 
             with Node(0x00, AntDevice.NETWORK_KEY) as node:
                 hall = Hall(
