@@ -122,7 +122,12 @@ async def write_db():
         if row != curr_row:
             data = [time.human_timestamp(), *list(row.values())]
 
-            db.insert("accelerometer", data)
+            # TODO: gestrire eccezione dal core
+            
+            try:
+                db.insert("accelerometer", data)
+            except:
+                pass
 
             curr_row = dict(row)
 
