@@ -71,7 +71,6 @@ class Powermeter(AntDevice):
         # attributes for Messagetype.calibration
         self._offset_buffer = deque(maxlen=10)
 
-
         # lunghezza_vettore_media = settings.average_power_time * 4
         # lunghezza_vettore_media_1s = 4
 
@@ -135,10 +134,13 @@ class Powermeter(AntDevice):
     def _receive_new_data(self, data):
         # callback for ant data
 
+        # print(data)
+
         self._payload = data
         self._received_data = True
-        self._last_data_read = self._current_time()
         self._last_message_type = self._get_message_type()
+
+        self._last_data_read = self._current_time()
 
     def read_data(self) -> dict:
         if not self._is_active(10):
@@ -159,7 +161,10 @@ class Powermeter(AntDevice):
             # TODO: provare con srm cerberus
             # print(self._get_accumulated_power())
 
-        elif self._received_data and self._last_message_type is MessageType.crank_torque_freq:
+        elif (
+            self._received_data
+            and self._last_message_type is MessageType.crank_torque_freq
+        ):
 
             # parameters to set before proceeding with computations -- retrieve from payload
             self._current_rotations_count = self._get_rotations_count()
@@ -174,9 +179,18 @@ class Powermeter(AntDevice):
             self._torque_frequency = self.calculate_torque_frequency()
             self._torque = self.calculate_torque()
 
+
+            print(            self._elapsed_time_interval ,
+            self._cadence_period ,
+            self._torque_ticks ,
+            self._torque_frequency ,
+            self._torque 
+)
+
+
             # calculations necessary for the cadence
-            self._cadence = self.calculate_cadence()
-            self._power = self.calculate_power()
+            self._power = self.calculate_power() or self._power
+            self._cadence = self.calculate_cadence() or self._cadence
 
             # storing previous parameter results
             self._previous_rotations_count = self._current_rotations_count
@@ -226,7 +240,7 @@ class Powermeter(AntDevice):
         return self._combine_bin(self._payload[6], self._payload[7])
 
     # Metodi per MessageType.crank_torque_freq
-    # getters
+
     def _get_rotations_count(self):
         return self._payload[1]
 
@@ -234,51 +248,71 @@ class Powermeter(AntDevice):
         return self._combine_bin(self._payload[3], self._payload[2])
 
     def _get_timestamp(self):
-        return self._combine_bin(self._payload[5], self._payload[6])
+        return self._combine_bin(self._payload[5], self._payload[4])
 
     def _get_torque_ticks_stamp(self):
         return self._combine_bin(self._payload[7], self._payload[6])
 
     # calculations
     def calculate_cadence_period(self):
-        if self._elapsed_time_interval is None:
+        if (
+            self._elapsed_time_interval is None
+            or self._current_rotations_count is None
+            or self._previous_rotations_count is None
+        ):
             return None
+
         if self._current_rotations_count - self._previous_rotations_count == 0:
             return None
+
         return self._elapsed_time_interval / (
-                    self._current_rotations_count - self._previous_rotations_count)
+            self._current_rotations_count - self._previous_rotations_count
+        )
 
     def calculate_cadence(self):
         if self._cadence_period is None:
             return None
-        return round(60 / self._cadence_period)
+
+        return round(60 / self._cadence_period, 4)
 
     def calculate_elapsed_time(self):
         if self._last_rx_time is None or self._current_rx_time is None:
             return None
+
         return (self._current_rx_time - self._last_rx_time) * 0.0005
 
     def calculate_power(self):
         if self._torque is None or self._cadence is None:
             return None
+
         return self._torque * self._cadence * pi / 30
 
     def calculate_torque_ticks(self):
-        if self._current_torque_ticks_stamp is None or self._previous_torque_ticks_stamp is None:
+        if (
+            self._current_torque_ticks_stamp is None
+            or self._previous_torque_ticks_stamp is None
+        ):
             return None
+
         return self._current_torque_ticks_stamp - self._previous_torque_ticks_stamp
 
     def calculate_torque_frequency(self):
         if self._torque_ticks is None or self._elapsed_time_interval is None:
             return None
-        return self._torque_ticks / self._elapsed_time_interval - self._offset
+
+        if self._elapsed_time_interval == 0 or self._torque_ticks == 0:
+            return None
+
+        return (1 / (self._elapsed_time_interval / self._torque_ticks)) - self._offset
 
     def calculate_torque(self):
-        if self._torque_frequency is None:
+        if self._torque_frequency is None or self._slope is None:
             return None
-        return self._torque_frequency * 10 / self._slope
 
+        if self._slope == 0:
+            return None
 
+        return self._torque_frequency / (self._slope / 10)
 
     # TODO: DEPRECATE
     # def _run(self):
