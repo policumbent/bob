@@ -12,88 +12,15 @@ Il factotum della bici
 <!-- ALL-CONTRIBUTORS-BADGE:END -->
 </h3>
 
-* BOB is not a single program, it is a collection of independent modules and tools to manage them.
-* Modules talk to each other through MQTT.
-* Up to now, all the modules are written in Python and are managed by systemd.
-* Every module has its own systemd service, and it's independent of the others.
+- BOB is not a single program, it is a collection of independent modules and tools to manage them.
+- Modules talk to each other through MQTT.
+- Up to now, all the modules are written in Python and are managed by systemd.
+- Every module has its own systemd service, and it's independent of the others.
 
 ## CLI
+
 In order to ease the management of the modules, BOB has a command line interface.\
 Read the [README](bobcli/README.md) to know how to use it.
-
-## Componenti
-
-_Work in progress_
-
-Per tutti manca la gestione delle impostazioni
-
-- sensori
-  - [x] ant
-  - [x] accelerometer
-  - [ ] weather => sensori umidità e temperatura a bordo della bici
-  - [x] gps
-  - [ ] gear => gestione cambio e comunicazione seriale
-- consumatori
-  - [x] csv
-  - [ ] power/speed profiles
-  - [x] raspberry manager (cronometro / temperatura cpu)
-  - [x] video
-- comunicazione
-  - [x] gpio => tasti cambio e combinazioni tasti
-  - [x] communication => collegamento con il server http
-  - [x] pyxbee_v2 => comunicazione tramite lora
-  - [x] bt => collegamento con l'app bt **(manca dockerfile)**
-- messaggi
-  - [x] messaggi a schermo
-  - [ ] alert su alice
-
-## Protocollo
-
-### Comuni (Mqtt)
-
-- publish
-  - `states/{name}` => Il sensore pubblica un json `{"connected": True}`quando si connette
-  - `settings/{name}` => Un sensore pubblica un json con le sue impostazioni
-  - `messages/{name}` => Un sensore pubblica un json con il messaggio che vuole mandare `{"text": "Ciao", "priority": 4, "time": 10, "type": 0}`
-  - `alerts/{name}` => Un sensore pubblica un json con il messaggio che vuole mandare `{"text": "Ciao", "priority": 4}`
-- subscribe
-  - `new_settings/{name}` => Un sensore effettua la subscribe sulle nuove impostazioni e se arriva un messaggio aggiorna le proprie
-  - `signals` => Un sensore effettua la subscribe sui segnali, se arriva un segnale il sensore compie la relativa azione `{"action": "reset"}`
-
-### Sensori (MqttSensor => Estende Mqtt)
-
-- publish
-  - `sensors/{name}` => Il sensore pubblica i suoi dati
-
-### Consumatori (MqttConsumer => Estende MqttSensor)
-
-- subscribe
-  - `sensors/{name}` => I consumatori effettuano la subscription ad una lista di sensori
-
-### Comunicazione (MqttRemote => Estende MqttConsumer)
-
-- publish
-  - `signals` => Manda dei segnali che saranno letti da tutti i sensori `{"action": "reset"}`
-  - `new_settings/{name}` => Manda le impostazioni ad ogni sensores
-- subscribe
-  - `settings`
-  - `alerts`
-
-### Messaggi (MqttMessages => Estende Mqtt)
-
-- publish
-  - `messages` => Pubblica un json con i messaggi da mostrare sulle due righe `{"line_1": "Messaggio riga 1", "line_2": "Messaggio riga 2"}`
-- subscribe
-  - `messages` => Riceve gli aggiornamenti dai vari sensori
-
-## TODO
-
-- [ ] implementare componenti mancanti
-- [ ] gestione settings
-- [ ] Eliminare moduli inutilizzati
-- [ ] Scrivere tutti i README dei singoli moduli
-- [ ] Gestire le dipendenze con Poetry
-- [ ] Integrare la UI con gli script di startup
 
 ## Contributors ✨
 
