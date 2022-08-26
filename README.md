@@ -5,9 +5,11 @@ Il factotum della bici
 
 <br>
 <br>
+
 <!-- ALL-CONTRIBUTORS-BADGE:START - Do not remove or modify this section -->
 [![All Contributors](https://img.shields.io/badge/all_contributors-6-orange.svg?style=flat-square)](#contributors-)
 <!-- ALL-CONTRIBUTORS-BADGE:END -->
+
 </h3>
 
 - BOB is not a single program, it is a collection of independent modules and tools to manage them.
