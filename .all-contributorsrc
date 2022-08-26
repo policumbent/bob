@@ -42,10 +42,21 @@
       "contributions": [
         "code"
       ]
+    },
+    {
+      "login": "davideaimar",
+      "name": "davide.aimar",
+      "avatar_url": "https://avatars.githubusercontent.com/u/17318562?v=4",
+      "profile": "http://www.davideaimar.com",
+      "contributions": [
+        "code",
+        "maintenance",
+        "ideas"
+      ]
     }
   ],
   "contributorsPerLine": 7,
-  "projectName": "BOB",
+  "projectName": "bob",
   "projectOwner": "policumbent",
   "repoType": "github",
   "repoHost": "https://github.com",
