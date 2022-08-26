@@ -1,3 +1,41 @@
 # ANT module
-### Description
-### TODO
+
+## Descrizione
+
+Modulo per acquisizione dati con sensori compatibili [ANT+](https://www.thisisant.com/developer/ant-plus/ant-plus-basics/)
+
+### Sensori
+
+Powermeter SRM
+
+Hall Velocita/Cadenza
+
+Fascia HRM
+
+#### Codici
+
+| Sensore | Bici        | Tipo             | ID         |
+| ------- | ----------- | ---------------- | ---------- |
+| Hall    | 🐂 TaurusX  | Velocità         | 24363      |
+| Hall    | 🐦 Phoenix  | Velocità/Cadenza | 13583      |
+| Hall    | 🐶 Cerberus | Velocità         | ...        |
+| PM      | 🐂 TaurusX  | PM6 (CTF)        | 51321      |
+| PM      | 🐦 Phoenix  | PM6 (CTF)        | 30636      |
+| PM      | 🐶 Cerberus | PM9              | 42941      |
+| HRM     | 🐂 TaurusX  | Heartrate        | ...        |
+| HRM     | 🐦 Phoenix  | Heartrate        | 678224 (?) |
+| HRM     | 🐶 Cerberus | Heartrate        | ...        |
+
+### Tabella DB
+
+Nome: `ant`
+
+Campi:
+
+| timestamp                   | speed   | distance | cadence | power   | heartrate |
+| --------------------------- | ------- | -------- | ------- | ------- | --------- |
+| `str` (core.time.humantime) | `float` | `float`  | `float` | `float` | `float`   |
+
+### Mqtt
+
+Come DB

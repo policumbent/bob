@@ -1,10 +1,10 @@
 # Accelerometer module
 
-### Description
+## Descrizione
 
 Modulo per acquisizione dati con accelerometro e giroscopio
 
-#### Sensore
+### Sensore
 
 MPU6050
 
@@ -17,7 +17,7 @@ dtparam=i2c_arm=on
 i2c_arm_baudrate=400000
 ```
 
-#### Tabella DB
+### Tabella DB
 
 Nome: `accelerometer`
 
@@ -27,6 +27,6 @@ Campi:
 | --------------------------- | ------- | ------- | ------- | ------- | ------- | ------- |
 | `str` (core.time.humantime) | `float` | `float` | `float` | `float` | `float` | `float` |
 
-#### Mqtt
+### Mqtt
 
-WIP
+No
