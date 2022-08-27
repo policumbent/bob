@@ -167,10 +167,23 @@ class Powermeter(AntDevice):
         ):
 
             # parameters to set before proceeding with computations -- retrieve from payload
+            # they are followed by their overflow check
             self._current_rotations_count = self._get_rotations_count()
+            if self._previous_rotations_count is not None and self._previous_rotations_count > self._current_rotations_count:
+                self._current_rotations_count += 256  # in case of overflow we increase the current rotations count
+
             self._slope = self._get_slope()
+            if self._slope < 100 or self._slope > 500:
+                self._slope = None  # skip the value
+
             self._current_rx_time = self._get_timestamp()
+            if self._last_rx_time is not None and self._last_rx_time > self._current_rx_time:
+                self._current_rx_time += 65535
+
             self._current_torque_ticks_stamp = self._get_torque_ticks_stamp()
+            if self._previous_torque_ticks_stamp is not None and self._previous_torque_ticks_stamp > self._current_torque_ticks_stamp:
+                self._current_torque_ticks_stamp += 65535
+
 
             # intermediate calculations
             self._elapsed_time_interval = self.calculate_elapsed_time()
@@ -180,12 +193,7 @@ class Powermeter(AntDevice):
             self._torque = self.calculate_torque()
 
 
-            print(            self._elapsed_time_interval ,
-            self._cadence_period ,
-            self._torque_ticks ,
-            self._torque_frequency ,
-            self._torque 
-)
+            print(self._elapsed_time_interval, self._cadence_period, self._torque_ticks, self._torque_frequency, self._torque)
 
 
             # calculations necessary for the cadence
@@ -193,9 +201,9 @@ class Powermeter(AntDevice):
             self._cadence = self.calculate_cadence() or self._cadence
 
             # storing previous parameter results
-            self._previous_rotations_count = self._current_rotations_count
-            self._last_rx_time = self._current_rx_time
-            self._previous_torque_ticks_stamp = self._current_torque_ticks_stamp
+            self._previous_rotations_count = self._current_rotations_count % 256  # this way we avoid growing too much
+            self._last_rx_time = self._current_rx_time % 65535
+            self._previous_torque_ticks_stamp = self._current_torque_ticks_stamp % 65535
 
         elif self._received_data and self._last_message_type is MessageType.calibration:
             self._offset_buffer.append(self._get_offset())
