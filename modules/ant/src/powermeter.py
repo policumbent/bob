@@ -125,22 +125,21 @@ class Powermeter(AntDevice):
             and self._last_message_type is MessageType.crank_torque_freq
         ):
 
-            # parameters to set before proceeding with computations -- retrieve from payload
-            # they are followed by their overflow check
+            # parameters to set before proceeding with computations retrieved from payload
             self._slope = self._get_slope()
             self._current_rx_time = self._get_timestamp()
             self._current_rotations_count = self._get_rotations_count()
             self._current_torque_ticks_stamp = self._get_torque_ticks_stamp()
 
             # intermediate calculations
-            self._elapsed_time_interval = self.calculate_elapsed_time()
-            self._cadence_period = self.calculate_cadence_period()
-            self._torque_ticks = self.calculate_torque_ticks()
-            self._torque_frequency = self.calculate_torque_frequency()
-            self._torque = self.calculate_torque()
+            self._elapsed_time_interval = self._calculate_elapsed_time()
+            self._cadence_period = self._calculate_cadence_period()
+            self._torque_ticks = self._calculate_torque_ticks()
+            self._torque_frequency = self._calculate_torque_frequency()
+            self._torque = self._calculate_torque()
 
             # calculate the average power
-            self._instant_power = self.calculate_power()
+            self._instant_power = self._calculate_power()
             if self._instant_power != None:
                 self._power_buffer.append(self._instant_power)
 
@@ -150,7 +149,7 @@ class Powermeter(AntDevice):
                     sum((self._power_buffer)) / self._power_buffer.maxlen
                 )
 
-            self._cadence = self.calculate_cadence() or self._cadence
+            self._cadence = self._calculate_cadence() or self._cadence
 
             # storing previous parameter results
             self._last_rx_time = self._current_rx_time
@@ -227,7 +226,7 @@ class Powermeter(AntDevice):
     def _get_torque_ticks_stamp(self):
         return self._combine_bin(self._payload[7], self._payload[6])
 
-    def calculate_elapsed_time(self):
+    def _calculate_elapsed_time(self):
         if self._last_rx_time is None or self._current_rx_time is None:
             return None
 
@@ -235,7 +234,7 @@ class Powermeter(AntDevice):
 
         return (self._current_rx_time - self._last_rx_time) * 0.0005
 
-    def calculate_cadence_period(self):
+    def _calculate_cadence_period(self):
         if (
             self._elapsed_time_interval is None
             or self._current_rotations_count is None
@@ -252,7 +251,7 @@ class Powermeter(AntDevice):
             self._current_rotations_count - self._last_rotations_count
         )
 
-    def calculate_torque_ticks(self):
+    def _calculate_torque_ticks(self):
         if (
             self._current_torque_ticks_stamp is None
             or self._last_torque_ticks_stamp is None
@@ -263,7 +262,7 @@ class Powermeter(AntDevice):
 
         return self._current_torque_ticks_stamp - self._last_torque_ticks_stamp
 
-    def calculate_torque_frequency(self):
+    def _calculate_torque_frequency(self):
         if self._torque_ticks is None or self._elapsed_time_interval is None:
             return None
 
@@ -274,7 +273,7 @@ class Powermeter(AntDevice):
 
         return (1 / (self._elapsed_time_interval / self._torque_ticks)) - self._offset
 
-    def calculate_torque(self):
+    def _calculate_torque(self):
         if self._torque_frequency is None or self._slope is None:
             return None
 
@@ -285,7 +284,7 @@ class Powermeter(AntDevice):
 
         return self._torque_frequency / (self._slope / 10)
 
-    def calculate_cadence(self):
+    def _calculate_cadence(self):
         if self._cadence_period is None:
             return None
 
@@ -294,7 +293,7 @@ class Powermeter(AntDevice):
 
         return round(60 / self._cadence_period, 4)
 
-    def calculate_power(self):
+    def _calculate_power(self):
         if self._torque is None or self._cadence is None:
             return None
 
