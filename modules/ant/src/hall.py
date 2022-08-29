@@ -91,15 +91,15 @@ class Hall(AntDevice):
             self._current_cadence_event_time = self._get_cadence_event_time()
             self._current_cadence_revolutions = self._get_cadence_revolutions()
 
-            self._speed = self.calculate_speed() or self._speed
-            self._distance = self.calculate_distance() or 0
+            self._speed = self._calculate_speed() or self._speed
+            self._distance = self._calculate_distance() or 0
             self._overall_distance = round(self._overall_distance + self._distance, 4)
 
             if (
                 self._device_type is DeviceTypeID.speed_cadence
                 and self._disable_cadence
             ):
-                self._cadence = self.calculate_cadence() or self._cadence
+                self._cadence = self._calculate_cadence() or self._cadence
 
             # update last reference
             self._last_speed_event_time = self._current_speed_event_time
@@ -110,7 +110,7 @@ class Hall(AntDevice):
         return {
             "speed": self._speed,
             "distance": self._overall_distance,
-            "cadence": self._cadence,
+            "hall_cadence": self._cadence,
         }
 
     # Metodi propri della classe
@@ -141,7 +141,7 @@ class Hall(AntDevice):
         if self._current_cadence_revolutions < self._last_cadence_revolutions:
             self._last_cadence_revolutions = self._current_cadence_revolutions
 
-    def calculate_cadence(self):
+    def _calculate_cadence(self):
         if (
             self._last_cadence_event_time is None
             or self._last_cadence_revolutions is None
@@ -171,7 +171,7 @@ class Hall(AntDevice):
         #     4,
         # )
 
-    def calculate_speed(self):
+    def _calculate_speed(self):
         if self._last_speed_event_time is None or self._last_speed_revolutions is None:
             return None
 
@@ -189,7 +189,7 @@ class Hall(AntDevice):
             4,
         )
 
-    def calculate_distance(self):
+    def _calculate_distance(self):
         # distance calculation depends on speed
         if self._last_speed_revolutions is None or self._last_speed_revolutions is None:
             return None
@@ -202,30 +202,3 @@ class Hall(AntDevice):
             / 1000,
             2,
         )
-
-    # def get_trap_speed(self):
-    #     if self.trap_speed == 0:
-    #         s = 0
-    #         for elem in self.average_array:
-    #             s += elem
-    #         if len(self.average_array) > 0:
-    #             self.trap_speed = s / len(self.average_array)
-    #     return str(round(self.trap_speed, 2))
-
-    # @property
-    # def trap_info(self):
-    #     # per il record dell'ora
-    #     if self.settings.hour_record:
-    #         if self.time_int == 0:
-    #             return ""
-    #         return "V_med: " + str(3.6 * self.distance / self.time_int)
-    #     if self.distance < self.settings.run_length:
-    #         return (
-    #             "Trappola tra "
-    #             + str(round(self.settings.run_length - self.distance))
-    #             + " metri"
-    #         )
-    #     elif self.distance > self.settings.run_length and self.distance_trap >= 0:
-    #         return "Fine trappola tra " + str(round(self.distance_trap)) + " metri"
-    #     else:
-    #         return "Velocità media trappola: " + str(self.get_trap_speed())

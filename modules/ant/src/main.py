@@ -24,7 +24,7 @@ async def read_data(sensor):
     while True:
         data.update(sensor.read_data())
 
-        await asyncio.sleep(0.1)
+        await asyncio.sleep(0.05)
 
 
 async def mqtt():
@@ -42,30 +42,25 @@ async def mqtt():
 
 
 async def write_db(db):
-    curr_row = None
     row = {
         "timestamp": str(0),
         "speed": 0,
         "distance": 0,
         "cadence": 0,
+        "hall_cadence": 0,
         "power": 0,
         "heartrate": 0,
     }
 
     while True:
+        row.update({"timestamp": time.human_timestamp(), **data})
+
         try:
-            row.update(data)
-
-            if row != curr_row:
-                row.update({"timestamp": time.human_timestamp()})
-
-                db.insert("ant", list(row.values()))
-
-                curr_row = dict(row)
+            db.insert_data(row)
         except:
             pass
-        finally:
-            await asyncio.sleep(0.2)
+        
+        await asyncio.sleep(1)
 
 
 async def main():
@@ -79,9 +74,11 @@ async def main():
             config = db.config("ant")
 
             bike = config.get("name")
+            
             hall_id = config.get(bike).get("hall_id")
             hall_type = config.get(bike).get("hall_type")
             hr_id = config.get(bike).get("hr_id")
+            pm_id = config.get(bike).get("pm_id")
 
             with Node(0x00, AntDevice.NETWORK_KEY) as node:
                 hall = Hall(
@@ -90,8 +87,7 @@ async def main():
                     device_type=DeviceTypeID(hall_type),
                 )
                 hr = HeartRate(node, sensor_id=hr_id)
-
-                pm = Powermeter(node, sensor_id=42941)
+                pm = Powermeter(node, sensor_id=pm_id)
 
                 # start ant loop and data read
                 threading.Thread(target=node.start, name="ant.easy").start()
