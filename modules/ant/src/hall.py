@@ -9,6 +9,8 @@ class Hall(AntDevice):
         node: Node,
         sensor_id=0,
         device_type=DeviceTypeID.speed,
+        circumference=1450,
+        cadence_circumference=350,
         disable_cadence=True,
     ):
         super().__init__(node, sensor_id)
@@ -16,9 +18,8 @@ class Hall(AntDevice):
         self._device_type = device_type
         self._disable_cadence = disable_cadence
 
-        # TODO: add correnct circumference
-        self._circumference = 1450
-        self._cadence_circumference = 350
+        self._circumference = circumference
+        self._cadence_circumference = cadence_circumference
 
         # data store
         self._speed = 0
