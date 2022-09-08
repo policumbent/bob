@@ -1,3 +1,5 @@
 # Gear module
-### Description
-### TODO
+
+## Description
+
+Ricava la marcia corrente dalla seriale bluetooth del controllore del cambio
