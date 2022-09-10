@@ -22,9 +22,9 @@ Fascia HRM
 | PM      | 🐂 TaurusX  | PM6 (CTF)        | 51321      |
 | PM      | 🐦 Phoenix  | PM6 (CTF)        | 30636      |
 | PM      | 🐶 Cerberus | PM9              | 42941      |
-| HRM     | 🐂 TaurusX  | Heartrate        | ...        |
+| HRM     | 🐂 TaurusX  | Heartrate        | 713908     |
 | HRM     | 🐦 Phoenix  | Heartrate        | 678224 (?) |
-| HRM     | 🐶 Cerberus | Heartrate        | ...        |
+| HRM     | 🐶 Cerberus | Heartrate        | 63908      |
 
 ### Tabella DB
 
