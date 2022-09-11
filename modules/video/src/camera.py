@@ -29,12 +29,6 @@ class OverlayElement:
         self._direction = direction
         self._unit = unit
 
-    def __str__(self) -> str:
-        if self._unit:
-            return f"{self.data} {self._unit}"
-        
-        return self.data
-
     def __len__(self):
         return self._sectors_length
 
@@ -61,13 +55,16 @@ class OverlayElement:
 
         data = self.DATA.get(self._key_data)
 
+        if self._unit:
+            return f"{data} {self._unit}"
+
         return str(data)
     
     def is_multiline(self):
         return self._sectors_length > 1
 
     def to_writable(self):
-        return self.position, self.color, str(self)
+        return self.position, self.color, self.data
 
 
 class Camera(PiCamera):
