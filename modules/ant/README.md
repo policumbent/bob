@@ -17,7 +17,7 @@ Fascia HRM
 | Sensore | Bici        | Tipo      | ID         |
 | ------- | ----------- | --------- | ---------- |
 | Hall    | 🐂 TaurusX  | Velocità  | 24363      |
-| Hall    | 🐦 Phoenix  | Velocità  | ...        |
+| Hall    | 🐦 Phoenix  | Velocità  | 4941       |
 | Hall    | 🐶 Cerberus | Velocità  | 13583      |
 | PM      | 🐂 TaurusX  | PM6 (CTF) | 51321      |
 | PM      | 🐦 Phoenix  | PM6 (CTF) | 30636      |
