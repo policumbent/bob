@@ -18,7 +18,7 @@ Fascia HRM
 | ------- | ----------- | --------- | ---------- |
 | Hall    | 🐂 TaurusX  | Velocità  | 24363      |
 | Hall    | 🐦 Phoenix  | Velocità  | 4941       |
-| Hall    | 🐶 Cerberus | Velocità  | 13583      |
+| Hall    | 🐶 Cerberus | Velocità  | 36567      |
 | PM      | 🐂 TaurusX  | PM6 (CTF) | 51321      |
 | PM      | 🐦 Phoenix  | PM6 (CTF) | 30636      |
 | PM      | 🐶 Cerberus | PM9       | 42941      |
