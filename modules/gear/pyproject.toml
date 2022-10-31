@@ -2,15 +2,14 @@
 name = "gear"
 version = "0.1.0"
 description = ""
-authors = ["Stefano Loscalzo <stefano.loscalzo@gmail.com>", "Davide Aimar <davide.aimar99gmail.com>", "Gabriele Belluardo <gabriele.belluardo@outlook.it>"]
+authors = ["Gabriele Belluardo <gabriele.belluardo@outlook.it>"]
 license = "GPL-3.0-or-later"
 
 [tool.poetry.dependencies]
-bob-core = { git = "https://github.com/policumbent/bob-core", rev = "main" }
+python = "^3.7.3"
 
 # package deps
-python = "^3.7.3"
-paho-mqtt = "^1.6.1"
+policumbent-bob-core = "^0.3.3"
 pyserial = "^3.5"
 
 [tool.poetry.dev-dependencies]
