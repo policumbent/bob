@@ -1,0 +1,13 @@
+[Unit]
+Description=Accelerometer service
+After=multi-user.target
+
+[Service]
+Type=simple
+User=pi
+restart=on-failure
+WorkingDirectory=${BOB_ROOT}/modules/accelerometer
+ExecStart=${BOB_ROOT}/modules/accelerometer/.venv/bin/python3 -m src.main
+
+[Install]
+WantedBy=multi-user.target

@@ -1,3 +1,0 @@
-paho-mqtt
-mpu6050-raspberrypi
-smbus

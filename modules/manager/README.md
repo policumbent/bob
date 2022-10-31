@@ -1,0 +1,3 @@
+# Manager module
+### Description
+### TODO

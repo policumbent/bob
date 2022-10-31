@@ -1,0 +1,12 @@
+[Unit]
+Description=sofia bluetooth service
+After=multi-user.target
+
+[Service]
+Type=simple
+restart=on-failure
+WorkingDirectory=${BOB_ROOT}/modules/sofia
+ExecStart=bash start.sh
+
+[Install]
+WantedBy=multi-user.target

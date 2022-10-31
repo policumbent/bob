@@ -1,0 +1,13 @@
+[Unit]
+Description=BOB
+After=docker.service
+Requires=docker.service
+
+[Service]
+User=pi
+Type=simple
+WorkingDirectory=${BOB_ROOT}
+ExecStart=docker-compose up -d
+
+[Install]
+WantedBy=multi-user.target

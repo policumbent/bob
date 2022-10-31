@@ -1,0 +1,13 @@
+[Unit]
+Description=hall service
+After=multi-user.target
+
+[Service]
+Type=simple
+User=pi
+restart=on-failure
+WorkingDirectory=${BOB_ROOT}/modules/LED
+ExecStart=${BOB_ROOT}/modules/LED/.venv/bin/python3 -m src.main 127.0.0.1
+
+[Install]
+WantedBy=multi-user.target
