@@ -1,0 +1,18 @@
+[tool.poetry]
+name = "new-alice"
+version = "0.1.0"
+description = "Passes datas to the server"
+authors = ["ghiannir <ghiannir@gmail.com>"]
+readme = "README.md"
+packages = [{include = "new_alice"}]
+
+[tool.poetry.dependencies]
+python = "3.7"
+asyncio = "^3.4.3"
+socketio = "^0.2.1"
+asyncio-mqtt = "^0.16.1"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
