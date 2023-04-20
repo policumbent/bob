@@ -23,7 +23,7 @@ sensors = [
     "ant/cadence"
 ]
 
-#data = [
+#sensors = [
 #    "speed/hall",
 #    "distance/hall",
 #    "wheel_rpm",
@@ -40,6 +40,7 @@ bus = can.Bus(
         receive_own_messages=True
     )
 
+# CAN listener
 data_reader = can.BufferedReader()
 
 can.Notifier(bus, [
@@ -48,6 +49,8 @@ can.Notifier(bus, [
 ])
 
 
+# Sends init debug messages to verify the state of the CAN bus and makes the
+# other devices on the bus activate their communication on the bus
 def debug_init():
     message = can.Message(
         arbitration_id=0x0,    
@@ -63,6 +66,8 @@ def debug_init():
         log.err("CAN: DEBUG_INIT message not sent");        
 
 
+# Subscribe this module to the MQTT topics specified in the `sensors` list and
+# collects their data, putting them in the `data` dictionary
 async def mqtt():
     while True:
         try:
