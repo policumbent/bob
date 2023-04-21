@@ -42,7 +42,7 @@ async def mqtt():
             await asyncio.sleep(1)
 
 
-async def write_csv(row, name_file):
+def write_csv(row, name_file):
     with open(name_file, "a") as csv_file:
         values = ''
         for value in row.values():
@@ -70,7 +70,12 @@ async def write_db(db, name_file: str):
 
     while True:
         row.update({"timestamp": time.human_timestamp(), **data})
-        write_csv(row, name_file)
+
+        try:
+            write_csv(row, name_file)
+        except Exception as e:
+            log.err(e)
+
 
         try:
             db.insert_data(row)
@@ -81,12 +86,15 @@ async def write_db(db, name_file: str):
 
 
 async def main():
-    name_file = f"{home_path}/bob/csv/{strftime('%d-%m-%Y@%H:%M:%S')}.csv"
     while True:
         try:
             # retrive configurations from db
             home_path = os.getenv("HOME")
             db_path = os.getenv("DATABASE_PATH") or f"{home_path}/bob/database.db"
+
+            # generate csv name for the run
+            name_file = f"{home_path}/bob/csv/{strftime('%d-%m-%Y@%H:%M:%S')}.csv"
+
 
             db = Database(table="ant", path=db_path, max_pending=10)
             config = db.config("ant")
