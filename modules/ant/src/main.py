@@ -42,7 +42,16 @@ async def mqtt():
             await asyncio.sleep(1)
 
 
-async def write_db(db, csv_file):
+async def write_csv(row, name_file):
+    with open(name_file, "a") as csv_file:
+        values = ''
+        for value in row.values():
+            values += f'{value},'
+        values = f"{values.rstrip(',')}\n"
+        csv_file.write(values)
+
+
+async def write_db(db, name_file: str):
     row = {
         "timestamp": str(0),
         "speed": 0,
@@ -53,19 +62,15 @@ async def write_db(db, csv_file):
         "heartrate": 0,
     }
     #import keys to the csv file
-    keys = ''
-    for key in row.keys():
-        keys += f'{key},'
-    csv_file.write(f'{keys.rstrip(",")}\n')
+    with open(name_file, "w") as csv_file:
+        keys = ''
+        for key in row.keys():
+            keys += f'{key},'
+        csv_file.write(f'{keys.rstrip(",")}\n')
 
     while True:
         row.update({"timestamp": time.human_timestamp(), **data})
-        #write values to the csv file TODO: apposite function
-        values = ''
-        for value in row.values():
-            values += f'{value},'
-        values = f"{values.rstrip(',')}\n"
-        csv_file.write(values)
+        write_csv(row, name_file)
 
         try:
             db.insert_data(row)
@@ -76,7 +81,7 @@ async def write_db(db, csv_file):
 
 
 async def main():
-    created_file = False
+    name_file = f"{home_path}/bob/csv/{strftime('%d-%m-%Y@%H:%M:%S')}.csv"
     while True:
         try:
             # retrive configurations from db
@@ -85,9 +90,9 @@ async def main():
 
             db = Database(table="ant", path=db_path, max_pending=10)
             config = db.config("ant")
-            if not created_file:
-                csv_file = open(f"{home_path}/bob/csv/{strftime('%d-%m-%Y@%H:%M:%S')}.csv","w")
-                created_file = True
+            # if not created_file:
+            #     csv_file = open(f"{home_path}/bob/csv/{strftime('%d-%m-%Y@%H:%M:%S')}.csv","w")
+            #     created_file = True
 
             bike = config.get("name")
             
@@ -114,7 +119,7 @@ async def main():
                     read_data(hr),
                     read_data(pm),
                     mqtt(),
-                    write_db(db, csv_file),
+                    write_db(db, name_file),
                 )
         except DriverNotFound:
             log.err("USB not connected")
@@ -122,7 +127,6 @@ async def main():
             log.err(e)
         finally:
             await asyncio.sleep(1)
-        csv_file.close()
 
 
 def entry_point():
