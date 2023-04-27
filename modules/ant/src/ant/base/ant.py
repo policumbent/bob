@@ -192,6 +192,7 @@ class Ant:
     def write_message(self, message):
         data = message.get()
         self._driver.write(data)
+        # print(f"Write data: {format_list(data)}")
         _logger.debug("Write data: %s", format_list(data))
 
     def read_message(self):
@@ -209,6 +210,7 @@ class Ant:
                 self._buffer.extend(data)
                 _logger.debug("Read data: %s (now have %s in buffer)",
                               format_list(data), format_list(self._buffer))
+                # print(f"Read data: {format_list(data)} (now have {format_list(self._buffer)} in buffer)")
                 _logger.debug("Buffer len: " + str(len(self._buffer)))
 
     # Ant functions

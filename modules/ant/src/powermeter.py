@@ -96,7 +96,7 @@ class Powermeter(AntDevice):
         self._payload = data
         self._received_data = True
         self._last_message_type = self._get_message_type()
-
+        print(f"Received datas: {self._payload} type: {self._last_message_type}")
         self._last_data_read = self._current_time()
 
     def read_data(self) -> dict:
@@ -158,6 +158,7 @@ class Powermeter(AntDevice):
 
         elif self._received_data and self._last_message_type is MessageType.calibration:
             self._offset_buffer.append(self._get_offset())
+            print("Calibration received offset: ", self._get_offset())
 
             if self._is_buffer_full(self._offset_buffer):
                 self._offset = round(
