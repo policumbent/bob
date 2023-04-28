@@ -1,6 +1,7 @@
 from enum import Enum
 from collections import deque
 from math import pi
+from typing import List
 
 from .device import AntDevice, DeviceTypeID
 
@@ -89,6 +90,7 @@ class Powermeter(AntDevice):
 
         # open channel
         self._channel.open()
+        self._request_calibration()
 
     def _receive_new_data(self, data):
         # callback for ant data
@@ -299,3 +301,7 @@ class Powermeter(AntDevice):
             return None
 
         return round(self._torque * self._cadence * pi / 30)
+
+    def _request_calibration(self):
+        cal_request = [0xAA, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF]
+        self._channel.send_broadcast_data(cal_request)

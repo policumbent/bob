@@ -1,6 +1,7 @@
 from __future__ import absolute_import, print_function
 
 import logging
+from typing import List
 
 # import threading
 from ..base.message import Message
@@ -107,3 +108,6 @@ class Channel:
             _logger.warning("failed to send burst transfer %s, retrying", self.id)
             self.send_burst_transfer(data)
 
+    def send_broadcast_data(self, data : List[int]):
+        _logger.debug("send broadcast data %s", self.id)
+        self._ant.send_broadcast_data(self.id, data)

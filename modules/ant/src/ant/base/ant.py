@@ -301,3 +301,8 @@ class Ant:
 
     def channel_event_function(self, channel, event, data):
         pass
+
+    def send_broadcast_data(self, channel, data):
+        assert len(data) == 8
+        message = Message(Message.ID.BROADCAST_DATA, array.array("B", [channel] + data))
+        self.write_message(message)
