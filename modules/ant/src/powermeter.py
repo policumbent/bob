@@ -105,7 +105,6 @@ class Powermeter(AntDevice):
         if not self._is_active():
             self._power = 0
             self._cadence = 0
-            self._offset = 0
             self._power_buffer.clear()
             self._offset_buffer.clear()
 
@@ -146,9 +145,8 @@ class Powermeter(AntDevice):
                 self._power_buffer.append(self._instant_power)
 
             # if buffer is full enaugh calculate average value of power
-            if self._is_buffer_full(self._power_buffer):
                 self._power = round(
-                    sum((self._power_buffer)) / self._power_buffer.maxlen
+                    sum((self._power_buffer)) / len(self._power_buffer)
                 )
 
             self._cadence = self._calculate_cadence() or self._cadence
@@ -160,13 +158,14 @@ class Powermeter(AntDevice):
 
         elif self._received_data and self._last_message_type is MessageType.calibration:
             self._offset_buffer.append(self._get_offset())
-            print("Calibration received offset: ", self._get_offset())
-
+            self._offset = self._get_offset()
             if self._is_buffer_full(self._offset_buffer):
                 self._offset = round(
                     sum(self._offset_buffer) / self._offset_buffer.maxlen
                 )
-
+        if self._received_data:
+            print(f"Offset {self._offset}, Cadence {self._cadence}, Power {self._power}, Torque ticks {self._torque_ticks}, Torque frequency {self._torque_frequency}, Elapsed Time {self._elapsed_time_interval}")
+            self._received_data = False
         return {"power": self._power, "cadence": self._cadence}
 
     # Metodi propri della classe
@@ -269,12 +268,12 @@ class Powermeter(AntDevice):
         if self._torque_ticks is None or self._elapsed_time_interval is None:
             return None
 
-        self._check_torque_ticks_register_overflow()
+        # self._check_torque_ticks_register_overflow()
 
         if self._elapsed_time_interval == 0 or self._torque_ticks == 0:
             return None
 
-        return (1 / (self._elapsed_time_interval / self._torque_ticks)) - self._offset
+        return (1 / float(self._elapsed_time_interval / self._torque_ticks)) - self._offset
 
     def _calculate_torque(self):
         if self._torque_frequency is None or self._slope is None:
@@ -300,7 +299,7 @@ class Powermeter(AntDevice):
         if self._torque is None or self._cadence is None:
             return None
 
-        return round(self._torque * self._cadence * pi / 30)
+        return self._torque * self._cadence * pi / 30
 
     def _request_calibration(self):
         cal_request = [0xAA, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF]
