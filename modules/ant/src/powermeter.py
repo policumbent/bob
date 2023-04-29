@@ -90,7 +90,7 @@ class Powermeter(AntDevice):
 
         # open channel
         self._channel.open()
-        self._request_calibration()
+        # self._request_calibration()
 
     def _receive_new_data(self, data):
         # callback for ant data
@@ -203,7 +203,7 @@ class Powermeter(AntDevice):
 
     def _check_rotation_register_overflow(self):
         if self._last_rotations_count > self._current_rotations_count:
-            self._last_rotations_count = self._current_rotations_count
+            self._last_rotations_count = self._last_rotations_count - 256
 
     def _check_slope_register_overflow(self):
         if self._slope < 100 or self._slope > 500:
@@ -211,11 +211,11 @@ class Powermeter(AntDevice):
 
     def _check_rx_time_register_overflow(self):
         if self._last_rx_time > self._current_rx_time:
-            self._last_rx_time = self._current_rx_time
+            self._last_rx_time = self._last_rx_time - 65536
 
     def _check_torque_ticks_register_overflow(self):
         if self._last_torque_ticks_stamp > self._current_torque_ticks_stamp:
-            self._last_torque_ticks_stamp = self._current_torque_ticks_stamp
+            self._last_torque_ticks_stamp = self._last_torque_ticks_stamp - 65536
 
     def _get_rotations_count(self):
         return self._payload[1]
