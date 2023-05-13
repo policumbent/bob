@@ -81,6 +81,7 @@ async def mqtt():
 
                         data.update({msg.sensor: round(msg.value)})
 
+
         except Exception as e:
             log.err(f"MQTT: {e}")
 
