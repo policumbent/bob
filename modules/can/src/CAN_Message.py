@@ -60,6 +60,7 @@ class CAN_Message:
     
 
     def enc_distance(self, distance):
+        id = (MSG_DATA << 9) | (DEV_RPI_DATA << 5) | (RPI_HS_DISTANCE)
         rounded_dist = self.rounder(distance, 0)
 
         encoded_distance = bytearray([
@@ -70,13 +71,48 @@ class CAN_Message:
         return id, encoded_distance
 
 
-    def enc_rpm(self, rpm):
-        pass
+    def enc_wheel_rpm(self, rpm):
+        id = (MSG_DATA << 9) | (DEV_RPI_DATA << 5) | (RPI_HS_W_RPM)
+        rounded_rpm = self.rounder(rpm, 1)
+
+        encoded_rpm = bytearray([
+            rounded_rpm & 0xff00,
+            rounded_rpm & 0x00ff
+        ])
+
+        return id, encoded_rpm
+
+
+    def enc_pedal_rpm(self, rpm):
+        id = (MSG_DATA << 9) | (DEV_RPI_DATA << 5) | (RPI_SRM_P_RPM)
+        rounded_rpm = self.rounder(rpm, 1)
+
+        encoded_rpm = bytearray([
+            rounded_rpm & 0xff00,
+            rounded_rpm & 0x00ff
+        ])
+
+        return id, encoded_rpm
 
     
     def enc_power(self, power):
-        pass
+        id = (MSG_DATA << 9) | (DEV_RPI_DATA << 5) | (RPI_SRM_PWR)
+        rounded_power = self.rounder(power, 1)
+
+        encoded_power = bytearray([
+            rounded_power & 0xff00,
+            rounded_power & 0x00ff
+        ])
+
+        return id, encoded_power
 
 
     def enc_heartrate(self, heartrate):
-        pass
+        id = (MSG_DATA << 9) | (DEV_RPI_DATA << 5) | (RPI_HEART_RATE)
+        rounded_hr = self.rounder(heartrate, 0)
+
+        encoded_hr = bytearray([
+            rounded_hr & 0xff
+        ])
+
+        return id, encoded_hr
