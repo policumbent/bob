@@ -38,15 +38,21 @@ DT_HEARTRATE    = 6
 DT_GEAR         = 7
 
 class CAN_Message:
-    def rounder(self, data_to_round, digits):
-        '''
-       function to round data to dedired float with n digits then multiplied by the same amount of 10*n to render it an int.'''
-        return int(round(data_to_round, digits))*pow(10,digits)
+    def rounder(self, data, decimal_digits):
+        """
+        rounding data function
+        :param data: data to be rounded
+        :param decimal_digits: number of input decimal digits
+        :return rounded data, formatted as int
+        """
+        return int(round(data, decimal_digits)) * pow(10, decimal_digits)
     
     def enc_speed(self, speed):
-        """encoding speed function
+        """
+        encoding speed function
         :param speed taken from MQTT server
-        :return id, bytearray:encoded_speed"""
+        :return id, bytearray:encoded_speed
+        """
 
         id = (MSG_DATA << 9) | (DEV_RPI_DATA << 5) | (RPI_HS_SPEED)
         rounded_speed = self.rounder(speed, 2)
