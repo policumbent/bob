@@ -38,13 +38,18 @@ DT_HEARTRATE    = 6
 DT_GEAR         = 7
 
 class CAN_Message:
+    def rounder(self, data_to_round, digits):
+        '''
+       function to round data to dedired float with n digits then multiplied by the same amount of 10*n to render it an int.'''
+        return int(round(data_to_round, digits))*10^digits
+    
     def enc_speed(self, speed):
         """encoding speed function
         :param speed taken from MQTT server
         :return id, bytearray:encoded_speed"""
 
         id = (MSG_DATA << 9) | (DEV_RPI_DATA << 5) | (RPI_HS_SPEED)
-        rounded_speed = int(round(speed, 2)) * 100
+        rounded_speed = self.rounder(speed, 2)
 
         encoded_speed = bytearray([
             rounded_speed & 0xff00,
@@ -55,7 +60,7 @@ class CAN_Message:
     
 
     def enc_distance(self, distance):
-        rounded_dist = int(round(distance, 0))
+        rounded_dist = self.rounder(distance, 0)
 
         encoded_distance = bytearray([
             rounded_dist & 0xff00,
