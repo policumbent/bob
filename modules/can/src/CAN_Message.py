@@ -41,7 +41,7 @@ class CAN_Message:
     def rounder(self, data_to_round, digits):
         '''
        function to round data to dedired float with n digits then multiplied by the same amount of 10*n to render it an int.'''
-        return int(round(data_to_round, digits))*10^digits
+        return int(round(data_to_round, digits))*pow(10,digits)
     
     def enc_speed(self, speed):
         """encoding speed function
