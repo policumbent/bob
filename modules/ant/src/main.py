@@ -90,7 +90,7 @@ async def main():
         try:
             # retrive configurations from db
             # home_path = os.getenv("HOME")
-            home_path = "/Users/riccardoghianni/Desktop/Policumbent"
+            home_path = "/home/riccardoghianni/Documents/Policumbent"
             # db_path = os.getenv("DATABASE_PATH") or f"{home_path}/bob/database.db"
             db_path = f"{home_path}/bob/database.db"
 
@@ -102,7 +102,7 @@ async def main():
             config = db.config("ant")
 
             # bike = config.get("name")
-            bike = "phoenix"
+            bike = "taurusx"
             
             hall_id = config.get(bike).get("hall_id")
             hall_type = config.get(bike).get("hall_type")

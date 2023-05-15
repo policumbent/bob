@@ -42,6 +42,7 @@ class Powermeter(AntDevice):
 
         # attributes for data calculation
         self._offset = 0
+        self._offset_flag = True
 
         # attributes for Messagetype.crank_torque_freq
         self._slope = None
@@ -64,10 +65,10 @@ class Powermeter(AntDevice):
         self._current_rx_time = None
 
         # attributes for Messagetype.poweronly and Messagetype.crank_torque_freq
-        self._power_buffer = deque(maxlen=8)
+        self._power_buffer = deque(maxlen=4)
 
         # attributes for Messagetype.calibration
-        self._offset_buffer = deque(maxlen=10)
+        self._offset_buffer = deque(maxlen=15)
 
         # inizializzazione del channel ant
         self._init_channel()
@@ -125,7 +126,7 @@ class Powermeter(AntDevice):
             self._received_data
             and self._last_message_type is MessageType.crank_torque_freq
         ):
-
+            # self._offset_flag = False
             # parameters to set before proceeding with computations retrieved from payload
             self._slope = self._get_slope()
             self._current_rx_time = self._get_timestamp()
@@ -156,13 +157,14 @@ class Powermeter(AntDevice):
             self._last_rotations_count = self._current_rotations_count
             self._last_torque_ticks_stamp = self._current_torque_ticks_stamp
 
-        elif self._received_data and self._last_message_type is MessageType.calibration:
+        elif self._received_data and self._last_message_type is MessageType.calibration and self._offset_flag:
             self._offset_buffer.append(self._get_offset())
-            self._offset = self._get_offset()
+            # self._offset = self._get_offset()
             if self._is_buffer_full(self._offset_buffer):
                 self._offset = round(
                     sum(self._offset_buffer) / self._offset_buffer.maxlen
                 )
+                self._offset_flag = False
         if self._received_data:
             print(f"Offset {self._offset}, Cadence {self._cadence}, Power {self._power}, Torque ticks {self._torque_ticks}, Torque frequency {self._torque_frequency}, Elapsed Time {self._elapsed_time_interval}")
             self._received_data = False
