@@ -1,41 +1,4 @@
-ID_TYPE_MASK    = 0b11000000000  # not used
-ID_DEV_MASK     = 0b00111100000
-ID_SPEC_MASK    = 0b00000011111
-
-MSG_DEBUG       = 0
-MSG_ERROR       = 1
-MSG_DATA        = 2
-MSG_INFO        = 3
-
-DEV_CORE_RPI    = 0b0000
-DEV_GEARBOX     = 0b0001
-DEV_RPI_DATA    = 0b0010
-DEV_GSM_DATA    = 0b0100
-DEV_LOW_PRTY    = 0b1000
-
-GB_LMT_SWITCH   = 0b00000
-GB_RECEIVER     = 0b00001   # Cerberus only
-GB_GEARBOX      = 0b00010
-
-RPI_HS_SPEED    = 0b00000
-RPI_HS_DISTANCE = 0b00001
-RPI_HS_W_RPM    = 0b00010
-RPI_SRM_PWR     = 0b00100
-RPI_SRM_P_RPM   = 0b00101
-RPI_HEART_RATE  = 0b01100
-
-GSM_GPS_SPEED   = 0b00000
-GSM_GPS_DIST    = 0b00001
-# GSM_GPS_COOR     0b00010
-
-DT_ERROR        = 1
-DT_SPEED        = 2
-DT_DISTANCE     = 3
-DT_RPM          = 4
-DT_POWER        = 5
-DT_HEARTRATE    = 6
-DT_GEAR         = 7
-
+from CAN_ID import *
 from CAN_DataType import CAN_DATA_TYPE
 
 class CAN_Message:
