@@ -12,16 +12,13 @@ from core.mqtt import Message
 
 from data_reader import data_read
 
+from topics import topics
+
+from CAN_Message import CAN_Message
 
 data = dict()
 
-sensors = [
-    "ant/speed",
-    "ant/distance",
-    "ant/power",
-    "ant/heartrate",
-    "ant/cadence"
-]
+sensors = topics
 
 #sensors = [
 #    "speed/hall",
@@ -80,6 +77,18 @@ async def mqtt():
                         msg = Message(msg)
 
                         data.update({msg.sensor: round(msg.value)})
+                        frame = CAN_Message(topic = msg.sensor, data = msg.value)
+
+                        can_frame = can.Message(
+                            arbitration_id = frame[0],
+                            data = frame[1],
+                            is_extended_id = False
+                        )
+
+                        try:
+                            bus.send(can_frame)
+                        except can.CanError as e:
+                            log.err(f"CAN: {e}")
 
 
         except Exception as e:

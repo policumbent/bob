@@ -1,7 +1,41 @@
-from CAN_ID import *
+import CAN_ID as CID
 from CAN_DataType import CAN_DATA_TYPE
 
+from topics import topic_dict, topics
+
 class CAN_Message:
+    def CAN_Message(self, enc_id = 0, enc_pl = 0):
+        self.enc_id = enc_id
+        self.enc_pl = enc_pl
+
+    def CAN_Message(self, topic = "", data = 0):
+        self.topic = topic
+        self.data = data
+
+        if (topic == topic_dict["hall_speed"]):
+            return self._enc_speed(self.data)
+        
+        if (topic == topic_dict["hall_distance"]):
+            return self._enc_distance(self.data)
+
+        if (topic == topic_dict["hall_wheel_rpm"]):
+            return self._enc_wheel_rpm(self.data)
+
+        if (topic == topic_dict["srm_pedal_rpm"]):
+            return self._enc_pedal_rpm(self.data)
+
+        if (topic == topic_dict["srm_power"]):
+            return self._enc_power(self.data)
+
+        if (topic == topic_dict["heartrate"]):
+            return self._enc_heartrate(self.data)
+        
+        return 0, 0
+
+    ###############################################
+    ################ DATA ENCODING ################
+    ###############################################
+
     def _encode_data(self, data, dlc, decimal_digits):
         """
         rounding data function
@@ -20,14 +54,14 @@ class CAN_Message:
         return encoded_data
 
     
-    def enc_speed(self, speed):
+    def _enc_speed(self, speed):
         """
         encodes speed in ByteArray format
         :param speed
         :return id -> int, encoded_speed -> ByteArray
         """
 
-        id = (MSG_DATA << 9) | (DEV_RPI_DATA << 5) | (RPI_HS_SPEED)
+        id = (CID.MSG_DATA << 9) | (CID.DEV_RPI_DATA << 5) | (CID.RPI_HS_SPEED)
 
         encoded_speed = self._encode_data(
             speed,
@@ -38,13 +72,13 @@ class CAN_Message:
         return id, encoded_speed
     
 
-    def enc_distance(self, distance):
+    def _enc_distance(self, distance):
         """
         encodes distance in ByteArray format
         :param distance
         :return id -> int, encoded_distance -> ByteArray
         """
-        id = (MSG_DATA << 9) | (DEV_RPI_DATA << 5) | (RPI_HS_DISTANCE)
+        id = (CID.MSG_DATA << 9) | (CID.DEV_RPI_DATA << 5) | (CID.RPI_HS_DISTANCE)
 
         encoded_distance = self._encode_data(
             distance,
@@ -55,14 +89,14 @@ class CAN_Message:
         return id, encoded_distance
 
 
-    def enc_wheel_rpm(self, rpm):
+    def _enc_wheel_rpm(self, rpm):
         """
         encodes rpm in ByteArray format
         :param rpm
         :return id -> int, encoded_rpm -> ByteArray
         """
 
-        id = (MSG_DATA << 9) | (DEV_RPI_DATA << 5) | (RPI_HS_W_RPM)
+        id = (CID.MSG_DATA << 9) | (CID.DEV_RPI_DATA << 5) | (CID.RPI_HS_W_RPM)
 
         encoded_rpm = self._encode_data(
             rpm,
@@ -73,14 +107,14 @@ class CAN_Message:
         return id, encoded_rpm
 
 
-    def enc_pedal_rpm(self, rpm):
+    def _enc_pedal_rpm(self, rpm):
         """
         encodes rpm in ByteArray format
         :param rpm
         :return id -> int, encoded_rpm -> ByteArray
         """
 
-        id = (MSG_DATA << 9) | (DEV_RPI_DATA << 5) | (RPI_SRM_P_RPM)
+        id = (CID.MSG_DATA << 9) | (CID.DEV_RPI_DATA << 5) | (CID.RPI_SRM_P_RPM)
 
         encoded_rpm = self._encode_data(
             rpm,
@@ -91,13 +125,14 @@ class CAN_Message:
         return id, encoded_rpm
 
     
-    def enc_power(self, power):
+    def _enc_power(self, power):
         """
         encodes power in ByteArray format
         :param power
         :return id -> int, encoded_power -> ByteArray
         """
-        id = (MSG_DATA << 9) | (DEV_RPI_DATA << 5) | (RPI_SRM_PWR)
+
+        id = (CID.MSG_DATA << 9) | (CID.DEV_RPI_DATA << 5) | (CID.RPI_SRM_PWR)
 
         encoded_power = self._encode_data(
             power,
@@ -108,14 +143,14 @@ class CAN_Message:
         return id, encoded_power
 
 
-    def enc_heartrate(self, heart_rate):
+    def _enc_heartrate(self, heart_rate):
         """
         encodes heart_rate in ByteArray format
         :param heart_rate
         :return id -> int, encoded_hr -> ByteArray
         """
 
-        id = (MSG_DATA << 9) | (DEV_RPI_DATA << 5) | (RPI_HEART_RATE)
+        id = (CID.MSG_DATA << 9) | (CID.DEV_RPI_DATA << 5) | (CID.RPI_HEART_RATE)
 
         encoded_hr = self._encode_data(
             heart_rate,
@@ -124,3 +159,9 @@ class CAN_Message:
         )
 
         return id, encoded_hr
+    
+
+    ###############################################
+    ################ DATA DECODING ################
+    ###############################################
+
