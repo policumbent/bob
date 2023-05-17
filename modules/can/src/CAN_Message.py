@@ -38,14 +38,21 @@ DT_HEARTRATE    = 6
 DT_GEAR         = 7
 
 class CAN_Message:
-    def rounder(self, data, decimal_digits):
+    def encode_data(self, data, dlc, decimal_digits):
         """
         rounding data function
         :param data: data to be rounded
         :param decimal_digits: number of input decimal digits
         :return rounded data, formatted as int
         """
-        return int(round(data, decimal_digits)) * pow(10, decimal_digits)
+        rounded_data = int(round(data, decimal_digits) * 10**decimal_digits)
+
+        encoded_data = bytearray([])
+        for i in range (dlc - 1, -1, -1):
+            encoded_data.append((rounded_data & (0xff << (i * 8))) >> (i * 8))
+
+        return encoded_data
+
     
     def enc_speed(self, speed):
         """
@@ -55,70 +62,41 @@ class CAN_Message:
         """
 
         id = (MSG_DATA << 9) | (DEV_RPI_DATA << 5) | (RPI_HS_SPEED)
-        rounded_speed = self.rounder(speed, 2)
-
-        encoded_speed = bytearray([
-            rounded_speed & 0xff00,
-            rounded_speed & 0x00ff
-        ])
+        encoded_speed = self.encode_data(speed, 2, 2)
 
         return id, encoded_speed
     
 
     def enc_distance(self, distance):
         id = (MSG_DATA << 9) | (DEV_RPI_DATA << 5) | (RPI_HS_DISTANCE)
-        rounded_dist = self.rounder(distance, 0)
-
-        encoded_distance = bytearray([
-            rounded_dist & 0xff00,
-            rounded_dist & 0x00ff
-        ])
+        encoded_distance = self.encode_data(distance, 2, 2)
 
         return id, encoded_distance
 
 
     def enc_wheel_rpm(self, rpm):
         id = (MSG_DATA << 9) | (DEV_RPI_DATA << 5) | (RPI_HS_W_RPM)
-        rounded_rpm = self.rounder(rpm, 1)
-
-        encoded_rpm = bytearray([
-            rounded_rpm & 0xff00,
-            rounded_rpm & 0x00ff
-        ])
+        encoded_rpm = self.encode_data(rpm, 2, 1)
 
         return id, encoded_rpm
 
 
     def enc_pedal_rpm(self, rpm):
         id = (MSG_DATA << 9) | (DEV_RPI_DATA << 5) | (RPI_SRM_P_RPM)
-        rounded_rpm = self.rounder(rpm, 1)
-
-        encoded_rpm = bytearray([
-            rounded_rpm & 0xff00,
-            rounded_rpm & 0x00ff
-        ])
+        encoded_rpm = self.encode_data(rpm, 2, 1)
 
         return id, encoded_rpm
 
     
     def enc_power(self, power):
         id = (MSG_DATA << 9) | (DEV_RPI_DATA << 5) | (RPI_SRM_PWR)
-        rounded_power = self.rounder(power, 1)
-
-        encoded_power = bytearray([
-            rounded_power & 0xff00,
-            rounded_power & 0x00ff
-        ])
+        encoded_power = self.encode_data(power, 2, 1)
 
         return id, encoded_power
 
 
     def enc_heartrate(self, heartrate):
         id = (MSG_DATA << 9) | (DEV_RPI_DATA << 5) | (RPI_HEART_RATE)
-        rounded_hr = self.rounder(heartrate, 0)
-
-        encoded_hr = bytearray([
-            rounded_hr & 0xff
-        ])
+        encoded_hr = self.encode_data(heartrate, 1, 0)
 
         return id, encoded_hr
