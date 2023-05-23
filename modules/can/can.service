@@ -1,0 +1,13 @@
+[Unit]
+Description=CAN manager module
+After=multi-user.target
+
+[Service]
+Type=simple
+restart=on-failure
+User=pi
+WorkingDirectory=${BOB_ROOT}/modules/can
+ExecStart=/usr/bin/python3 -m src.main 
+
+[Install]
+WantedBy=multi-user.target
