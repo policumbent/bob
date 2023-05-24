@@ -1,3 +1,0 @@
-# Weather module
-### Description
-### TODO
