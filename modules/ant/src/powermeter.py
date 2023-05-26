@@ -99,7 +99,7 @@ class Powermeter(AntDevice):
         self._payload = data
         self._received_data = True
         self._last_message_type = self._get_message_type()
-        print(f"Received datas: {self._payload} type: {self._last_message_type}")
+        # print(f"Received datas: {self._payload} type: {self._last_message_type}")
         self._last_data_read = self._current_time()
 
     def read_data(self) -> dict:
@@ -166,7 +166,7 @@ class Powermeter(AntDevice):
                 )
                 self._offset_flag = False
         if self._received_data:
-            print(f"Offset {self._offset}, Cadence {self._cadence}, Power {self._power}, Torque ticks {self._torque_ticks}, Torque frequency {self._torque_frequency}, Elapsed Time {self._elapsed_time_interval}")
+            # print(f"Offset {self._offset}, Cadence {self._cadence}, Power {self._power}, Torque ticks {self._torque_ticks}, Torque frequency {self._torque_frequency}, Elapsed Time {self._elapsed_time_interval}")
             self._received_data = False
         return {"power": self._power, "cadence": self._cadence}
 

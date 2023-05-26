@@ -89,10 +89,8 @@ async def main():
     while True:
         try:
             # retrive configurations from db
-            # home_path = os.getenv("HOME")
-            home_path = "/home/riccardoghianni/Documents/Policumbent"
-            # db_path = os.getenv("DATABASE_PATH") or f"{home_path}/bob/database.db"
-            db_path = f"{home_path}/bob/database.db"
+            home_path = os.getenv("HOME")
+            db_path = os.getenv("DATABASE_PATH") or f"{home_path}/bob/database.db"
 
             # generate csv name for the run
             name_file = f"{home_path}/bob/csv/{strftime('%d-%m-%Y@%H:%M:%S')}.csv"
@@ -101,7 +99,6 @@ async def main():
             db = Database(table="ant", path=db_path, max_pending=10)
             config = db.config("ant")
 
-            # bike = config.get("name")
             bike = "taurusx"
             
             hall_id = config.get(bike).get("hall_id")
