@@ -192,6 +192,7 @@ class Ant:
     def write_message(self, message):
         data = message.get()
         self._driver.write(data)
+        # print(f"Write data: {format_list(data)}")
         _logger.debug("Write data: %s", format_list(data))
 
     def read_message(self):
@@ -209,6 +210,7 @@ class Ant:
                 self._buffer.extend(data)
                 _logger.debug("Read data: %s (now have %s in buffer)",
                               format_list(data), format_list(self._buffer))
+                # print(f"Read data: {format_list(data)} (now have {format_list(self._buffer)} in buffer)")
                 _logger.debug("Buffer len: " + str(len(self._buffer)))
 
     # Ant functions
@@ -299,3 +301,8 @@ class Ant:
 
     def channel_event_function(self, channel, event, data):
         pass
+
+    def send_broadcast_data(self, channel, data):
+        assert len(data) == 8
+        message = Message(Message.ID.BROADCAST_DATA, array.array("B", [channel] + data))
+        self.write_message(message)

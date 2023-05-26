@@ -110,8 +110,10 @@ class Node:
 
                 if data_type == "broadcast":
                     self.channels[channel].on_broadcast_data(data)
+                    # print(f"Channel {channel} pushed broadcast {data}")
                 elif data_type == "burst":
                     self.channels[channel].on_burst_data(data)
+                    # print(f"Channel {channel} pushed burst {data}")
                 else:
                     _logger.warning("Unknown data type '%s': %r", data_type, data)
             except queue.Empty as e:

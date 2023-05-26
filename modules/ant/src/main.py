@@ -98,11 +98,8 @@ async def main():
 
             db = Database(table="ant", path=db_path, max_pending=10)
             config = db.config("ant")
-            # if not created_file:
-            #     csv_file = open(f"{home_path}/bob/csv/{strftime('%d-%m-%Y@%H:%M:%S')}.csv","w")
-            #     created_file = True
 
-            bike = config.get("name")
+            bike = "taurusx"
             
             hall_id = config.get(bike).get("hall_id")
             hall_type = config.get(bike).get("hall_type")

@@ -149,7 +149,7 @@ async def main():
             await asyncio.gather(
                 read_acc(mpu, off_acc),
                 read_gyro(mpu, off_gyr),
-                # write_csv(),
+                write_csv(),
                 write_db(),
             )
         except OSError:
