@@ -12,7 +12,7 @@ CAN_DATA_TYPE_LIST = [
 
 
 class CAN_DataType:
-    def CAN_DataType(self, dlc, decimal_digits):
+    def __init__(self, dlc, decimal_digits):
         self.dlc = dlc
         self.decimal_digits = decimal_digits
 

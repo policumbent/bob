@@ -4,11 +4,11 @@ from CAN_DataType import CAN_DATA_TYPE
 from topics import topic_dict, topics
 
 class CAN_Message:
-    def CAN_Message(self, enc_id = 0, enc_pl = 0):
+    def __init__(self, enc_id = 0, enc_pl = 0):
         self.enc_id = enc_id
         self.enc_pl = enc_pl
 
-    def CAN_Message(self, topic = "", data = 0):
+    def __init__(self, topic = "", data = 0):
         self.topic = topic
         self.data = data
 
