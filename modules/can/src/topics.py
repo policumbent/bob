@@ -1,9 +1,9 @@
 topics = [
+    "ant/power",
+    "ant/cadence"
     "ant/speed",
     "ant/distance",
-    "ant/power",
     "ant/heartrate",
-    "ant/cadence"
 ]
 
 topic_to_dbc = {

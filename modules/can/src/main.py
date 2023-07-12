@@ -1,6 +1,10 @@
 import os
+import subprocess
+
+from threading import Thread
 
 from datetime import datetime
+import time
 
 import asyncio
 from asyncio import sleep
@@ -10,8 +14,6 @@ import cantools
 
 from core import Mqtt, Database, log
 from core.mqtt import Message
-
-from data_reader import data_read
 
 from topics import *
 
@@ -35,16 +37,12 @@ bus = can.Bus(
         interface='socketcan',
         channel='can0',
         bitrate=500000,
-        receive_own_messages=True
+        receive_own_messages=False
     )
 
-# CAN listener
-data_reader = can.BufferedReader()
 
-can.Notifier(bus, [
-    can.Logger(f"{datetime.now().replace(microsecond=0).isoformat()}"),
-    data_reader
-])
+def can_logger():
+    subprocess.call("./can_logger.sh")
 
 
 ## Sends init debug messages to verify the state of the CAN bus and makes the
@@ -98,12 +96,20 @@ async def mqtt():
             await sleep(1)
 
 
+async def can_reader():
+    for msg in bus:
+        print(msg.data)
+
+
 async def main():
     home_path = os.getenv("HOME")
 
+    can_logger_thread = Thread(target=can_logger)
+    can_logger_thread.start()
+
     await asyncio.gather(
         mqtt(),
-        data_read(data_reader)
+        can_reader()
     )
 
     #debug_init()
