@@ -4,16 +4,12 @@ BS_:
 
 BU_:
 
-BO_ 546 GbError: 2 Vector__XXX
- SG_ GbErrCode : 0|3@1+ (1,0) [0|1] "" Vector__XXX
- SG_ GbMode : 3|1@1+ (1,0) [0|1] "" Vector__XXX
- SG_ GbShifting : 4|2@1+ (1,0) [0|3] "" Vector__XXX
- SG_ GbGear : 8|5@1+ (1,0) [0|16] "" Vector__XXX
+BO_ 546 GbError: 1 Vector__XXX
+ SG_ GbErrCode : 0|3@1+ (1,0) [0|7] "" Vector__XXX
+ SG_ GbGear : 3|5@1+ (1,0) [0|16] "" Vector__XXX
 
 BO_ 1058 GbData: 1 Vector__XXX
- SG_ GbMode : 0|1@1+ (1,0) [0|1] "" Vector__XXX
- SG_ GbShifting : 1|2@1+ (1,0) [0|3] "" Vector__XXX
- SG_ GbGear : 3|5@1+ (1,0) [0|16] "" Vector__XXX
+ SG_ GbGear : 0|5@1+ (1,0) [0|16] "" Vector__XXX
 
 BO_ 1057 RxGreta: 2 Vector__XXX
  SG_ TelekBattery : 1|7@1+ (1,0) [0|100] "%" Vector__XXX
@@ -34,4 +30,5 @@ BO_ 1092 BobHsDisplacement: 2 Vector__XXX
 
 BO_ 1094 BobHR: 1 Vector__XXX
  SG_ HeartRate : 0|8@1+ (1,0) [0|250] "bpm" Vector__XXX
+
 
