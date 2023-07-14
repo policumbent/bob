@@ -15,7 +15,21 @@ import cantools
 from core import Mqtt, Database, log
 from core.mqtt import Message
 
-from topics import *
+topics = [
+    "ant/power",
+    "ant/cadence"
+    "ant/speed",
+    "ant/distance",
+    "ant/heartrate",
+]
+
+topic_to_dbc = {
+    "ant/power":        ("BobSrmPower", "SrmPower"),
+    "ant/cadence":      ("BobSrmCadence", "SrmCadence"),
+    "ant/speed":        ("BobHsSpeed", "HsSpeed"),
+    "ant/distance":     ("BobHsDistance", "HsDistance"),
+    "ant/heartrate":    ("BobHR", "HeartRate")
+}
 
 data = dict()
 
@@ -31,7 +45,7 @@ sensors = topics
 #]
 
 
-dbc = cantools.database.load_file('../policanbent.dbc')
+dbc = cantools.database.load_file('./policanbent.dbc')
 
 bus = can.Bus(
         interface='socketcan',
