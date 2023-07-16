@@ -4,7 +4,7 @@ After=multi-user.target
 
 [Service]
 Type=simple
-restart=on-failure
+Restart=on-failure
 User=pi
 WorkingDirectory=/home/pi/bob/modules/can
 ExecStart=/usr/bin/python3 -m src.main 

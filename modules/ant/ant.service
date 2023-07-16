@@ -5,9 +5,9 @@ After=multi-user.target
 [Service]
 Type=simple
 User=pi
-restart=on-failure
-WorkingDirectory=${BOB_ROOT}/modules/ant
-ExecStart=${BOB_ROOT}/modules/ant/.venv/bin/python3 -m src.main 
+Restart=on-failure
+WorkingDirectory=/home/pi/bob/modules/ant
+ExecStart=/home/pi/bob/modules/ant/.venv/bin/python3 -m src.main 
 
 [Install]
 WantedBy=multi-user.target
