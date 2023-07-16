@@ -21,6 +21,7 @@ topics = [
     "ant/speed",
     "ant/distance",
     "ant/heartrate",
+    "gear"
 ]
 
 topic_to_dbc = {
@@ -28,7 +29,23 @@ topic_to_dbc = {
     "ant/cadence":      ("BobSrmCadence", "SrmCadence"),
     "ant/speed":        ("BobHsSpeed", "HsSpeed"),
     "ant/distance":     ("BobHsDistance", "HsDistance"),
-    "ant/heartrate":    ("BobHR", "HeartRate")
+    "ant/heartrate":    ("BobHR", "HeartRate"),
+    "gear":             ("GbData", "GbGear")
+}
+
+dbc_to_topic = {
+    "GbError": {
+        "GbErrCode": "gb/error_code",
+        "GbGear": "Gear"
+    },
+    "RxGreta": {
+        "TelekBattery": "telekhambion/battery",
+        "RxShifting": "greta/shifting",
+        "RxTimeout": "greta/rx_timemout"
+    },
+    "GbData": {
+        "GbGear": "gear"
+    }
 }
 
 data = dict()
@@ -111,8 +128,14 @@ async def mqtt():
 
 
 async def can_reader():
-    for msg in bus:
-        print(msg.data)
+    async with Mqtt() as client:
+        for msg in bus:
+            dbc.decode_message(msg.arbitration_id, msg.data)
+
+            msg_name = dbc.get_message_by_frame_id(msg.arbitration_id).name
+
+            for signal in msg:
+                await client.sensor_publish(dbc_to_topic[msg_name][signal], msg[signal])
 
 
 async def main():
