@@ -21,7 +21,11 @@ topics = [
     "ant/speed",
     "ant/distance",
     "ant/heartrate",
-    "gear"
+    "gb/gear",
+    "gb/error_code",
+    "greta/shifting",
+    "greta/rx_timeout",
+    "telekhambion/battery"
 ]
 
 topic_to_dbc = {
@@ -30,13 +34,13 @@ topic_to_dbc = {
     "ant/speed":        ("BobHsSpeed", "HsSpeed"),
     "ant/distance":     ("BobHsDistance", "HsDistance"),
     "ant/heartrate":    ("BobHR", "HeartRate"),
-    "gear":             ("GbData", "GbGear")
+    "gb/gear":          ("GbData", "GbGear")
 }
 
 dbc_to_topic = {
     "GbError": {
         "GbErrCode": "gb/error_code",
-        "GbGear": "Gear"
+        "GbGear": "gb/gear"
     },
     "RxGreta": {
         "TelekBattery": "telekhambion/battery",
@@ -44,7 +48,7 @@ dbc_to_topic = {
         "RxTimeout": "greta/rx_timemout"
     },
     "GbData": {
-        "GbGear": "gear"
+        "GbGear": "gb/gear"
     }
 }
 
@@ -128,14 +132,18 @@ async def mqtt():
 
 
 async def can_reader():
-    async with Mqtt() as client:
-        for msg in bus:
-            dbc.decode_message(msg.arbitration_id, msg.data)
+    try:
+        async with Mqtt() as client:
+            for msg in bus:
+                dbc.decode_message(msg.arbitration_id, msg.data)
 
-            msg_name = dbc.get_message_by_frame_id(msg.arbitration_id).name
+                msg_name = dbc.get_message_by_frame_id(msg.arbitration_id).name
 
-            for signal in msg:
-                await client.sensor_publish(dbc_to_topic[msg_name][signal], msg[signal])
+                for signal in msg:
+                    await client.sensor_publish(dbc_to_topic[msg_name][signal], msg[signal])
+                    
+    except Exception as e:
+            log.err(f"MQTT: {e}")
 
 
 async def main():

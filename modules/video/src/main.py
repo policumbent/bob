@@ -19,7 +19,7 @@ sensors = [
     "ant/power",
     "ant/heartrate",
     "ant/cadence",
-    "gear",
+    "gb/gear",
 ]
 
 
