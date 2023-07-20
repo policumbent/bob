@@ -38,14 +38,16 @@ topic_to_dbc = {
 }
 
 dbc_to_topic = {
+    "GretaError": {
+        "TimeOutError": "greta/timeout_error"
+    }
     "GbError": {
         "GbErrCode": "gb/error_code",
         "GbGear": "gb/gear"
     },
-    "RxGreta": {
+    "GretaData": {
         "TelekBattery": "telekhambion/battery",
         "RxShifting": "greta/shifting",
-        "RxTimeout": "greta/rx_timemout"
     },
     "GbData": {
         "GbGear": "gb/gear"
