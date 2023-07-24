@@ -40,7 +40,7 @@ topic_to_dbc = {
 dbc_to_topic = {
     "GretaError": {
         "TimeOutError": "greta/timeout_error"
-    }
+    },
     "GbError": {
         "GbErrCode": "gb/error_code",
         "GbGear": "gb/gear"
@@ -137,12 +137,12 @@ async def can_reader():
     try:
         async with Mqtt() as client:
             for msg in bus:
-                dbc.decode_message(msg.arbitration_id, msg.data)
+                decoded_msg = dbc.decode_message(msg.arbitration_id, msg.data)
 
                 msg_name = dbc.get_message_by_frame_id(msg.arbitration_id).name
 
-                for signal in msg:
-                    await client.sensor_publish(dbc_to_topic[msg_name][signal], msg[signal])
+                for signal in decoded_msg:
+                    await client.sensor_publish(dbc_to_topic[msg_name][signal], decoded_msg[signal])
                     
     except Exception as e:
             log.err(f"MQTT: {e}")
