@@ -15,6 +15,8 @@ import cantools
 from core import Mqtt, Database, log
 from core.mqtt import Message
 
+
+# complete list of topics
 topics = [
     "ant/power",
     "ant/cadence"
@@ -26,6 +28,14 @@ topics = [
     "greta/shifting",
     "greta/rx_timeout",
     "telekhambion/battery"
+]
+
+subscribed_topics = [
+    "ant/power",
+    "ant/cadence"
+    "ant/speed",
+    "ant/distance",
+    "ant/heartrate",
 ]
 
 topic_to_dbc = {
@@ -56,17 +66,7 @@ dbc_to_topic = {
 
 data = dict()
 
-sensors = topics
-
-#sensors = [
-#    "speed/hall",
-#    "distance/hall",
-#    "wheel_rpm",
-#    "power",
-#    "pedal_rpm",
-#    "heart_rate"
-#]
-
+sensors = subscribed_topics
 
 dbc = cantools.database.load_file('./policanbent.dbc')
 
@@ -116,8 +116,8 @@ async def mqtt():
                         
                         id_name = topic_to_dbc[msg.sensor][0]
                         sig_name = topic_to_dbc[msg.sensor][1]
-                        pl = db.encode_message(id_name, {sig_name: msg.value})
-                        id_frame = db.get_message_by_name[id_name].frame_id
+                        pl = dbc.encode_message(id_name, {sig_name: msg.value})
+                        id_frame = dbc.get_message_by_name[id_name].frame_id
                         can_frame = can.Message(arbitration_id=id_frame, data=pl)
 
                         try:
@@ -136,6 +136,9 @@ async def mqtt():
 async def can_reader():
     try:
         async with Mqtt() as client:
+            # asynchronous for loop: whenever a message is received on the CAN
+            # bus, a new iteration is performed, otherwise it won't exit the
+            # loop but it will wait for another message
             for msg in bus:
                 decoded_msg = dbc.decode_message(msg.arbitration_id, msg.data)
 
@@ -143,6 +146,8 @@ async def can_reader():
 
                 for signal in decoded_msg:
                     await client.sensor_publish(dbc_to_topic[msg_name][signal], decoded_msg[signal])
+
+                # TODO: write the data received on the CAN Bus on the database
                     
     except Exception as e:
             log.err(f"MQTT: {e}")
