@@ -1,12 +1,22 @@
+# note: substitute <module-name> with the actual name
+
 [Unit]
-Description=${MODULE_NAME} service
+Description=<module-name> service
 After=multi-user.target
 
 [Service]
 Type=simple
-Restart=always
-WorkingDirectory=${BOB_ROOT}/modules/${MODULE_NAME}
-ExecStart=${BOB_ROOT}/modules/${MODULE_NAME}/.venv/bin/python3 -m src.main 127.0.0.1
+Restart=on-failure
+WorkingDirectory=/home/pi/bob/modules/<module-name>
+
+# you have two options for the ExecStart part, recall to comment or delete the
+# lines that you do not need
+
+# if you're using a venv:
+ExecStart=/home/pi/bob/modules/<module-name>/.venv/bin/python3 -m src.main
+
+# if you're NOT using a venv:
+ExecStart=/usr/bin/python3 -m src.main 
 
 [Install]
 WantedBy=multi-user.target
