@@ -22,6 +22,13 @@ Il factotum della bici
 In order to ease the management of the modules, BOB has a command line interface.\
 Read the [README](bobcli/README.md) to know how to use it.
 
+## SETUP
+
+All modules are started independently through the `.service` file present in each module folder. 
+Such service executes the python files present in the src folder using the local virtual enviroment. 
+In order to correctly initialize all modules it is required to have the virtual enviroment set up, to do so use the
+command `poetry install` in each module directory.
+ 
 ## Contributors ✨
 
 Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/docs/en/emoji-key)):
