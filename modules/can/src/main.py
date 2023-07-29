@@ -42,7 +42,7 @@ topic_to_dbc = {
     "ant/power":        ("BobSrmPower", "SrmPower"),
     "ant/cadence":      ("BobSrmCadence", "SrmCadence"),
     "ant/speed":        ("BobHsSpeed", "HsSpeed"),
-    "ant/distance":     ("BobHsDistance", "HsDistance"),
+    "ant/distance":     ("BobHsDisplacement", "HsDisplacement"),
     "ant/heartrate":    ("BobHR", "HeartRate"),
     "gb/gear":          ("GbData", "GbGear")
 }
@@ -61,6 +61,14 @@ dbc_to_topic = {
     },
     "GbData": {
         "GbGear": "gb/gear"
+    },
+    "MiriamGpsData": {
+        "GpsSpeed": "gps/speed",
+        "GpsDisplacement": "gps/displacement"
+    },
+    "MiriamGpsCoords": {
+        "GpsLatitude": "gps/latitude",
+        "GpsLongitude": "gps/longitude"
     }
 }
 
