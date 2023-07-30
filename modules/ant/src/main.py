@@ -45,13 +45,13 @@ async def mqtt():
             async with Mqtt() as client:
                 while True:
                     for key, value in mqtt_data.items():
-                        if key != "sensor" and key != "timestamp" and key != "printed":
+                        if key != "sensor" and key != "timestamp" and key != "saved":
                             await client.sensor_publish(f"ant/{key}", value)
                     await asyncio.sleep(0.1)
         except Exception as e:
             log.err(e)
         finally:
-            await asyncio.sleep(0.5)
+            await asyncio.sleep(1)
 
 
 def write_csv(row, name_file):
@@ -67,16 +67,26 @@ async def write_db(db, name_file: str, sensor_type: str):
     while True:
 
         for element in data:
-            if element["sensor"] == sensor_type and not element["printed"]:
+            if element["sensor"] == sensor_type and not element["saved"]:
 
-                row = {}
-                for key, value in element.items():
-                    if key != "sensor" and key != "sensor":
-
-                        if key == "hall_cadence":
-                            key = "cadence"
-
-                        row[key] = value
+                if sensor_type == "powermeter":
+                    row = {
+                        "timestamp": element["timestamp"],
+                        "power": element["power"],
+                        "cadence": element["cadence"]
+                    }
+                elif sensor_type == "hall":
+                    row = {
+                        "timestamp": element["timestamp"],
+                        "cadence": element["hall_cadence"],
+                        "speed": element["speed"],
+                        "distance": element["distance"]                        
+                    }
+                else:
+                    row = {
+                        "timestamp": element["timestamp"],
+                        "heartrate": element["heartrate"]
+                    }
 
                 try:
                     write_csv(row, name_file)
@@ -88,7 +98,7 @@ async def write_db(db, name_file: str, sensor_type: str):
                 except:
                     pass
 
-                element["printed"] = 1
+                element["saved"] = True
         
         await asyncio.sleep(0.1)
 
@@ -126,31 +136,28 @@ async def main():
         hr_id = config.get(bike).get("hr_id")
         pm_id = config.get(bike).get("pm_id")
 
-        while True:
-            with Node(0x00, AntDevice.NETWORK_KEY) as node:
-                hall = Hall(
-                    node,
-                    sensor_id=hall_id,
-                    device_type=DeviceTypeID(hall_type),
-                )
-                hr = HeartRate(node, sensor_id=hr_id)
-                pm = Powermeter(node, sensor_id=pm_id)
+        with Node(0x00, AntDevice.NETWORK_KEY) as node:
+            hall = Hall(
+                node,
+                sensor_id=hall_id,
+                device_type=DeviceTypeID(hall_type),
+            )
+            hr = HeartRate(node, sensor_id=hr_id)
+            pm = Powermeter(node, sensor_id=pm_id)
 
-                # start ant loop and data read
-                threading.Thread(target=node.start, name="ant.easy").start()
+            # start ant loop and data read
+            threading.Thread(target=node.start, name="ant.easy").start()
 
-                # release async tasks
-                await asyncio.gather(
-                    read_data(hall),
-                    read_data(hr),
-                    read_data(pm),
-                    mqtt(),
-                    write_db(db_powermeter, name_file_powermeter, "powermeter"),
-                    write_db(db_hall, name_file_hall, "hall"),
-                    write_db(db_hearthrate, name_file_hearthrate, "heartrate"),
-                )
-
-            await asyncio.sleep(1)
+            # release async tasks
+            await asyncio.gather(
+                read_data(hall),
+                read_data(hr),
+                read_data(pm),
+                mqtt(),
+                write_db(db_powermeter, name_file_powermeter, "powermeter"),
+                write_db(db_hall, name_file_hall, "hall"),
+                write_db(db_hearthrate, name_file_hearthrate, "heartrate"),
+            )
 
     except DriverNotFound:
         log.err("USB not connected")

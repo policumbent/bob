@@ -114,7 +114,7 @@ class Hall(AntDevice):
             "hall_cadence": float(self._cadence),
             "speed": float(self._speed),
             "distance": float(self._overall_distance),
-            "printed": 0,
+            "saved": False,
         }
 
     # Metodi propri della classe

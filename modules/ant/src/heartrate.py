@@ -45,7 +45,7 @@ class HeartRate(AntDevice):
             "sensor": "heartrate",
             "timestamp": str(self._last_data_read),
             "heartrate": float(self._heartrate),
-            "printed": 0,
+            "saved": False,
         }
 
     # Metodi propri della classe
