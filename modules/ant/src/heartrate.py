@@ -1,6 +1,6 @@
 from .device import AntDevice, DeviceTypeID, Node
 
-from core import time
+from time import time
 
 
 class HeartRate(AntDevice):
@@ -41,7 +41,11 @@ class HeartRate(AntDevice):
     def read_data(self) -> dict:
         self._heartrate = self._get_heartrate() if self._is_active() else 0
 
-        return {"heartrate": self._heartrate}
+        return {
+            "sensor": "hearthrate",
+            "timestamp": str(time()),
+            "heartrate": self._heartrate,
+        }
 
     # Metodi propri della classe
 

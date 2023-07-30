@@ -5,6 +5,8 @@ from typing import List
 
 from .device import AntDevice, DeviceTypeID
 
+from core import time
+
 
 class MessageType(Enum):
     # used
@@ -168,7 +170,12 @@ class Powermeter(AntDevice):
         if self._received_data:
             # print(f"Offset {self._offset}, Cadence {self._cadence}, Power {self._power}, Torque ticks {self._torque_ticks}, Torque frequency {self._torque_frequency}, Elapsed Time {self._elapsed_time_interval}")
             self._received_data = False
-        return {"power": self._power, "cadence": self._cadence}
+        return {
+            "sensor": "powermeter",
+            "timestamp": time.timestamp(),
+            "power": self._power,
+            "cadence": self._cadence,
+        }
 
     # Metodi propri della classe
 

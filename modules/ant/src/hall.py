@@ -1,4 +1,4 @@
-from core import time
+from time import time
 
 from .device import AntDevice, DeviceTypeID, Node
 
@@ -109,9 +109,11 @@ class Hall(AntDevice):
             self._last_cadence_revolutions = self._current_cadence_revolutions
 
         return {
+            "sensor": "hall",
+            "timestamp": str(time()),
             "speed": self._speed,
             "distance": self._overall_distance,
-            "hall_cadence": self._cadence,
+            "hall_cadence": self._cadence
         }
 
     # Metodi propri della classe
