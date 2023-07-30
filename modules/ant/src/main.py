@@ -3,6 +3,7 @@ import threading
 import logging
 import os
 from time import strftime, time
+from collections import deque
 
 from core import log, Mqtt, Database
 
@@ -18,7 +19,7 @@ from .powermeter import Powermeter
 logging.disable(logging.WARNING)
 
 # global data storage
-data = []
+data = deque(maxlen=100)
 mqtt_data = {}
 
 
