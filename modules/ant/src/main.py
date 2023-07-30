@@ -93,19 +93,6 @@ async def write_db(db, name_file: str, sensor_type: str):
         await asyncio.sleep(0.1)
 
 
-async def clean_data():
-    while True:
-
-        tmp_data = data.copy()
-
-        data = []
-        for element in tmp_data:
-            if float(element["timestamp"]) > time() - 10:
-                data.append(element)
-
-        asyncio.sleep(1)
-
-
 async def main():
     try:
         # retrive configurations from db
