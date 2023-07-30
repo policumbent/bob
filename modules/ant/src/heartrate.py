@@ -42,9 +42,10 @@ class HeartRate(AntDevice):
         self._heartrate = self._get_heartrate() if self._is_active() else 0
 
         return {
-            "sensor": "hearthrate",
-            "timestamp": str(time()),
-            "heartrate": self._heartrate,
+            "sensor": "heartrate",
+            "timestamp": str(self._last_data_read),
+            "heartrate": float(self._heartrate),
+            "printed": 0,
         }
 
     # Metodi propri della classe

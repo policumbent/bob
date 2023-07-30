@@ -110,10 +110,11 @@ class Hall(AntDevice):
 
         return {
             "sensor": "hall",
-            "timestamp": str(time()),
-            "speed": self._speed,
-            "distance": self._overall_distance,
-            "hall_cadence": self._cadence
+            "timestamp": str(self._last_data_read),
+            "hall_cadence": float(self._cadence),
+            "speed": float(self._speed),
+            "distance": float(self._overall_distance),
+            "printed": 0,
         }
 
     # Metodi propri della classe

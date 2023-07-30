@@ -5,8 +5,6 @@ from typing import List
 
 from .device import AntDevice, DeviceTypeID
 
-from core import time
-
 
 class MessageType(Enum):
     # used
@@ -67,10 +65,10 @@ class Powermeter(AntDevice):
         self._current_rx_time = None
 
         # attributes for Messagetype.poweronly and Messagetype.crank_torque_freq
-        self._power_buffer = deque(maxlen=4)
+        self._power_buffer = deque(maxlen=1)
 
         # attributes for Messagetype.calibration
-        self._offset_buffer = deque(maxlen=15)
+        self._offset_buffer = deque(maxlen=4)
 
         # inizializzazione del channel ant
         self._init_channel()
@@ -172,9 +170,10 @@ class Powermeter(AntDevice):
             self._received_data = False
         return {
             "sensor": "powermeter",
-            "timestamp": time.timestamp(),
-            "power": self._power,
-            "cadence": self._cadence,
+            "timestamp": str(self._last_data_read),
+            "power": float(self._power),
+            "cadence": float(self._cadence),
+            "printed": 0,
         }
 
     # Metodi propri della classe

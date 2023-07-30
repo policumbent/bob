@@ -2,7 +2,7 @@ import asyncio
 import threading
 import logging
 import os
-from time import strftime
+from time import strftime, time
 
 from core import log, Mqtt, Database
 
@@ -45,13 +45,13 @@ async def mqtt():
             async with Mqtt() as client:
                 while True:
                     for key, value in mqtt_data.items():
-                        if key != "sensor" and key != "timestamp":
+                        if key != "sensor" and key != "timestamp" and key != "printed":
                             await client.sensor_publish(f"ant/{key}", value)
                     await asyncio.sleep(0.1)
         except Exception as e:
             log.err(e)
         finally:
-            await asyncio.sleep(1)
+            await asyncio.sleep(0.5)
 
 
 def write_csv(row, name_file):
@@ -65,30 +65,45 @@ def write_csv(row, name_file):
 
 async def write_db(db, name_file: str, sensor_type: str):
     while True:
-        tmp_data = list(data)
 
-        for element in tmp_data:
-            if element["sensor"] == sensor_type:
+        for element in data:
+            if element["sensor"] == sensor_type and not element["printed"]:
 
                 row = {}
                 for key, value in element.items():
-                    if key != "sensor":
-                        row[key] = value
+                    if key != "sensor" and key != "sensor":
 
-                data.remove(element)
+                        if key == "hall_cadence":
+                            key = "cadence"
+
+                        row[key] = value
 
                 try:
                     write_csv(row, name_file)
                 except Exception as e:
                     log.err(e)
 
-
                 try:
                     db.insert_data(row)
                 except:
                     pass
+
+                element["printed"] = 1
         
         await asyncio.sleep(0.1)
+
+
+async def clean_data():
+    while True:
+
+        tmp_data = data.copy()
+
+        data = []
+        for element in tmp_data:
+            if float(element["timestamp"]) > time() - 10:
+                data.append(element)
+
+        asyncio.sleep(1)
 
 
 async def main():
@@ -104,7 +119,7 @@ async def main():
 
         name_file_hall = f"{home_path}/bob/csv/hall_{strftime('%d-%m-%Y@%H:%M:%S')}.csv"
         with open(name_file_hall, "w") as csv_file:
-            csv_file.write(f'timestamp,speed,distance,hall_cadence\n')
+            csv_file.write(f'timestamp,cadence,speed,distance\n')
 
         name_file_hearthrate = f"{home_path}/bob/csv/hearthrate_{strftime('%d-%m-%Y@%H:%M:%S')}.csv"
         with open(name_file_hearthrate, "w") as csv_file:
@@ -113,7 +128,7 @@ async def main():
         # create database object to interact with the tables
         db_powermeter = Database(table="powermeter", path=db_path, max_pending=10)
         db_hall = Database(table="hall", path=db_path, max_pending=10)
-        db_hearthrate = Database(table="hearthrate", path=db_path, max_pending=10)
+        db_hearthrate = Database(table="heartrate", path=db_path, max_pending=10)
 
         config = Database(path=db_path).config("ant")
 
@@ -145,8 +160,10 @@ async def main():
                     mqtt(),
                     write_db(db_powermeter, name_file_powermeter, "powermeter"),
                     write_db(db_hall, name_file_hall, "hall"),
-                    write_db(db_hearthrate, name_file_hearthrate, "hearthrate")
+                    write_db(db_hearthrate, name_file_hearthrate, "heartrate"),
                 )
+
+            await asyncio.sleep(1)
 
     except DriverNotFound:
         log.err("USB not connected")

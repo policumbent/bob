@@ -4,7 +4,7 @@ from enum import Enum
 from .ant.easy.channel import Channel
 from .ant.easy.node import Node
 
-from core import time
+from time import time
 
 
 _DEFAULT_CHANNEL_TYPE = Channel.Type.BIDIRECTIONAL_RECEIVE
@@ -41,8 +41,8 @@ class AntDevice(ABC):
         return self._node.new_channel(type)
 
     def _current_time(self):
-        return time._unix_time()
-
+        return time()
+                   
     def _elapsed_time(self):
         return self._current_time() - self._last_data_read
 
