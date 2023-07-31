@@ -31,8 +31,6 @@ class AntDevice(ABC):
         self._received_data = False
         self._last_data_read = None
 
-        self._data_ready_collection = False # flag used to understand if data is new or not from other classes
-
         if channel_type:
             self._channel = self._create_channel(channel_type)
 
@@ -52,17 +50,6 @@ class AntDevice(ABC):
     def _is_active(self, time_sec=5):
         return self._last_data_read and self._elapsed_time() < time_sec
 
-    def _data_collected(self):
-        self._data_ready_collection = False
-
-    def _data_prepare(self):
-        self._data_ready_collection = True
-
-    def is_data_ready(self) -> bool:
-        return self._data_ready_collection
-    
-    def get_sensor_type(self):
-        return self._sensor_type
 
     @staticmethod
     def _combine_bin(lsb, msb):
@@ -82,4 +69,16 @@ class AntDevice(ABC):
     
     @abstractmethod
     def get_sensor_type(self) -> str:
-        return ""
+        return None
+
+    @abstractmethod
+    def _data_collected(self):
+        pass
+
+    @abstractmethod
+    def _data_prepare(self):
+        pass
+
+    @abstractmethod
+    def is_data_ready(self) -> bool:
+        pass

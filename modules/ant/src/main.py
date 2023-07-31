@@ -17,12 +17,16 @@ from .powermeter import Powermeter
 
 # disable all logging for the ant library
 logging.disable(logging.WARNING)
+logging.basicConfig(filename='error_messages.log', filemode="w", level=logging.DEBUG)
 
 # global data storage
 
 data = {
     "powermeter": {
         "valid": False,
+        "database_instance": None,
+        "database_buffer": list(), # a list of rows that must be published in the database
+        "csv_dump": "",
         "payload": {
             "timestamp": 0,
             "power": 0,
@@ -31,6 +35,9 @@ data = {
     },
     "hall": {
         "valid": False,
+        "database_instance": None,
+        "database_buffer": list(),
+        "csv_dump": "",
         "payload": {
             "timestamp": 0,
             "hall_cadence": 0,
@@ -40,6 +47,9 @@ data = {
     },
     "heartrate": {
         "valid": False,
+        "database_instance": None,
+        "database_buffer": list(),
+        "csv_dump": "",
         "payload":{
             "timestamp": 0,
             "heartrate": 0
@@ -51,6 +61,7 @@ data = {
 mqtt_data = {}
 
 
+
 async def read_data(sensor):
     while True:
 
@@ -59,9 +70,12 @@ async def read_data(sensor):
             mqtt_data.update(read)
             data[sensor.get_sensor_type()]["payload"].update(read)
             data[sensor.get_sensor_type()]["valid"] = True
+            logging.debug(f"Data read with payload {data}")
+
+            write_db(data[sensor.get_sensor_type()]["database_instance"], data[sensor.get_sensor_type()]["csv_dump"], sensor.get_sensor_type())
+
         else:
             data[sensor.get_sensor_type()]["valid"] = False
-
         await asyncio.sleep(0.4)
 
 
@@ -76,6 +90,7 @@ async def mqtt():
                     await asyncio.sleep(0.1)
         except Exception as e:
             log.err(e)
+            logging.error(f"MQTT EXCEPTION: {e}")
         finally:
             await asyncio.sleep(1)
 
@@ -89,59 +104,68 @@ def write_csv(row, name_file):
         csv_file.write(values)
 
 
-async def write_db(db, name_file: str, sensor_type: str):
-    while True:
+def write_db(db, name_file: str, sensor_type: str):
+    logging.debug("attempting to write on dB")
+    if(data[sensor_type]["valid"] == True):
 
-        if(data[sensor_type]["valid"] == True):
+        row = data[sensor_type]["payload"].copy()
+        data[sensor_type]["database_buffer"].append(row)
+        logging.debug(f"attempt succeeded with {row}")
 
-            row = data[sensor_type]["payload"].copy()
+        try:
+            write_csv(row, name_file)
+        except Exception as e:
+            log.err(e)
+            logging.error(f"CSV EXCEPTION: {e}")
+        try:
+            for r in data[sensor_type]["database_buffer"].copy(): 
+                db.insert_data(r)
+                data[sensor_type]["database_buffer"].remove(r)
+        except Exception as e:
+            log.err(e)
+            logging.error(f"DATABASE EXCEPTION: {e}")
+    
+    else:
+        logging.debug(f"attempt failed --> {data[sensor_type]}")
 
-            try:
-                write_csv(row, name_file)
-            except Exception as e:
-                log.err(e)
-
-            try:
-                db.insert_data(row)
-            except:
-                pass
-        
-        await asyncio.sleep(0.6)
 
 
 async def main():
+    # retrive configurations from db
+    home_path = os.getenv("HOME")
+    db_path = os.getenv("DATABASE_PATH") or f"{home_path}/bob/database.db"
+
+    # generate csv name for the run and import keys to the csv file
+    data["powermeter"]["csv_dump"] = f"{home_path}/bob/csv/powermeter_{strftime('%d-%m-%Y@%H:%M:%S')}.csv"
+    with open(data["powermeter"]["csv_dump"], "w") as csv_file:
+        csv_file.write(f'timestamp,power,cadence\n')
+
+    data["hall"]["csv_dump"] = f"{home_path}/bob/csv/hall_{strftime('%d-%m-%Y@%H:%M:%S')}.csv"
+    with open(data["hall"]["csv_dump"], "w") as csv_file:
+        csv_file.write(f'timestamp,cadence,speed,distance\n')
+
+    data["heartrate"]["csv_dump"] = f"{home_path}/bob/csv/hearthrate_{strftime('%d-%m-%Y@%H:%M:%S')}.csv"
+    with open(data["heartrate"]["csv_dump"], "w") as csv_file:
+        csv_file.write(f'timestamp,hearthrate\n')
+
+    # create database object to interact with the tables
+    data["powermeter"]["database_instance"] = Database(table="powermeter", path=db_path, max_pending=10)
+    data["hall"]["database_instance"] = Database(table="hall", path=db_path, max_pending=10)
+    data["heartrate"]["database_instance"] = Database(table="heartrate", path=db_path, max_pending=10)
+
+
+    config = Database(path=db_path).config("ant")
+
+    bike = "taurusx"
+    
+    hall_id = config.get(bike).get("hall_id")
+    hall_type = config.get(bike).get("hall_type")
+    hr_id = config.get(bike).get("hr_id")
+    pm_id = config.get(bike).get("pm_id")
+
+
+    logging.debug("Configuration successfully retrieved")
     try:
-        # retrive configurations from db
-        home_path = os.getenv("HOME")
-        db_path = os.getenv("DATABASE_PATH") or f"{home_path}/bob/database.db"
-
-        # generate csv name for the run and import keys to the csv file
-        name_file_powermeter = f"{home_path}/bob/csv/powermeter_{strftime('%d-%m-%Y@%H:%M:%S')}.csv"
-        with open(name_file_powermeter, "w") as csv_file:
-            csv_file.write(f'timestamp,power,cadence\n')
-
-        name_file_hall = f"{home_path}/bob/csv/hall_{strftime('%d-%m-%Y@%H:%M:%S')}.csv"
-        with open(name_file_hall, "w") as csv_file:
-            csv_file.write(f'timestamp,cadence,speed,distance\n')
-
-        name_file_hearthrate = f"{home_path}/bob/csv/hearthrate_{strftime('%d-%m-%Y@%H:%M:%S')}.csv"
-        with open(name_file_hearthrate, "w") as csv_file:
-            csv_file.write(f'timestamp,hearthrate\n')
-
-        # create database object to interact with the tables
-        db_powermeter = Database(table="powermeter", path=db_path, max_pending=10)
-        db_hall = Database(table="hall", path=db_path, max_pending=10)
-        db_hearthrate = Database(table="heartrate", path=db_path, max_pending=10)
-
-        config = Database(path=db_path).config("ant")
-
-        bike = "taurusx"
-        
-        hall_id = config.get(bike).get("hall_id")
-        hall_type = config.get(bike).get("hall_type")
-        hr_id = config.get(bike).get("hr_id")
-        pm_id = config.get(bike).get("pm_id")
-
         with Node(0x00, AntDevice.NETWORK_KEY) as node:
             hall = Hall(
                 node,
@@ -160,15 +184,14 @@ async def main():
                 read_data(hr),
                 read_data(pm),
                 mqtt(),
-                write_db(db_powermeter, name_file_powermeter, "powermeter"),
-                write_db(db_hall, name_file_hall, "hall"),
-                write_db(db_hearthrate, name_file_hearthrate, "heartrate"),
             )
 
     except DriverNotFound:
         log.err("USB not connected")
+        logging.error("USB not connected")
     except Exception as e:
         log.err(e)
+        logging.error(f"MAIN EXCEPTION: {e}")
     finally:
         await asyncio.sleep(1)
 

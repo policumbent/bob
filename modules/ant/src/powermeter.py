@@ -44,6 +44,7 @@ class Powermeter(AntDevice):
         # attributes for data calculation
         self._offset = 0
         self._offset_flag = True
+        self._data_ready_collection = False # flag used to understand if data is new or not from other classes
 
         # attributes for Messagetype.crank_torque_freq
         self._slope = None
@@ -87,6 +88,18 @@ class Powermeter(AntDevice):
         # open channel
         self._channel.open()
         # self._request_calibration()
+
+    def _data_collected(self):
+        self._data_ready_collection = False
+
+    def _data_prepare(self):
+        self._data_ready_collection = True
+
+    def is_data_ready(self) -> bool:
+        return    self._data_ready_collection
+
+    def get_sensor_type(self):
+        return self._sensor_type
 
     def _receive_new_data(self, data):
         # callback for ant data
@@ -275,17 +288,19 @@ class Powermeter(AntDevice):
         return self._torque_frequency / (self._slope / 10)
 
     def _calculate_cadence(self):
+        # here the return is zero, otherwise we may influence the final data
         if self._cadence_period is None:
-            return None
+            return 0
 
         if self._cadence_period == 0:
-            return None
+            return 0
 
         return round(60 / self._cadence_period, 4)
 
     def _calculate_power(self):
+        # here the return is zero, otherwise we may influence the final data
         if self._torque is None or self._cadence is None:
-            return None
+            return 0
 
         return self._torque * self._cadence * pi / 30
 

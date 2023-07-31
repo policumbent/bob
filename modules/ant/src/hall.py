@@ -19,6 +19,8 @@ class Hall(AntDevice):
         self._disable_cadence = disable_cadence
         self._sensor_type = "hall"
 
+        self._data_ready_collection = False # flag used to understand if data is new or not from other classes
+
         self._circumference = circumference
         self._cadence_circumference = cadence_circumference
 
@@ -69,6 +71,18 @@ class Hall(AntDevice):
 
         # open channel
         self._channel.open()
+
+    def _data_collected(self):
+        self._data_ready_collection = False
+
+    def _data_prepare(self):
+        self._data_ready_collection = True
+
+    def is_data_ready(self) -> bool:
+        return  self._data_ready_collection
+
+    def get_sensor_type(self):
+        return self._sensor_type
 
     def _receive_new_data(self, data):
         # callback for ant data
