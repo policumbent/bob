@@ -30,6 +30,7 @@ data = {
         "payload": {
             "timestamp": 0,
             "power": 0,
+            "instant_power": 0,
             "cadence": 0
         }
     },
@@ -40,7 +41,7 @@ data = {
         "csv_dump": "",
         "payload": {
             "timestamp": 0,
-            "hall_cadence": 0,
+            "hall_cadence": 0,  # not currently supported by our hall sensor
             "speed": 0,
             "distance": 0
         }                     
@@ -76,7 +77,7 @@ async def read_data(sensor):
 
         else:
             data[sensor.get_sensor_type()]["valid"] = False
-        await asyncio.sleep(0.4)
+        await asyncio.sleep(1)
 
 
 async def mqtt():
@@ -123,7 +124,7 @@ def write_db(db, name_file: str, sensor_type: str):
                 data[sensor_type]["database_buffer"].remove(r)
         except Exception as e:
             log.err(e)
-            logging.error(f"DATABASE EXCEPTION: {e}")
+            logging.error(f"DATABASE EXCEPTION: {e} --> {data[sensor_type]['database_buffer']}")
     
     else:
         logging.debug(f"attempt failed --> {data[sensor_type]}")
@@ -138,20 +139,20 @@ async def main():
     # generate csv name for the run and import keys to the csv file
     data["powermeter"]["csv_dump"] = f"{home_path}/bob/csv/powermeter_{strftime('%d-%m-%Y@%H:%M:%S')}.csv"
     with open(data["powermeter"]["csv_dump"], "w") as csv_file:
-        csv_file.write(f'timestamp,power,cadence\n')
+        csv_file.write(f'{",".join(data["powermeter"]["payload"].keys())}\n')
 
     data["hall"]["csv_dump"] = f"{home_path}/bob/csv/hall_{strftime('%d-%m-%Y@%H:%M:%S')}.csv"
     with open(data["hall"]["csv_dump"], "w") as csv_file:
-        csv_file.write(f'timestamp,cadence,speed,distance\n')
+        csv_file.write(f'{",".join(data["hall"]["payload"].keys())}\n')
 
     data["heartrate"]["csv_dump"] = f"{home_path}/bob/csv/hearthrate_{strftime('%d-%m-%Y@%H:%M:%S')}.csv"
     with open(data["heartrate"]["csv_dump"], "w") as csv_file:
-        csv_file.write(f'timestamp,hearthrate\n')
+        csv_file.write(f'{",".join(data["heartrate"]["payload"].keys())}\n')
 
     # create database object to interact with the tables
-    data["powermeter"]["database_instance"] = Database(table="powermeter", path=db_path, max_pending=10)
-    data["hall"]["database_instance"] = Database(table="hall", path=db_path, max_pending=10)
-    data["heartrate"]["database_instance"] = Database(table="heartrate", path=db_path, max_pending=10)
+    data["powermeter"]["database_instance"] = Database(table="powermeter", path=db_path, max_pending=0)
+    data["hall"]["database_instance"] = Database(table="hall", path=db_path, max_pending=0)
+    data["heartrate"]["database_instance"] = Database(table="heartrate", path=db_path, max_pending=0)
 
 
     config = Database(path=db_path).config("ant")

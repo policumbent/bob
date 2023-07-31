@@ -39,7 +39,9 @@ class Powermeter(AntDevice):
 
         # data store
         self._power = 0
+        self._instant_power = 0
         self._cadence = 0
+        self._power_buffer = deque(maxlen=5)
 
         # attributes for data calculation
         self._offset = 0
@@ -49,7 +51,6 @@ class Powermeter(AntDevice):
         # attributes for Messagetype.crank_torque_freq
         self._slope = None
         self._torque = None
-        self._instant_power = None
 
         self._torque_ticks = None
         self._torque_frequency = None
@@ -120,7 +121,14 @@ class Powermeter(AntDevice):
 
         elif self._received_data and self._last_message_type is MessageType.power_only:
             self._cadence = self._get_instant_cadence()
-            self._power_buffer = self._get_instant_power()
+            self._instant_power = self._get_instant_power()
+            if(self._instant_power is not None and self._instant_power != 0.0):
+                self._power_buffer.append(self._instant_power)
+
+            if(len(self._power_buffer) >0):
+                self._power = round(
+                    sum((self._power_buffer)) / len(self._power_buffer)
+                )
 
             # TODO: provare con srm cerberus
             # print(self._get_accumulated_power())
@@ -144,7 +152,14 @@ class Powermeter(AntDevice):
             self._torque = self._calculate_torque()
 
             # calculate the average power
-            self._power = self._calculate_power()
+            self._instant_power = self._calculate_power()
+            if self._instant_power is not None and self._instant_power != 0.0:
+                self._power_buffer.append(self._instant_power)
+            
+            if(len(self._power_buffer) >0):
+                self._power = round(
+                    sum((self._power_buffer)) / len(self._power_buffer)
+                )
 
             self._cadence = self._calculate_cadence() or self._cadence
 
@@ -166,7 +181,8 @@ class Powermeter(AntDevice):
         return {
             "timestamp": str(self._last_data_read),
             "power": float(self._power),
-            "cadence": float(self._cadence),
+            "instant_power": float(self._instant_power),
+            "cadence": float(self._cadence)
         }
 
     # Metodi propri della classe
