@@ -49,26 +49,78 @@ topic_to_dbc = {
 
 dbc_to_topic = {
     "GretaError": {
-        "TimeOutError": "greta/timeout_error"
+        "TimeOutError": {
+            "mqtt": None,
+            "log": None
+        }
     },
     "GbError": {
-        "GbErrCode": "gb/error_code",
-        "GbGear": "gb/gear"
+        "GbErrCode": {
+            "mqtt": None,
+            "log": None
+        },
+        "GbGear": {
+            "mqtt": None,
+            "log": None
+        }
     },
     "GretaData": {
-        "TelekBattery": "telekhambion/battery",
-        "RxShifting": "greta/shifting",
+        "TelekBattery": {
+            "mqtt": None,
+            "log": None
+        },
+        "RxShifting": {
+            "mqtt": None,
+            "log": None
+        },
     },
     "GbData": {
-        "GbGear": "gb/gear"
+        "GbGear": {
+            "mqtt": "gb/gear",
+            "log": None
+        }
     },
     "MiriamGpsData": {
-        "GpsSpeed": "gps/speed",
-        "GpsDisplacement": "gps/displacement"
+        "GpsSpeed": {
+            "mqtt": None,
+            "log": None
+        },
+        "GpsDisplacement": {
+            "mqtt": None,
+            "log": None
+        }
     },
     "MiriamGpsCoords": {
-        "GpsLatitude": "gps/latitude",
-        "GpsLongitude": "gps/longitude"
+        "GpsLatitude": {
+            "mqtt": None,
+            "log": None
+        },
+        "GpsLongitude": {
+            "mqtt": None,
+            "log": None
+        }
+    },
+    "MiriamAirQuality": {
+        "CO2Level": {
+            "mqtt": None,
+            "log": None
+        },
+        "TVOC": {
+            "mqtt": None,
+            "log": None
+        }
+    },
+    "MiriamTemp": {
+        "Temperature": {
+            "mqtt": None,
+            "log": None
+        }
+    },
+    "MiriamGpsOther": {
+        "Altitude": {
+            "mqtt": None,
+            "log": None
+        }
     }
 }
 
@@ -153,9 +205,10 @@ async def can_reader():
                 msg_name = dbc.get_message_by_frame_id(msg.arbitration_id).name
 
                 for signal in decoded_msg:
-                    await client.sensor_publish(dbc_to_topic[msg_name][signal], decoded_msg[signal])
+                    if dbc_to_topic[msg_name][signal]["mqtt"] != None
+                        await client.sensor_publish(dbc_to_topic[msg_name][signal]["mqtt"], decoded_msg[signal])
 
-                # TODO: write the data received on the CAN Bus on the database
+                # TODO: write the data received on the CAN Bus in a logger
                     
     except Exception as e:
             log.err(f"MQTT: {e}")
