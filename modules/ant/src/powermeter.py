@@ -33,21 +33,24 @@ class Powermeter(AntDevice):
 
         # device type
         self._device_type_id = device_type.value
+        self._sensor_type = "powermeter"
 
         self._last_message_type = None
 
         # data store
         self._power = 0
+        self._instant_power = 0
         self._cadence = 0
+        self._power_buffer = deque(maxlen=5)
 
         # attributes for data calculation
         self._offset = 0
         self._offset_flag = True
+        self._data_ready_collection = False # flag used to understand if data is new or not from other classes
 
         # attributes for Messagetype.crank_torque_freq
         self._slope = None
         self._torque = None
-        self._instant_power = None
 
         self._torque_ticks = None
         self._torque_frequency = None
@@ -63,12 +66,6 @@ class Powermeter(AntDevice):
 
         self._last_rx_time = None
         self._current_rx_time = None
-
-        # attributes for Messagetype.poweronly and Messagetype.crank_torque_freq
-        self._power_buffer = deque(maxlen=4)
-
-        # attributes for Messagetype.calibration
-        self._offset_buffer = deque(maxlen=15)
 
         # inizializzazione del channel ant
         self._init_channel()
@@ -93,9 +90,21 @@ class Powermeter(AntDevice):
         self._channel.open()
         # self._request_calibration()
 
+    def _data_collected(self):
+        self._data_ready_collection = False
+
+    def _data_prepare(self):
+        self._data_ready_collection = True
+
+    def is_data_ready(self) -> bool:
+        return    self._data_ready_collection
+
+    def get_sensor_type(self):
+        return self._sensor_type
+
     def _receive_new_data(self, data):
         # callback for ant data
-
+        self._data_prepare()
         self._payload = data
         self._received_data = True
         self._last_message_type = self._get_message_type()
@@ -103,6 +112,7 @@ class Powermeter(AntDevice):
         self._last_data_read = self._current_time()
 
     def read_data(self) -> dict:
+        # if the 
         if not self._is_active():
             self._power = 0
             self._cadence = 0
@@ -111,12 +121,13 @@ class Powermeter(AntDevice):
 
         elif self._received_data and self._last_message_type is MessageType.power_only:
             self._cadence = self._get_instant_cadence()
-            self._power_buffer.append(self._get_instant_power())
+            self._instant_power = self._get_instant_power()
+            if(self._instant_power is not None and self._instant_power != 0.0):
+                self._power_buffer.append(self._instant_power)
 
-            # if buffer is full enaugh calculate average value of power
-            if self._is_buffer_full(self._power_buffer):
+            if(len(self._power_buffer) >0):
                 self._power = round(
-                    sum((self._power_buffer)) / self._power_buffer.maxlen
+                    sum((self._power_buffer)) / len(self._power_buffer)
                 )
 
             # TODO: provare con srm cerberus
@@ -142,10 +153,10 @@ class Powermeter(AntDevice):
 
             # calculate the average power
             self._instant_power = self._calculate_power()
-            if self._instant_power != None:
+            if self._instant_power is not None and self._instant_power != 0.0:
                 self._power_buffer.append(self._instant_power)
-
-            # if buffer is full enaugh calculate average value of power
+            
+            if(len(self._power_buffer) >0):
                 self._power = round(
                     sum((self._power_buffer)) / len(self._power_buffer)
                 )
@@ -158,17 +169,21 @@ class Powermeter(AntDevice):
             self._last_torque_ticks_stamp = self._current_torque_ticks_stamp
 
         elif self._received_data and self._last_message_type is MessageType.calibration and self._offset_flag:
-            self._offset_buffer.append(self._get_offset())
-            # self._offset = self._get_offset()
-            if self._is_buffer_full(self._offset_buffer):
-                self._offset = round(
-                    sum(self._offset_buffer) / self._offset_buffer.maxlen
-                )
-                self._offset_flag = False
+            self._offset = self._get_offset()
+            self._offset_flag = False
+
         if self._received_data:
             # print(f"Offset {self._offset}, Cadence {self._cadence}, Power {self._power}, Torque ticks {self._torque_ticks}, Torque frequency {self._torque_frequency}, Elapsed Time {self._elapsed_time_interval}")
             self._received_data = False
-        return {"power": self._power, "cadence": self._cadence}
+
+        # the data has been collected --> will be restored by next callback
+        self._data_collected()
+        return {
+            "timestamp": str(self._last_data_read),
+            "power": float(self._power),
+            "instant_power": float(self._instant_power),
+            "cadence": float(self._cadence)
+        }
 
     # Metodi propri della classe
 
@@ -289,17 +304,19 @@ class Powermeter(AntDevice):
         return self._torque_frequency / (self._slope / 10)
 
     def _calculate_cadence(self):
+        # here the return is zero, otherwise we may influence the final data
         if self._cadence_period is None:
-            return None
+            return 0
 
         if self._cadence_period == 0:
-            return None
+            return 0
 
         return round(60 / self._cadence_period, 4)
 
     def _calculate_power(self):
+        # here the return is zero, otherwise we may influence the final data
         if self._torque is None or self._cadence is None:
-            return None
+            return 0
 
         return self._torque * self._cadence * pi / 30
 

@@ -1,4 +1,4 @@
-from core import time
+from time import time
 
 from .device import AntDevice, DeviceTypeID, Node
 
@@ -17,6 +17,9 @@ class Hall(AntDevice):
 
         self._device_type = device_type
         self._disable_cadence = disable_cadence
+        self._sensor_type = "hall"
+
+        self._data_ready_collection = False # flag used to understand if data is new or not from other classes
 
         self._circumference = circumference
         self._cadence_circumference = cadence_circumference
@@ -69,9 +72,21 @@ class Hall(AntDevice):
         # open channel
         self._channel.open()
 
+    def _data_collected(self):
+        self._data_ready_collection = False
+
+    def _data_prepare(self):
+        self._data_ready_collection = True
+
+    def is_data_ready(self) -> bool:
+        return  self._data_ready_collection
+
+    def get_sensor_type(self):
+        return self._sensor_type
+
     def _receive_new_data(self, data):
         # callback for ant data
-
+        self._data_prepare()
         self._payload = data
         self._received_data = True
         self._last_data_read = self._current_time()
@@ -108,11 +123,16 @@ class Hall(AntDevice):
             self._last_cadence_event_time = self._current_cadence_event_time
             self._last_cadence_revolutions = self._current_cadence_revolutions
 
+        self._data_collected()
         return {
-            "speed": self._speed,
-            "distance": self._overall_distance,
-            "hall_cadence": self._cadence,
+            "timestamp": str(self._last_data_read),
+            "hall_cadence": float(self._cadence),
+            "speed": float(self._speed),
+            "distance": float(self._overall_distance),
         }
+
+    def get_sensor_type(self) -> str:
+        return self._sensor_type
 
     # Metodi propri della classe
 

@@ -4,7 +4,7 @@ from enum import Enum
 from .ant.easy.channel import Channel
 from .ant.easy.node import Node
 
-from core import time
+from time import time
 
 
 _DEFAULT_CHANNEL_TYPE = Channel.Type.BIDIRECTIONAL_RECEIVE
@@ -25,6 +25,7 @@ class AntDevice(ABC):
         self._channel = None
         self._sensor_id = sensor_id
 
+
         # sensor data
         self._payload = None
         self._received_data = False
@@ -41,13 +42,14 @@ class AntDevice(ABC):
         return self._node.new_channel(type)
 
     def _current_time(self):
-        return time._unix_time()
-
+        return time()
+                   
     def _elapsed_time(self):
         return self._current_time() - self._last_data_read
 
     def _is_active(self, time_sec=5):
         return self._last_data_read and self._elapsed_time() < time_sec
+
 
     @staticmethod
     def _combine_bin(lsb, msb):
@@ -63,4 +65,20 @@ class AntDevice(ABC):
 
     @abstractmethod
     def read_data(self):
+        pass
+    
+    @abstractmethod
+    def get_sensor_type(self) -> str:
+        return None
+
+    @abstractmethod
+    def _data_collected(self):
+        pass
+
+    @abstractmethod
+    def _data_prepare(self):
+        pass
+
+    @abstractmethod
+    def is_data_ready(self) -> bool:
         pass
