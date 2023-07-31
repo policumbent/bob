@@ -33,6 +33,7 @@ class Powermeter(AntDevice):
 
         # device type
         self._device_type_id = device_type.value
+        self._sensor_type = "powermeter"
 
         self._last_message_type = None
 
@@ -89,7 +90,7 @@ class Powermeter(AntDevice):
 
     def _receive_new_data(self, data):
         # callback for ant data
-
+        self._data_prepare()
         self._payload = data
         self._received_data = True
         self._last_message_type = self._get_message_type()
@@ -97,6 +98,7 @@ class Powermeter(AntDevice):
         self._last_data_read = self._current_time()
 
     def read_data(self) -> dict:
+        # if the 
         if not self._is_active():
             self._power = 0
             self._cadence = 0
@@ -146,12 +148,12 @@ class Powermeter(AntDevice):
             # print(f"Offset {self._offset}, Cadence {self._cadence}, Power {self._power}, Torque ticks {self._torque_ticks}, Torque frequency {self._torque_frequency}, Elapsed Time {self._elapsed_time_interval}")
             self._received_data = False
 
+        # the data has been collected --> will be restored by next callback
+        self._data_collected()
         return {
-            "sensor": "powermeter",
             "timestamp": str(self._last_data_read),
             "power": float(self._power),
             "cadence": float(self._cadence),
-            "saved": False,
         }
 
     # Metodi propri della classe

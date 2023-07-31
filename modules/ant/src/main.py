@@ -19,25 +19,50 @@ from .powermeter import Powermeter
 logging.disable(logging.WARNING)
 
 # global data storage
-data = deque(maxlen=100)
+
+data = {
+    "powermeter": {
+        "valid": False,
+        "payload": {
+            "timestamp": 0,
+            "power": 0,
+            "cadence": 0
+        }
+    },
+    "hall": {
+        "valid": False,
+        "payload": {
+            "timestamp": 0,
+            "hall_cadence": 0,
+            "speed": 0,
+            "distance": 0
+        }                     
+    },
+    "heartrate": {
+        "valid": False,
+        "payload":{
+            "timestamp": 0,
+            "heartrate": 0
+        }
+    }
+}
+
+
 mqtt_data = {}
 
 
 async def read_data(sensor):
     while True:
-        read = sensor.read_data()
 
-        mqtt_data.update(read)
+        if(sensor.is_data_ready()):
+            read = sensor.read_data()
+            mqtt_data.update(read)
+            data[sensor.get_sensor_type()]["payload"].update(read)
+            data[sensor.get_sensor_type()]["valid"] = True
+        else:
+            data[sensor.get_sensor_type()]["valid"] = False
 
-        already_present = False
-        for element in data:
-            if element["sensor"] == read["sensor"] and element["timestamp"] == read["timestamp"]:
-                already_present = True
-            
-        if not already_present:
-            data.append(read)
-
-        await asyncio.sleep(0.05)
+        await asyncio.sleep(0.4)
 
 
 async def mqtt():
@@ -46,7 +71,7 @@ async def mqtt():
             async with Mqtt() as client:
                 while True:
                     for key, value in mqtt_data.items():
-                        if key != "sensor" and key != "timestamp" and key != "saved":
+                        if key != "timestamp":
                             await client.sensor_publish(f"ant/{key}", value)
                     await asyncio.sleep(0.1)
         except Exception as e:
@@ -67,41 +92,21 @@ def write_csv(row, name_file):
 async def write_db(db, name_file: str, sensor_type: str):
     while True:
 
-        for element in data:
-            if element["sensor"] == sensor_type and not element["saved"]:
+        if(data[sensor_type]["valid"] == True):
 
-                if sensor_type == "powermeter":
-                    row = {
-                        "timestamp": element["timestamp"],
-                        "power": element["power"],
-                        "cadence": element["cadence"]
-                    }
-                elif sensor_type == "hall":
-                    row = {
-                        "timestamp": element["timestamp"],
-                        "cadence": element["hall_cadence"],
-                        "speed": element["speed"],
-                        "distance": element["distance"]                        
-                    }
-                else:
-                    row = {
-                        "timestamp": element["timestamp"],
-                        "heartrate": element["heartrate"]
-                    }
+            row = data[sensor_type]["payload"].copy()
 
-                try:
-                    write_csv(row, name_file)
-                except Exception as e:
-                    log.err(e)
+            try:
+                write_csv(row, name_file)
+            except Exception as e:
+                log.err(e)
 
-                try:
-                    db.insert_data(row)
-                except:
-                    pass
-
-                element["saved"] = True
+            try:
+                db.insert_data(row)
+            except:
+                pass
         
-        await asyncio.sleep(0.1)
+        await asyncio.sleep(0.6)
 
 
 async def main():

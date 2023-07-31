@@ -8,6 +8,7 @@ class HeartRate(AntDevice):
         super().__init__(node, sensor_id)
 
         self._device_type_id = device_type.value
+        self._sensor_type="heartrate"
 
         # data store
         self._heartrate = 0
@@ -35,18 +36,20 @@ class HeartRate(AntDevice):
         self._channel.open()
 
     def _receive_new_data(self, data):
+        self._data_prepare()
         self._payload = data
         self._last_data_read = self._current_time()
 
     def read_data(self) -> dict:
         self._heartrate = self._get_heartrate() if self._is_active() else 0
-
+        self._data_collected()
         return {
-            "sensor": "heartrate",
             "timestamp": str(self._last_data_read),
-            "heartrate": float(self._heartrate),
-            "saved": False,
+            "heartrate": float(self._heartrate)
         }
+
+    def get_sensor_type(self) -> str:
+        return self._sensor_type
 
     # Metodi propri della classe
 
