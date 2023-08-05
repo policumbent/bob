@@ -1,5 +1,6 @@
 import os
 import subprocess
+import logging
 
 from threading import Thread
 
@@ -38,6 +39,7 @@ subscribed_topics = [
     "ant/heartrate",
 ]
 
+# map between Mqtt message and encapsulating message on CAN
 topic_to_dbc = {
     "ant/power":        ("BobSrmPower", "SrmPower"),
     "ant/cadence":      ("BobSrmCadence", "SrmCadence"),
@@ -48,78 +50,89 @@ topic_to_dbc = {
 }
 
 dbc_to_topic = {
-    "GretaError": {
-        "TimeOutError": {
-            "mqtt": None,
-            "log": None
+    "GretaError": {         # Meassage sent via CAN
+        "TimeOutError": {   # Signal
+            "mqtt": None,   # Topic where it is published (None -> not published
         }
     },
     "GbError": {
+
         "GbErrCode": {
-            "mqtt": None,
-            "log": None
+            "mqtt": None
         },
         "GbGear": {
-            "mqtt": None,
-            "log": None
+            "mqtt": None
         }
     },
-    "GretaData": {
+    "GretaData":{
         "TelekBattery": {
-            "mqtt": None,
-            "log": None
+            "mqtt": None
         },
         "RxShifting": {
-            "mqtt": None,
-            "log": None
+            "mqtt": None
         },
     },
     "GbData": {
+
+        "database_instance": None, # table where to publish data
+        "csv_dump": "",            # file where it saves information
+
         "GbGear": {
-            "mqtt": "gb/gear",
-            "log": None
+            "mqtt": "gb/gear"
         }
     },
     "MiriamGpsData": {
+
+        "database_instance": None, # table where to publish data
+        "csv_dump": "",            # file where it saves information
+
         "GpsSpeed": {
-            "mqtt": None,
-            "log": None
+            "mqtt": None
         },
         "GpsDisplacement": {
-            "mqtt": None,
-            "log": None
+            "mqtt": None
         }
     },
     "MiriamGpsCoords": {
+
+        "database_instance": None, # table where to publish data
+        "csv_dump": "",            # file where it saves information
+
         "GpsLatitude": {
-            "mqtt": None,
-            "log": None
+            "mqtt": None
         },
         "GpsLongitude": {
-            "mqtt": None,
-            "log": None
+            "mqtt": None
         }
     },
     "MiriamAirQuality": {
+
+        "database_instance": None, # table where to publish data
+        "csv_dump": "",            # file where it saves information
+
         "CO2Level": {
-            "mqtt": None,
-            "log": None
+            "mqtt": None
         },
         "TVOC": {
-            "mqtt": None,
-            "log": None
+            "mqtt": None
         }
     },
     "MiriamTemp": {
+
+        "database_instance": None, # table where to publish data
+        "csv_dump": "",            # file where it saves information
+
         "Temperature": {
-            "mqtt": None,
-            "log": None
+            "mqtt": None
         }
     },
     "MiriamGpsOther": {
+
+        "database_instance": None, # table where to publish data
+        "csv_dump": "",            # file where it saves information
+
         "Altitude": {
-            "mqtt": None,
-            "log": None
+            "mqtt": None
         }
     }
 }
@@ -203,19 +216,63 @@ async def can_reader():
                 decoded_msg = dbc.decode_message(msg.arbitration_id, msg.data)
 
                 msg_name = dbc.get_message_by_frame_id(msg.arbitration_id).name
+                
+                row = dict()
 
                 for signal in decoded_msg:
-                    if dbc_to_topic[msg_name][signal]["mqtt"] != None
+                    if dbc_to_topic[msg_name][signal]["mqtt"] != None:
                         await client.sensor_publish(dbc_to_topic[msg_name][signal]["mqtt"], decoded_msg[signal])
-
-                # TODO: write the data received on the CAN Bus in a logger
+                        row[signal] = decoded_msg[signal]
+                    
+                
+                if("database_instance" in dbc_to_topic[msg_name]):
+                    write_db(dbc_to_topic[msg_name]["database_instance"], dbc_to_topic[msg_name]["csv_dump"], row)
                     
     except Exception as e:
             log.err(f"MQTT: {e}")
 
 
+
+
+def write_csv(row, name_file):
+    with open(name_file, "a") as csv_file:
+        values = ''
+        for value in row.values():
+            values += f'{value},'
+        values = f"{values.rstrip(',')}\n"
+        csv_file.write(values)
+
+
+def write_db(db, name_file: str, row: dict):
+    logging.debug("attempting to write on dB")
+    try:
+        write_csv(row, name_file)
+    except Exception as e:
+        log.err(e)
+        logging.error(f"CSV EXCEPTION: {e}")
+    try:
+        db.insert_data(row)
+    except Exception as e:
+        log.err(e)
+        logging.error(f"DATABASE EXCEPTION: {e}")
+
+
+
 async def main():
     home_path = os.getenv("HOME")
+    db_path = os.getenv("DATABASE_PATH") or f"{home_path}/bob/database.db"
+
+    ## Database gathering
+    # create database object to interact with the tables
+    # TODO: create tables for database
+    #########################################################################################################
+    data["GbData"]["database_instance"] = Database(table="gear", path=db_path, max_pending=0)
+    data["MiriamGpsData"]["database_instance"] = Database(table="gps_data", path=db_path, max_pending=0)
+    data["MiriamGpsCoords"]["database_instance"] = Database(table="gps_coordinates", path=db_path, max_pending=0)
+    data["MiriamAirQuality"]["database_instance"] = Database(table="air_quality", path=db_path, max_pending=0)
+    data["MiriamTemp"]["database_instance"] = Database(table="internal_temperature", path=db_path, max_pending=0)
+    data["MiriamGpsOther"]["database_instance"] = Database(table="gps_altitude", path=db_path, max_pending=0)
+    #########################################################################################################
 
     can_logger_thread = Thread(target=can_logger)
     can_logger_thread.start()

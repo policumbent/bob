@@ -24,9 +24,9 @@ logging.basicConfig(filename='error_messages.log', filemode="w", level=logging.D
 data = {
     "powermeter": {
         "valid": False,
-        "database_instance": None,
+        "database_instance": None, # table where to publish data
         "database_buffer": list(), # a list of rows that must be published in the database
-        "csv_dump": "",
+        "csv_dump": "",            # file where it saves information
         "payload": {
             "timestamp": 0,
             "power": 0,
@@ -157,7 +157,7 @@ async def main():
 
     config = Database(path=db_path).config("ant")
 
-    bike = "taurusx"
+    bike = "taurusx" # TODO: modify the database config -- not working on Cerberus, only on Phoenix
     
     hall_id = config.get(bike).get("hall_id")
     hall_type = config.get(bike).get("hall_type")
