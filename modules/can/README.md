@@ -7,6 +7,14 @@ It uses [python-can](https://pypi.org/project/python-can/) and
 [cantools](https://pypi.org/project/python-can/) as libraries to manage both the
 CAN Bus and its messages.
 
+## Preliminary operations
+
+Before doing anything, you have to make ``can_logger.sh`` executable, so you
+will have to move in this folder and run:
+```Bash
+chmod +x can_logger.sh
+```
+
 ## ``python-can``
 
 This library is used to manage the CAN Bus through SocketCAN. It defines a
