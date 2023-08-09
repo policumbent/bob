@@ -266,7 +266,6 @@ async def main():
 
     ## Database gathering
     # create database object to interact with the tables
-    # TODO: create tables for database
     #########################################################################################################
     dbc_to_topic["GbData"]["database_instance"] = Database(table="gear", path=db_path, max_pending=0)
     dbc_to_topic["MiriamGpsData"]["database_instance"] = Database(table="gps_data", path=db_path, max_pending=0)
