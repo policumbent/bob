@@ -157,8 +157,7 @@ async def main():
 
     config = Database(path=db_path).config("ant")
 
-    bike = "taurusx" # TODO: modify the database config -- not working on Cerberus, only on Phoenix
-    
+    bike = config.get("name") # retrieves the informations related to the bike   
     hall_id = config.get(bike).get("hall_id")
     hall_type = config.get(bike).get("hall_type")
     hr_id = config.get(bike).get("hr_id")
