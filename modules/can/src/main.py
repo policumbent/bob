@@ -219,6 +219,8 @@ async def can_reader():
                 
                 row = dict()
 
+                row["timestamp"] = time.time()
+
                 for signal in decoded_msg:
                     if dbc_to_topic[msg_name][signal]["mqtt"] != None:
                         await client.sensor_publish(dbc_to_topic[msg_name][signal]["mqtt"], decoded_msg[signal])
@@ -266,12 +268,12 @@ async def main():
     # create database object to interact with the tables
     # TODO: create tables for database
     #########################################################################################################
-    data["GbData"]["database_instance"] = Database(table="gear", path=db_path, max_pending=0)
-    data["MiriamGpsData"]["database_instance"] = Database(table="gps_data", path=db_path, max_pending=0)
-    data["MiriamGpsCoords"]["database_instance"] = Database(table="gps_coordinates", path=db_path, max_pending=0)
-    data["MiriamAirQuality"]["database_instance"] = Database(table="air_quality", path=db_path, max_pending=0)
-    data["MiriamTemp"]["database_instance"] = Database(table="internal_temperature", path=db_path, max_pending=0)
-    data["MiriamGpsOther"]["database_instance"] = Database(table="gps_altitude", path=db_path, max_pending=0)
+    dbc_to_topic["GbData"]["database_instance"] = Database(table="gear", path=db_path, max_pending=0)
+    dbc_to_topic["MiriamGpsData"]["database_instance"] = Database(table="gps_data", path=db_path, max_pending=0)
+    dbc_to_topic["MiriamGpsCoords"]["database_instance"] = Database(table="gps_coordinates", path=db_path, max_pending=0)
+    dbc_to_topic["MiriamAirQuality"]["database_instance"] = Database(table="air_quality", path=db_path, max_pending=0)
+    dbc_to_topic["MiriamTemp"]["database_instance"] = Database(table="internal_temperature", path=db_path, max_pending=0)
+    dbc_to_topic["MiriamGpsOther"]["database_instance"] = Database(table="gps_altitude", path=db_path, max_pending=0)
     #########################################################################################################
 
     can_logger_thread = Thread(target=can_logger)
