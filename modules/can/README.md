@@ -9,10 +9,20 @@ CAN Bus and its messages.
 
 ## Preliminary operations
 
+### Making ``can_logger.sh`` executable
+
 Before doing anything, you have to make ``can_logger.sh`` executable, so you
 will have to move in this folder and run:
 ```Bash
 chmod +x can_logger.sh
+```
+
+### Dependencies installation
+
+Since, at this point in time, this module does not have a virtual environment,
+you will have to manually install its dependencies. You have to manually run:
+```Bash
+pip install requirements.txt
 ```
 
 ## ``python-can``
