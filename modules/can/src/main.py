@@ -207,30 +207,31 @@ async def mqtt():
 
 
 async def can_reader():
-    try:
-        async with Mqtt() as client:
-            # asynchronous for loop: whenever a message is received on the CAN
-            # bus, a new iteration is performed, otherwise it won't exit the
-            # loop but it will wait for another message
-            for msg in bus:
-                decoded_msg = dbc.decode_message(msg.arbitration_id, msg.data)
+    while True:
+        try:
+            async with Mqtt() as client:
+                # asynchronous for loop: whenever a message is received on the CAN
+                # bus, a new iteration is performed, otherwise it won't exit the
+                # loop but it will wait for another message
+                for msg in bus:
+                    decoded_msg = dbc.decode_message(msg.arbitration_id, msg.data)
 
-                msg_name = dbc.get_message_by_frame_id(msg.arbitration_id).name
-                
-                row = dict()
-
-                row["timestamp"] = time.time()
-
-                for signal in decoded_msg:
-                    if dbc_to_topic[msg_name][signal]["mqtt"] != None:
-                        await client.sensor_publish(dbc_to_topic[msg_name][signal]["mqtt"], decoded_msg[signal])
-                        row[signal] = decoded_msg[signal]
+                    msg_name = dbc.get_message_by_frame_id(msg.arbitration_id).name
                     
-                
-                if("database_instance" in dbc_to_topic[msg_name]):
-                    write_db(dbc_to_topic[msg_name]["database_instance"], dbc_to_topic[msg_name]["csv_dump"], row)
+                    row = dict()
+
+                    row["timestamp"] = time.time()
+
+                    for signal in decoded_msg:
+                        if dbc_to_topic[msg_name][signal]["mqtt"] != None:
+                            await client.sensor_publish(dbc_to_topic[msg_name][signal]["mqtt"], decoded_msg[signal])
+                            row[signal] = decoded_msg[signal]
+                        
                     
-    except Exception as e:
+                    if("database_instance" in dbc_to_topic[msg_name]):
+                        write_db(dbc_to_topic[msg_name]["database_instance"], dbc_to_topic[msg_name]["csv_dump"], row)
+                        
+        except Exception as e:
             log.err(f"MQTT: {e}")
 
 
