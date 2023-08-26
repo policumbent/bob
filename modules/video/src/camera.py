@@ -72,7 +72,7 @@ class Camera(PiCamera):
 
     def __init__(
         self,
-        screen_dim=(1024, 820),
+        screen_dim=(1024, 820),  # If not working use as resolution 1024x768 which should work on modern raspberries (also activate grid to see if it works)
         sectors=(5, 4),
         framerate=40,
         video_rotation=0,
