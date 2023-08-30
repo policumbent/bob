@@ -49,4 +49,5 @@ BO_ 1157 MiriamTemp: 2 Vector__XXX
  SG_ Temperature : 0|16@1+ (0.01,0) [0|60] "°C" Vector__XXX
 
 BO_ 1160 MiriamGpsOther: 2 Vector__XXX
- SG_ Altitude : 0|16@1+ (1,1) [0|3000] "m" Vector__XXX
+ SG_ Altitude : 0|16@1+ (1,0) [0|3000] "m" Vector__XXX
+
