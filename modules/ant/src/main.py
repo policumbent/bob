@@ -16,7 +16,7 @@ from .hall import Hall
 from .powermeter import Powermeter
 
 # disable all logging for the ant library
-logging.disable(logging.WARNING)
+#logging.disable(logging.WARNING)
 logging.basicConfig(filename='error_messages.log', filemode="w", level=logging.DEBUG)
 
 # global data storage
@@ -171,6 +171,7 @@ async def main():
                 node,
                 sensor_id=hall_id,
                 device_type=DeviceTypeID(hall_type),
+                circumference = 1490 * 3.125 if (bike == "cerberus") else 1450 # cerberus hall is not mounted on the wheel because of rpm limit
             )
             hr = HeartRate(node, sensor_id=hr_id)
             pm = Powermeter(node, sensor_id=pm_id)

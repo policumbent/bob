@@ -89,6 +89,7 @@ class Hall(AntDevice):
         self._data_prepare()
         self._payload = data
         self._received_data = True
+        # print(f"Received datas: {self._payload} type: {self._last_message_type}")
         self._last_data_read = self._current_time()
 
     def read_data(self) -> dict:
@@ -122,6 +123,10 @@ class Hall(AntDevice):
             self._last_speed_revolutions = self._current_speed_revolutions
             self._last_cadence_event_time = self._current_cadence_event_time
             self._last_cadence_revolutions = self._current_cadence_revolutions
+
+            print(f"Received SPEED MESSAGE: speed = {self._speed}")
+            print(f"Received CADENCE MESSAGE: cadence = {self._cadence}")
+            print(f"Received DISTANCE MESSAGE: distance = {self._overall_distance}")
 
         self._data_collected()
         return {

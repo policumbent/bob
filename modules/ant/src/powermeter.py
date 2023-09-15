@@ -132,6 +132,8 @@ class Powermeter(AntDevice):
 
             # TODO: provare con srm cerberus
             # print(self._get_accumulated_power())
+            
+            print(f"Received POWERONLY MESSAGE: instant_power = {self._instant_power}")
 
         elif (
             self._received_data
@@ -163,6 +165,8 @@ class Powermeter(AntDevice):
 
             self._cadence = self._calculate_cadence() or self._cadence
 
+            print(f"Received CTF MESSAGE: instant_power = {self._instant_power}")
+
             # storing previous parameter results
             self._last_rx_time = self._current_rx_time
             self._last_rotations_count = self._current_rotations_count
@@ -170,6 +174,7 @@ class Powermeter(AntDevice):
 
         elif self._received_data and self._last_message_type is MessageType.calibration and self._offset_flag:
             self._offset = self._get_offset()
+            print(f"Received CALIBRATION MESSAGE: offset = {self._offset}")
             self._offset_flag = False
 
         if self._received_data:

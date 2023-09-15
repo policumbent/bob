@@ -58,7 +58,7 @@ async def video(config):
 
                 # velocità altro a sx
                 vcam.add_overlay_element(
-                    OverlayElement((0, 0), Colors.black, sensors[0], "kph")
+                    OverlayElement((0, 0), Colors.blue, sensors[0], "kph")
                 )
                 
                 # distanza basso a dx
