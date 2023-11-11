@@ -7,6 +7,7 @@ from .colors import Colors
 
 from core import log, Mqtt, Database, time
 from core.mqtt import Message
+import Pipe
 
 
 # global data storage
@@ -108,6 +109,16 @@ async def mqtt(_):
         finally:
             await sleep(1)
 
+async def fifo(Pipe: pipe):
+    while True:
+        try:
+            if pipe.read():
+                sensor, value = pipe.get_data().rstrip().split(":")
+                data.update({sensor: round(value)})
+        except Exception as e:
+            log.err(f"MQTT: {e}")
+        finally:
+            await sleep(1)
 
 async def main():
     # retrive configurations from db
@@ -115,9 +126,13 @@ async def main():
     db_path = os.getenv("DATABASE_PATH") or f"{home_path}/bob/database.db"
 
     config = Database(path=db_path).config("video")
-
+    pipe = Pipe(f'{home_path}/bob/named_pipe.txt', 'r')
     # release async tasks
-    await asyncio.gather(video(config), mqtt(config))
+    await asyncio.gather(
+        video(config),
+        # mqtt(config), 
+        fifo(pipe)
+        )
 
 
 def entry_point():

@@ -6,7 +6,7 @@ from time import strftime, time
 from collections import deque
 
 from core import log, Mqtt, Database
-
+from pipe import Pipe
 
 from .ant.base.driver import DriverNotFound
 from .device import AntDevice, DeviceTypeID, Node
@@ -79,6 +79,21 @@ async def read_data(sensor):
             data[sensor.get_sensor_type()]["valid"] = False
         await asyncio.sleep(1)
 
+async def fifo(pipe):
+    while True:
+        try:
+            while True:
+                for key, value in mqtt_data.items():
+                    if key != "timestamp":
+                        pipe.write(f"{key}:{value}")
+                    await asyncio.sleep(0.1)
+        except Exception as e:
+            log.err(e)
+            logging.error(f"PIPE EXCEPTION: {e}")
+        finally:
+            await asyncio.sleep(1)
+
+            
 
 async def mqtt():
     while True:
@@ -184,7 +199,8 @@ async def main():
                 read_data(hall),
                 read_data(hr),
                 read_data(pm),
-                mqtt(),
+                # mqtt(),
+                fifo()
             )
 
     except DriverNotFound:
