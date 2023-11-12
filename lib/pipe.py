@@ -1,13 +1,12 @@
-from os import mkfifo
-import os, stat
+import os
+import stat
+
 from select import select
 from core import log
 
 class Pipe():
-    _path = ''
-    _fifo = None
+    _path = None
     _data = None
-    _pipein = -1
     def __init__(self, path : str, sub_type : str):
         if sub_type[0] == 'r':
             typ = 0
@@ -31,10 +30,13 @@ class Pipe():
         return self._data
         
     def write(self, datas : str):
-        if os.path.exists(self._path):
-            if stat.S_ISFIFO(os.stat(self._path).st_mode):
-                with open(self._path, 'w') as self._fifo:
-                    self._fifo.write(datas)
+        try:
+            if os.path.exists(self._path):
+                if stat.S_ISFIFO(os.stat(self._path).st_mode):
+                    with open(self._path, 'w') as fifo:
+                        fifo.write(f"{datas}-")
+        except Exception as e:
+            print(e)
 
     def read(self):
         try:

@@ -87,7 +87,7 @@ async def fifo(pipe):
             while True:
                 for key, value in mqtt_data.items():
                     if key != "timestamp":
-                        await pipe.write(f"{key}:{value}")
+                        pipe.write(f"{key}:{value}")
                 await asyncio.sleep(0.1)
         except Exception as e:
             log.err(e)

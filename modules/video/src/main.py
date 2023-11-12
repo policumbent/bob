@@ -1,5 +1,6 @@
 import asyncio
 import os
+import sys
 
 from asyncio import sleep
 from .camera import Camera, OverlayElement, CameraError
@@ -7,8 +8,10 @@ from .colors import Colors
 
 from core import log, Mqtt, Database, time
 from core.mqtt import Message
-import Pipe
 
+#import lib path
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', '..', 'lib')))
+from pipe import Pipe
 
 # global data storage
 data = dict()
@@ -93,12 +96,14 @@ async def video(config):
             await sleep(1)
 
 
-async def fifo(Pipe: pipe):
+async def fifo(pipe : Pipe):
     while True:
         try:
             if pipe.read():
-                sensor, value = pipe.get_data().rstrip().split(":")
-                data.update({f"ant/{sensor}": round(value)})
+                for rd in pipe.get_data().rstrip().split("-"):
+                    if rd != "":
+                        sensor, value = rd.split(":")
+                        data.update({f"ant/{sensor}": round(float(value))})
         except Exception as e:
             log.err(f"FIFO: {e}")
         finally:
