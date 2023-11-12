@@ -1,19 +1,21 @@
 import asyncio
 import threading
 import logging
-import os
+import os, sys
 from time import strftime, time
 from collections import deque
 
 from core import log, Mqtt, Database
-from pipe import Pipe
-
 from .ant.base.driver import DriverNotFound
 from .device import AntDevice, DeviceTypeID, Node
 
 from .heartrate import HeartRate
 from .hall import Hall
 from .powermeter import Powermeter
+
+#import lib path
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', '..', 'lib')))
+from pipe import Pipe
 
 # disable all logging for the ant library
 #logging.disable(logging.WARNING)
@@ -62,7 +64,6 @@ data = {
 mqtt_data = {}
 
 
-
 async def read_data(sensor):
     while True:
 
@@ -79,34 +80,18 @@ async def read_data(sensor):
             data[sensor.get_sensor_type()]["valid"] = False
         await asyncio.sleep(1)
 
+
 async def fifo(pipe):
     while True:
         try:
             while True:
                 for key, value in mqtt_data.items():
                     if key != "timestamp":
-                        pipe.write(f"{key}:{value}")
-                    await asyncio.sleep(0.1)
+                        await pipe.write(f"{key}:{value}")
+                await asyncio.sleep(0.1)
         except Exception as e:
             log.err(e)
             logging.error(f"PIPE EXCEPTION: {e}")
-        finally:
-            await asyncio.sleep(1)
-
-            
-
-async def mqtt():
-    while True:
-        try:
-            async with Mqtt() as client:
-                while True:
-                    for key, value in mqtt_data.items():
-                        if key != "timestamp":
-                            await client.sensor_publish(f"ant/{key}", value)
-                    await asyncio.sleep(0.1)
-        except Exception as e:
-            log.err(e)
-            logging.error(f"MQTT EXCEPTION: {e}")
         finally:
             await asyncio.sleep(1)
 
@@ -143,7 +128,6 @@ def write_db(db, name_file: str, sensor_type: str):
     
     else:
         logging.debug(f"attempt failed --> {data[sensor_type]}")
-
 
 
 async def main():
@@ -191,6 +175,8 @@ async def main():
             hr = HeartRate(node, sensor_id=hr_id)
             pm = Powermeter(node, sensor_id=pm_id)
 
+            #start fifo communication
+            pipe = Pipe(f'{home_path}/bob/named_pipe.txt', 'w')
             # start ant loop and data read
             threading.Thread(target=node.start, name="ant.easy").start()
 
@@ -200,7 +186,7 @@ async def main():
                 read_data(hr),
                 read_data(pm),
                 # mqtt(),
-                fifo()
+                fifo(pipe)
             )
 
     except DriverNotFound:

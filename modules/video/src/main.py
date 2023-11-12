@@ -93,32 +93,17 @@ async def video(config):
             await sleep(1)
 
 
-async def mqtt(_):
-    while True:
-        try:
-            # will connect to the mosquitto server broker on the local docker
-            async with Mqtt() as client:
-                message_loop = await client.sensor_subscribe(sensors)
-                async with message_loop as messages:
-                    async for msg in messages:
-                        msg = Message(msg)
-
-                        data.update({msg.sensor: round(msg.value)})
-        except Exception as e:
-            log.err(f"MQTT: {e}")
-        finally:
-            await sleep(1)
-
 async def fifo(Pipe: pipe):
     while True:
         try:
             if pipe.read():
                 sensor, value = pipe.get_data().rstrip().split(":")
-                data.update({sensor: round(value)})
+                data.update({f"ant/{sensor}": round(value)})
         except Exception as e:
-            log.err(f"MQTT: {e}")
+            log.err(f"FIFO: {e}")
         finally:
             await sleep(1)
+
 
 async def main():
     # retrive configurations from db
@@ -126,11 +111,11 @@ async def main():
     db_path = os.getenv("DATABASE_PATH") or f"{home_path}/bob/database.db"
 
     config = Database(path=db_path).config("video")
+    #create pipe
     pipe = Pipe(f'{home_path}/bob/named_pipe.txt', 'r')
     # release async tasks
     await asyncio.gather(
         video(config),
-        # mqtt(config), 
         fifo(pipe)
         )
 

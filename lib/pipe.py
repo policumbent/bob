@@ -1,6 +1,7 @@
 from os import mkfifo
 import os, stat
 from select import select
+from core import log
 
 class Pipe():
     _path = ''
@@ -13,12 +14,10 @@ class Pipe():
         elif sub_type[0] == 'w':
             typ = 1
         else:
-            #log.err("Wrong arguments in class inisialization: class Pipe()")
+            log.err("Wrong arguments in class inisialization: class Pipe()")
             raise Exception("bob-core/no correct arguments specified")
         if os.path.exists(path):
-            if stat.S_ISFIFO(os.stat(path).st_mode):
-                pass
-            else:
+            if not stat.S_ISFIFO(os.stat(path).st_mode):
                 os.remove(path)
                 os.mkfifo(path)
         else:
@@ -30,19 +29,7 @@ class Pipe():
 
     def get_data(self):
         return self._data
-
-    # def start_writing(self):
-    #     try:
-    #         self._fifo = open(self._path, 'w', 1)
-    #     except Exception as e:
-    #         print(e)
-    #     pass
-
-    
-    # def start_reading(self):
-    #     with open(self._path, 'r') as fifo:
-    #         self._fifo = fifo
-
+        
     def write(self, datas : str):
         if os.path.exists(self._path):
             if stat.S_ISFIFO(os.stat(self._path).st_mode):
