@@ -1,3 +1,0 @@
-# Gear module
-### Description
-### TODO
