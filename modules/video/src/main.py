@@ -110,29 +110,23 @@ async def fifo(pipe : Pipe):
             await sleep(1)
 
 
-
-
-
-
-
-
 async def main():
     # retrive configurations from db
     home_path = os.getenv("HOME")
     db_path = os.getenv("DATABASE_PATH") or f"{home_path}/bob/database.db"
 
     config = Database(path=db_path).config("video")
+
     #create pipe
-
     pipe_ant = Pipe(f'{home_path}/bob/named_pipe.txt', 'r')
-
     pipe_can = Pipe(f'{home_path}/bob/can_to_video_pipe.txt', 'r')
+    
     # release async tasks
     await asyncio.gather(
         video(config),
         fifo(pipe_ant),
         fifo(pipe_can)
-        )
+    )
 
 
 def entry_point():
@@ -141,4 +135,3 @@ def entry_point():
 
 if __name__ == "__main__":
     entry_point()
-

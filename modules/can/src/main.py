@@ -15,6 +15,8 @@ import cantools
 
 from core import Database, log
 from core.mqtt import Message
+
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', '..', 'lib')))
 from pipe import Pipe
 
 # complete list of topics

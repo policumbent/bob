@@ -96,8 +96,6 @@ async def fifo(pipe):
             await asyncio.sleep(1)
 
 
-
-
 def write_csv(row, name_file):
     with open(name_file, "a") as csv_file:
         values = ''
