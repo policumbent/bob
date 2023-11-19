@@ -13,9 +13,9 @@ from asyncio import sleep
 import can
 import cantools
 
-from core import Mqtt, Database, log
+from core import Database, log
 from core.mqtt import Message
-
+from pipe import Pipe
 
 # complete list of topics
 topics = [
@@ -174,22 +174,21 @@ def can_logger():
 
 # Subscribe this module to the MQTT topics specified in the `sensors` list and
 # collects their data, putting them in the `data` dictionary
-async def mqtt():
+
+#mette il messaggio su bus
+
+async def fifo_ant(pipe : Pipe):
     while True:
         try:
-            # will connect to the mosquitto server broker on the local docker
-            async with Mqtt() as client:
-                message_loop = await client.sensor_subscribe(sensors)
+            if pipe.read():
+                for rd in pipe.get_data().rstrip().split("-"):
+                    if rd != "":
+                        sensor, value = rd.split(":")
 
-                async with message_loop as messages:
-                    async for msg in messages:
-                        msg = Message(msg)
+                        id_name = topic_to_dbc[sensor][0]
+                        sig_name = topic_to_dbc[sensor][1]
 
-                        data.update({msg.sensor: round(msg.value)})
-                        
-                        id_name = topic_to_dbc[msg.sensor][0]
-                        sig_name = topic_to_dbc[msg.sensor][1]
-                        pl = dbc.encode_message(id_name, {sig_name: msg.value})
+                        pl = dbc.encode_message(id_name, {sig_name: value})
                         id_frame = dbc.get_message_by_name[id_name].frame_id
                         can_frame = can.Message(arbitration_id=id_frame, data=pl)
 
@@ -200,39 +199,34 @@ async def mqtt():
 
 
         except Exception as e:
-            log.err(f"MQTT: {e}")
-
+            log.err(f"FIFO: {e}")
         finally:
             await sleep(1)
 
 
-async def can_reader():
+async def can_reader(pipe):
     while True:
         try:
-            async with Mqtt() as client:
-                # asynchronous for loop: whenever a message is received on the CAN
-                # bus, a new iteration is performed, otherwise it won't exit the
-                # loop but it will wait for another message
-                for msg in bus:
-                    decoded_msg = dbc.decode_message(msg.arbitration_id, msg.data)
+            for msg in bus:
+                decoded_msg = dbc.decode_message(msg.arbitration_id, msg.data)
 
-                    msg_name = dbc.get_message_by_frame_id(msg.arbitration_id).name
+                msg_name = dbc.get_message_by_frame_id(msg.arbitration_id).name
                     
-                    row = dict()
+                row = dict()
 
-                    row["timestamp"] = time.time()
+                row["timestamp"] = time.time()
 
-                    for signal in decoded_msg:
-                        if dbc_to_topic[msg_name][signal]["mqtt"] != None:
-                            await client.sensor_publish(dbc_to_topic[msg_name][signal]["mqtt"], decoded_msg[signal])
-                            row[signal] = decoded_msg[signal]
+                for signal in decoded_msg:
+                    if dbc_to_topic[msg_name][signal]["mqtt"] != None:
+                        if msg_name=="GbData" and signal=="GbGear":
+                            pipe.write(f"{dbc_to_topic[msg_name][signal]['mqtt']}:{decoded_msg[signal]}")
+                        row[signal] = decoded_msg[signal]
                         
                     
-                    if("database_instance" in dbc_to_topic[msg_name]):
-                        write_db(dbc_to_topic[msg_name]["database_instance"], dbc_to_topic[msg_name]["csv_dump"], row)
-                        
+                if("database_instance" in dbc_to_topic[msg_name]):
+                        write_db(dbc_to_topic[msg_name]["database_instance"], dbc_to_topic[msg_name]["csv_dump"], row)            
         except Exception as e:
-            log.err(f"MQTT: {e}")
+            log.err(f"FIFO: {e}")
 
 
 
@@ -259,8 +253,6 @@ def write_db(db, name_file: str, row: dict):
         log.err(e)
         logging.error(f"DATABASE EXCEPTION: {e}")
 
-
-
 async def main():
     home_path = os.getenv("HOME")
     db_path = os.getenv("DATABASE_PATH") or f"{home_path}/bob/database.db"
@@ -278,10 +270,11 @@ async def main():
 
     can_logger_thread = Thread(target=can_logger)
     can_logger_thread.start()
-
+    pipe_video = Pipe(f'{home_path}/bob/can_to_video_pipe.txt', 'w')
+    pipe_ant=Pipe(f'{home_path}/bob/ant_to_can_pipe.txt', 'r')
     await asyncio.gather(
-        mqtt(),
-        can_reader()
+        can_reader(pipe_video),
+        fifo_ant(pipe_ant)
     )
 
     #debug_init()

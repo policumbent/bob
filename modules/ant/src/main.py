@@ -96,6 +96,8 @@ async def fifo(pipe):
             await asyncio.sleep(1)
 
 
+
+
 def write_csv(row, name_file):
     with open(name_file, "a") as csv_file:
         values = ''
@@ -176,7 +178,9 @@ async def main():
             pm = Powermeter(node, sensor_id=pm_id)
 
             #start fifo communication
-            pipe = Pipe(f'{home_path}/bob/named_pipe.txt', 'w')
+            pipe_video = Pipe(f'{home_path}/bob/named_pipe.txt', 'w')
+            pipe_can=Pipe(f'{home_path}/bob/ant_to_can_pipe.txt', 'w')
+
             # start ant loop and data read
             threading.Thread(target=node.start, name="ant.easy").start()
 
@@ -185,8 +189,8 @@ async def main():
                 read_data(hall),
                 read_data(hr),
                 read_data(pm),
-                # mqtt(),
-                fifo(pipe)
+                fifo(pipe_video),
+                fifo(pipe_can)
             )
 
     except DriverNotFound:
@@ -205,3 +209,4 @@ def entry_point():
 
 if __name__ == "__main__":
     entry_point()
+
