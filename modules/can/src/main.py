@@ -19,6 +19,9 @@ from core.mqtt import Message
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', '..', 'lib')))
 from pipe import Pipe
 
+FIFO_TO_VIDEO = "fifo_to_video"
+FIFO_TO_CAN   = "fifo_to_can"
+
 # complete list of topics
 topics = [
     "ant/power",
@@ -154,32 +157,15 @@ bus = can.Bus(
 
 
 def can_logger():
-    subprocess.call("./can_logger.sh")
-
-
-## Sends init debug messages to verify the state of the CAN bus and makes the
-## other devices on the bus activate their communication on the bus
-#def debug_init():
-#    message = can.Message(
-#        arbitration_id=0x0,    
-#        is_extended_id=False,
-#        is_remote_frame=True,
-#        dlc=5
-#    )
-#
-#    try:
-#        bus.send(message, timeout=0.1)
-#
-#    except can.CanError:
-#        log.err("CAN: DEBUG_INIT message not sent");        
+    subprocess.call("./can_logger.sh")     
 
 
 # Subscribe this module to the MQTT topics specified in the `sensors` list and
 # collects their data, putting them in the `data` dictionary
 
-#mette il messaggio su bus
+# writes message on bus
 
-async def fifo_ant(pipe : Pipe):
+async def fifo_rx(pipe : Pipe):
     while True:
         try:
             if pipe.read():
@@ -199,7 +185,6 @@ async def fifo_ant(pipe : Pipe):
                         except can.CanError as e:
                             log.err(f"CAN: {e}")
 
-
         except Exception as e:
             log.err(f"FIFO: {e}")
         finally:
@@ -211,26 +196,22 @@ async def can_reader(pipe):
         try:
             for msg in bus:
                 decoded_msg = dbc.decode_message(msg.arbitration_id, msg.data)
-
                 msg_name = dbc.get_message_by_frame_id(msg.arbitration_id).name
-                    
-                row = dict()
 
+                row = dict()
                 row["timestamp"] = time.time()
 
                 for signal in decoded_msg:
                     if dbc_to_topic[msg_name][signal]["mqtt"] != None:
                         if msg_name=="GbData" and signal=="GbGear":
                             pipe.write(f"{dbc_to_topic[msg_name][signal]['mqtt']}:{decoded_msg[signal]}")
-                        row[signal] = decoded_msg[signal]
+                            row[signal] = decoded_msg[signal]
                         
-                    
                 if("database_instance" in dbc_to_topic[msg_name]):
-                        write_db(dbc_to_topic[msg_name]["database_instance"], dbc_to_topic[msg_name]["csv_dump"], row)            
+                        write_db(dbc_to_topic[msg_name]["database_instance"], dbc_to_topic[msg_name]["csv_dump"], row)
+                        
         except Exception as e:
             log.err(f"FIFO: {e}")
-
-
 
 
 def write_csv(row, name_file):
@@ -272,14 +253,14 @@ async def main():
 
     can_logger_thread = Thread(target=can_logger)
     can_logger_thread.start()
-    pipe_video = Pipe(f'{home_path}/bob/can_to_video_pipe.txt', 'w')
-    pipe_ant=Pipe(f'{home_path}/bob/ant_to_can_pipe.txt', 'r')
+
+    pipe_to_video = Pipe(f'{home_path}/bob/{FIFO_TO_VIDEO}', 'w')
+    pipe_rx       = Pipe(f'{home_path}/bob/{FIFO_TO_CAN}', 'r')
+
     await asyncio.gather(
         can_reader(pipe_video),
-        fifo_ant(pipe_ant)
+        fifo_ant(pipe_rx)
     )
-
-    #debug_init()
 
 
 def entry_point():

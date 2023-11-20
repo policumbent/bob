@@ -9,12 +9,14 @@ class Pipe():
     _path = None
     _data = None
 
+    _fifo = None
+
 
     def __init__(self, path : str, sub_type : str):
         if sub_type[0] == 'r':
-            typ = 0
+            type = 0
         elif sub_type[0] == 'w':
-            typ = 1
+            type = 1
         else:
             log.err("Wrong arguments in class inisialization: class Pipe()")
             raise Exception("bob-core/no correct arguments specified")
@@ -27,6 +29,11 @@ class Pipe():
             os.mkfifo(path)
 
         self._path = path
+        
+        if type == 0:
+            self._fifo = os.open(path, os.O_RDONLY)
+        else:
+            self._fifo = os.open(path, os.O_WRONLY)
 
 
     def get_path(self):
@@ -39,26 +46,19 @@ class Pipe():
 
     def write(self, datas : str):
         try:
-            if os.path.exists(self._path):
-                if stat.S_ISFIFO(os.stat(self._path).st_mode):
-                    with open(self._path, 'w') as fifo:
-                        fifo.write(f"{datas}-")
+            os.write(self._fifo, f"{datas}-".encode())
         except Exception as e:
-            print(e)
+            log.err(f"FIFO (Pipe class): {e}")
 
 
     def read(self):
         try:
-            with open(self._path, 'r') as fifo:
-                select([fifo],[],[fifo])
-                self._data = fifo.read()
-                if self._data == '':
-                    return False
-                else:
-                    return True
+            self._data = os.read(self._fifo, 100)
+            return self._data.decode()
         except Exception as e:
-            print(e)
+            log.err(f"FIFO (Pipe class): {e}")
         
 
     def cleanup(self):
+        os.close(self._fifo)
         os.unlink(self._path)

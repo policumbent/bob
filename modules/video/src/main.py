@@ -13,6 +13,8 @@ from core.mqtt import Message
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', '..', 'lib')))
 from pipe import Pipe
 
+FIFO_TO_VIDEO = "fifo_to_video"
+
 # global data storage
 data = dict()
 
@@ -118,14 +120,12 @@ async def main():
     config = Database(path=db_path).config("video")
 
     #create pipe
-    pipe_ant = Pipe(f'{home_path}/bob/named_pipe.txt', 'r')
-    pipe_can = Pipe(f'{home_path}/bob/can_to_video_pipe.txt', 'r')
+    pipe_rx = Pipe(f'{home_path}/bob/{FIFO_TO_VIDEO}', 'r')
     
     # release async tasks
     await asyncio.gather(
         video(config),
-        fifo(pipe_ant),
-        fifo(pipe_can)
+        fifo(pipe_rx),
     )
 
 

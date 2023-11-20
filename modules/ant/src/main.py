@@ -21,6 +21,9 @@ from pipe import Pipe
 #logging.disable(logging.WARNING)
 logging.basicConfig(filename='error_messages.log', filemode="w", level=logging.DEBUG)
 
+FIFO_TO_VIDEO = "fifo_to_video"
+FIFO_TO_CAN   = "fifo_to_can"
+
 # global data storage
 
 data = {
@@ -176,8 +179,8 @@ async def main():
             pm = Powermeter(node, sensor_id=pm_id)
 
             #start fifo communication
-            pipe_video = Pipe(f'{home_path}/bob/named_pipe.txt', 'w')
-            pipe_can=Pipe(f'{home_path}/bob/ant_to_can_pipe.txt', 'w')
+            pipe_to_video = Pipe(f'{home_path}/bob/{FIFO_TO_VIDEO}', 'w')
+            pipe_to_can   = Pipe(f'{home_path}/bob/{FIFO_TO_CAN}', 'w')
 
             # start ant loop and data read
             threading.Thread(target=node.start, name="ant.easy").start()
@@ -187,8 +190,8 @@ async def main():
                 read_data(hall),
                 read_data(hr),
                 read_data(pm),
-                fifo(pipe_video),
-                fifo(pipe_can)
+                fifo(pipe_to_video),
+                fifo(pipe_to_can)
             )
 
     except DriverNotFound:
