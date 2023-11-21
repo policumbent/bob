@@ -118,15 +118,13 @@ async def main():
     db_path = os.getenv("DATABASE_PATH") or f"{home_path}/bob/database.db"
 
     config = Database(path=db_path).config("video")
-
     #create pipe
-    pipe_rx = Pipe(f'{home_path}/bob/{FIFO_TO_VIDEO}', 'r')
-    
+    pipe = Pipe(f'{home_path}/bob/{FIFO_TO_VIDEO}', 'r')
     # release async tasks
     await asyncio.gather(
         video(config),
-        fifo(pipe_rx),
-    )
+        fifo(pipe)
+        )
 
 
 def entry_point():

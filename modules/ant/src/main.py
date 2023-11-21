@@ -69,7 +69,6 @@ mqtt_data = {}
 
 async def read_data(sensor):
     while True:
-
         if(sensor.is_data_ready()):
             read = sensor.read_data()
             mqtt_data.update(read)
@@ -191,7 +190,7 @@ async def main():
                 read_data(hr),
                 read_data(pm),
                 fifo(pipe_to_video),
-                fifo(pipe_to_can)
+                #fifo(pipe_to_can)
             )
 
     except DriverNotFound:
@@ -210,4 +209,3 @@ def entry_point():
 
 if __name__ == "__main__":
     entry_point()
-

@@ -3,7 +3,6 @@
 .env
 .pytest*
 .vscode
-csv
 **/__pycache__/**
 dist
 onboard_video
