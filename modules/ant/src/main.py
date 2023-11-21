@@ -1,11 +1,12 @@
-import asyncio
 import threading
+from threading import Thread
+
 import logging
 import os, sys
 from time import strftime, time
 from collections import deque
 
-from core import log, Mqtt, Database
+from core import log, Database
 from .ant.base.driver import DriverNotFound
 from .device import AntDevice, DeviceTypeID, Node
 
@@ -64,14 +65,14 @@ data = {
 }
 
 
-mqtt_data = {}
+curr_data = {}
 
 
-async def read_data(sensor):
+def read_data(sensor):
     while True:
         if(sensor.is_data_ready()):
             read = sensor.read_data()
-            mqtt_data.update(read)
+            curr_data.update(read)
             data[sensor.get_sensor_type()]["payload"].update(read)
             data[sensor.get_sensor_type()]["valid"] = True
             logging.debug(f"Data read with payload {data}")
@@ -80,22 +81,23 @@ async def read_data(sensor):
 
         else:
             data[sensor.get_sensor_type()]["valid"] = False
-        await asyncio.sleep(1)
+        # consider adding a sleep
 
 
-async def fifo(pipe):
+# TODO: make it a thread with threading
+def fifo(pipe):
     while True:
         try:
             while True:
-                for key, value in mqtt_data.items():
+                for key, value in curr_data.items():
                     if key != "timestamp":
                         pipe.write(f"{key}:{value}")
-                await asyncio.sleep(0.1)
+                # consider adding a sleep
         except Exception as e:
             log.err(e)
             logging.error(f"PIPE EXCEPTION: {e}")
         finally:
-            await asyncio.sleep(1)
+            # consider adding a sleep
 
 
 def write_csv(row, name_file):
@@ -132,7 +134,7 @@ def write_db(db, name_file: str, sensor_type: str):
         logging.debug(f"attempt failed --> {data[sensor_type]}")
 
 
-async def main():
+def main():
     # retrive configurations from db
     home_path = os.getenv("HOME")
     db_path = os.getenv("DATABASE_PATH") or f"{home_path}/bob/database.db"
@@ -155,7 +157,6 @@ async def main():
     data["hall"]["database_instance"] = Database(table="hall", path=db_path, max_pending=0)
     data["heartrate"]["database_instance"] = Database(table="heartrate", path=db_path, max_pending=0)
 
-
     config = Database(path=db_path).config("ant")
 
     bike = config.get("name") # retrieves the informations related to the bike   
@@ -164,8 +165,8 @@ async def main():
     hr_id = config.get(bike).get("hr_id")
     pm_id = config.get(bike).get("pm_id")
 
-
     logging.debug("Configuration successfully retrieved")
+
     try:
         with Node(0x00, AntDevice.NETWORK_KEY) as node:
             hall = Hall(
@@ -184,14 +185,28 @@ async def main():
             # start ant loop and data read
             threading.Thread(target=node.start, name="ant.easy").start()
 
-            # release async tasks
-            await asyncio.gather(
-                read_data(hall),
-                read_data(hr),
-                read_data(pm),
-                fifo(pipe_to_video),
-                #fifo(pipe_to_can)
-            )
+            read_data_hall_thread = Thread(target=read_data, args=hall)
+            read_data_hr_thread   = Thread(target=read_data, args=hr)
+            read_data_pm_thread   = Thread(target=read_data, args=pm)
+            
+            fifo_to_video_thread  = Thread(target=fifo, args=pipe_to_video)
+            fifo_to_video_thread  = Thread(target=fifo, args=pipe_to_video)
+
+            while True:
+                if not read_data_hall_thread.is_alive():
+                    read_data_hall_thread.start()
+
+                if not read_data_hr_thread.is_alive():
+                    read_data_hr_thread.start()
+
+                if not read_data_pm_thread.is_alive():
+                    read_data_pm_thread.start()
+
+                if not fifo_to_video_thread.is_alive():
+                    fifo_to_video_thread.start()
+
+                if not fifo_to_video_thread.is_alive():
+                    fifo_to_video_thread.start()
 
     except DriverNotFound:
         log.err("USB not connected")
@@ -199,13 +214,9 @@ async def main():
     except Exception as e:
         log.err(e)
         logging.error(f"MAIN EXCEPTION: {e}")
-    finally:
-        await asyncio.sleep(1)
-
-
-def entry_point():
-    asyncio.run(main())
+    #finally:
+        # consider adding a sleep
 
 
 if __name__ == "__main__":
-    entry_point()
+    main()
