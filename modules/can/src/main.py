@@ -1,4 +1,5 @@
 import os
+import sys
 import subprocess
 import logging
 
@@ -259,7 +260,7 @@ async def main():
 
     await asyncio.gather(
         can_reader(pipe_video),
-        fifo_ant(pipe_rx)
+        fifo_rx(pipe_rx)
     )
 
 
