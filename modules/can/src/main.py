@@ -1,15 +1,12 @@
-import os
-import sys
+import os, sys
 import subprocess
 import logging
 
+import threading
 from threading import Thread
 
 from datetime import datetime
 import time
-
-import asyncio
-from asyncio import sleep
 
 import can
 import cantools
@@ -166,7 +163,7 @@ def can_logger():
 
 # writes message on bus
 
-async def fifo_rx(pipe : Pipe):
+def fifo_rx(pipe : Pipe):
     while True:
         try:
             if pipe.read():
@@ -188,11 +185,11 @@ async def fifo_rx(pipe : Pipe):
 
         except Exception as e:
             log.err(f"FIFO: {e}")
-        finally:
-            await sleep(1)
+        #finally:
+            # TODO: consider adding a sleep
 
 
-async def can_reader(pipe):
+def can_reader(pipe):
     while True:
         try:
             for msg in bus:
@@ -237,7 +234,8 @@ def write_db(db, name_file: str, row: dict):
         log.err(e)
         logging.error(f"DATABASE EXCEPTION: {e}")
 
-async def main():
+
+def main():
     home_path = os.getenv("HOME")
     db_path = os.getenv("DATABASE_PATH") or f"{home_path}/bob/database.db"
 
@@ -258,15 +256,9 @@ async def main():
     pipe_to_video = Pipe(f'{home_path}/bob/{FIFO_TO_VIDEO}', 'w')
     pipe_rx       = Pipe(f'{home_path}/bob/{FIFO_TO_CAN}', 'r')
 
-    await asyncio.gather(
-        can_reader(pipe_video),
-        fifo_rx(pipe_rx)
-    )
-
-
-def entry_point():
-    asyncio.run(main())
+    can_reader_thread = Thread(target=can_reader, args=pipe_video)
+    fifo_rx_thread    = Thread(target=fifo_rx, args=pipe_rx)
 
 
 if __name__ == '__main__':
-    entry_point()
+    main()
