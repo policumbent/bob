@@ -1,6 +1,8 @@
+import threading
+from threading import Thread
+
 import asyncio
-import os
-import sys
+import os, sys
 
 from asyncio import sleep
 from .camera import Camera, OverlayElement, CameraError
@@ -33,9 +35,6 @@ async def video(config):
     # main loop of the camera logic
     while True:
         try:
-
-            # configuration params
-            
             video = config.get("video_rotation") or 0
             overlay = config.get("overlay_rotation") or video
 
@@ -98,7 +97,7 @@ async def video(config):
             await sleep(1)
 
 
-async def fifo(pipe : Pipe):
+def fifo(pipe : Pipe):
     while True:
         try:
             if pipe.read():
@@ -108,8 +107,17 @@ async def fifo(pipe : Pipe):
                         data.update({f"ant/{sensor}": round(float(value))})
         except Exception as e:
             log.err(f"FIFO: {e}")
-        finally:
-            await sleep(1)
+        #finally:
+            # TODO: consider adding a sleep
+
+
+def thread_manager():
+    fifo_thread  = Thread(target=fifo, args=pipe)
+
+    while True:
+        if not fifo_thread.is_alive():
+            fifo_thread.start()
+        # TODO: put a right measured sleep
 
 
 async def main():
@@ -120,11 +128,8 @@ async def main():
     config = Database(path=db_path).config("video")
     #create pipe
     pipe = Pipe(f'{home_path}/bob/{FIFO_TO_VIDEO}', 'r')
-    # release async tasks
-    await asyncio.gather(
-        video(config),
-        fifo(pipe)
-        )
+
+    await asyncio.gather(video(config))
 
 
 def entry_point():

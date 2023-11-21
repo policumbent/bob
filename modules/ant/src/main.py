@@ -81,7 +81,7 @@ def read_data(sensor):
 
         else:
             data[sensor.get_sensor_type()]["valid"] = False
-        # consider adding a sleep
+        # TODO: consider adding a sleep
 
 
 # TODO: make it a thread with threading
@@ -92,12 +92,12 @@ def fifo(pipe):
                 for key, value in curr_data.items():
                     if key != "timestamp":
                         pipe.write(f"{key}:{value}")
-                # consider adding a sleep
+                # TODO: consider adding a sleep
         except Exception as e:
             log.err(e)
             logging.error(f"PIPE EXCEPTION: {e}")
         finally:
-            # consider adding a sleep
+            # TODO: consider adding a sleep
 
 
 def write_csv(row, name_file):
@@ -178,7 +178,8 @@ def main():
             hr = HeartRate(node, sensor_id=hr_id)
             pm = Powermeter(node, sensor_id=pm_id)
 
-            #start fifo communication
+            # open pipe
+            # TODO: consider to open the pipe inside the relative thread
             pipe_to_video = Pipe(f'{home_path}/bob/{FIFO_TO_VIDEO}', 'w')
             pipe_to_can   = Pipe(f'{home_path}/bob/{FIFO_TO_CAN}', 'w')
 
@@ -207,6 +208,8 @@ def main():
 
                 if not fifo_to_video_thread.is_alive():
                     fifo_to_video_thread.start()
+                
+                # TODO: put a right measured sleep
 
     except DriverNotFound:
         log.err("USB not connected")
@@ -215,7 +218,7 @@ def main():
         log.err(e)
         logging.error(f"MAIN EXCEPTION: {e}")
     #finally:
-        # consider adding a sleep
+        # TODO: consider adding a sleep
 
 
 if __name__ == "__main__":
