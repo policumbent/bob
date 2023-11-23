@@ -209,7 +209,7 @@ def main():
                 if not fifo_to_video_thread.is_alive():
                     fifo_to_video_thread.start()
                 
-                # TODO: put a right measured sleep
+                time.sleep(1)
 
     except DriverNotFound:
         log.err("USB not connected")
@@ -217,8 +217,6 @@ def main():
     except Exception as e:
         log.err(e)
         logging.error(f"MAIN EXCEPTION: {e}")
-    #finally:
-        # TODO: consider adding a sleep
 
 
 if __name__ == "__main__":

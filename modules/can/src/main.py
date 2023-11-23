@@ -259,6 +259,15 @@ def main():
     can_reader_thread = Thread(target=can_reader, args=pipe_video)
     fifo_rx_thread    = Thread(target=fifo_rx, args=pipe_rx)
 
+    while True:
+        if not can_reader_thread.is_alive():
+            can_reader_thread.start()
+        
+        if not fifo_rx_thread.is_alive()
+            fifo_rx_thread.start()
+
+        time.sleep(1)
+
 
 if __name__ == '__main__':
     main()

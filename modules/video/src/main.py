@@ -117,7 +117,8 @@ def thread_manager():
     while True:
         if not fifo_thread.is_alive():
             fifo_thread.start()
-        # TODO: put a right measured sleep
+        
+        time.sleep(0.2)
 
 
 async def main():
@@ -128,6 +129,9 @@ async def main():
     config = Database(path=db_path).config("video")
     #create pipe
     pipe = Pipe(f'{home_path}/bob/{FIFO_TO_VIDEO}', 'r')
+
+    thread_manager_thread = Thread(target=thread_manager)
+    thread_manager_thread.start()
 
     await asyncio.gather(video(config))
 
