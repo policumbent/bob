@@ -17,6 +17,10 @@ from pipe import Pipe
 
 FIFO_TO_VIDEO = "fifo_to_video"
 
+# retrive configurations from db
+home_path = os.getenv("HOME")
+db_path = os.getenv("DATABASE_PATH") or f"{home_path}/bob/database.db"
+
 # global data storage
 data = dict()
 
@@ -97,7 +101,9 @@ async def video(config):
             await sleep(1)
 
 
-def fifo(pipe : Pipe):
+def fifo():
+    pipe = Pipe(f'{home_path}/bob/{FIFO_TO_VIDEO}', 'r')
+
     while True:
         try:
             if pipe.read():
@@ -112,7 +118,7 @@ def fifo(pipe : Pipe):
 
 
 def thread_manager():
-    fifo_thread  = Thread(target=fifo, args=pipe)
+    fifo_thread  = Thread(target=fifo)
 
     while True:
         if not fifo_thread.is_alive():
@@ -122,13 +128,7 @@ def thread_manager():
 
 
 async def main():
-    # retrive configurations from db
-    home_path = os.getenv("HOME")
-    db_path = os.getenv("DATABASE_PATH") or f"{home_path}/bob/database.db"
-
     config = Database(path=db_path).config("video")
-    #create pipe
-    pipe = Pipe(f'{home_path}/bob/{FIFO_TO_VIDEO}', 'r')
 
     thread_manager_thread = Thread(target=thread_manager)
     thread_manager_thread.start()

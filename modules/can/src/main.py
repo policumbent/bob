@@ -16,6 +16,9 @@ from core import Database, log
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', '..', 'lib')))
 from pipe import Pipe
 
+home_path = os.getenv("HOME")
+db_path = os.getenv("DATABASE_PATH") or f"{home_path}/bob/database.db"
+
 FIFO_TO_VIDEO = "fifo_to_video"
 FIFO_TO_CAN   = "fifo_to_can"
 
@@ -155,11 +158,13 @@ def can_logger():
 
 # writes message on bus
 
-def fifo_rx(pipe : Pipe):
+def fifo_rx():
+    pipe_rx = Pipe(f'{home_path}/bob/{FIFO_TO_CAN}', 'r')
+
     while True:
         try:
-            if pipe.read():
-                for rd in pipe.get_data().rstrip().split("-"):
+            if pipe_rx.read():
+                for rd in pipe_rx.get_data().rstrip().split("-"):
                     if rd != "":
                         sensor, value = rd.split(":")
 
@@ -181,7 +186,9 @@ def fifo_rx(pipe : Pipe):
             # TODO: consider adding a sleep
 
 
-def can_reader(pipe):
+def can_reader():
+    pipe_to_video = Pipe(f'{home_path}/bob/{FIFO_TO_VIDEO}', 'w')
+
     while True:
         try:
             for msg in bus:
@@ -193,7 +200,7 @@ def can_reader(pipe):
 
                 for signal in decoded_msg:
                     if dbc_to_topic[msg_name][signal]["pipe"] != None:
-                        pipe.write(f"{dbc_to_topic[msg_name][signal]['pipe']}:{decoded_msg[signal]}")
+                        pipe_to_video.write(f"{dbc_to_topic[msg_name][signal]['pipe']}:{decoded_msg[signal]}")
                         row[signal] = decoded_msg[signal]
                         
                 if("database_instance" in dbc_to_topic[msg_name]):
@@ -227,9 +234,6 @@ def write_db(db, name_file: str, row: dict):
 
 
 def main():
-    home_path = os.getenv("HOME")
-    db_path = os.getenv("DATABASE_PATH") or f"{home_path}/bob/database.db"
-
     ## Database gathering
     # create database object to interact with the tables
     #########################################################################################################
@@ -244,11 +248,8 @@ def main():
     can_logger_thread = Thread(target=can_logger)
     can_logger_thread.start()
 
-    pipe_to_video = Pipe(f'{home_path}/bob/{FIFO_TO_VIDEO}', 'w')
-    pipe_rx       = Pipe(f'{home_path}/bob/{FIFO_TO_CAN}', 'r')
-
-    can_reader_thread = Thread(target=can_reader, args=pipe_video)
-    fifo_rx_thread    = Thread(target=fifo_rx, args=pipe_rx)
+    can_reader_thread = Thread(target=can_reader)
+    fifo_rx_thread    = Thread(target=fifo_rx)
 
     while True:
         if not can_reader_thread.is_alive():

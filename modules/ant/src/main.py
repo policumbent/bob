@@ -22,6 +22,10 @@ from pipe import Pipe
 #logging.disable(logging.WARNING)
 logging.basicConfig(filename='error_messages.log', filemode="w", level=logging.DEBUG)
 
+# retrive configurations from db
+home_path = os.getenv("HOME")
+db_path = os.getenv("DATABASE_PATH") or f"{home_path}/bob/database.db"
+
 FIFO_TO_VIDEO = "fifo_to_video"
 FIFO_TO_CAN   = "fifo_to_can"
 
@@ -85,7 +89,9 @@ def read_data(sensor):
 
 
 # TODO: make it a thread with threading
-def fifo(pipe):
+def fifo(pipe_name: str):
+    pipe_to_video = Pipe(f'{home_path}/bob/{pipe_name}', 'w')
+
     while True:
         try:
             while True:
@@ -135,10 +141,6 @@ def write_db(db, name_file: str, sensor_type: str):
 
 
 def main():
-    # retrive configurations from db
-    home_path = os.getenv("HOME")
-    db_path = os.getenv("DATABASE_PATH") or f"{home_path}/bob/database.db"
-
     # generate csv name for the run and import keys to the csv file
     data["powermeter"]["csv_dump"] = f"{home_path}/bob/csv/powermeter_{strftime('%d-%m-%Y@%H:%M:%S')}.csv"
     with open(data["powermeter"]["csv_dump"], "w") as csv_file:
@@ -178,11 +180,6 @@ def main():
             hr = HeartRate(node, sensor_id=hr_id)
             pm = Powermeter(node, sensor_id=pm_id)
 
-            # open pipe
-            # TODO: consider to open the pipe inside the relative thread
-            pipe_to_video = Pipe(f'{home_path}/bob/{FIFO_TO_VIDEO}', 'w')
-            pipe_to_can   = Pipe(f'{home_path}/bob/{FIFO_TO_CAN}', 'w')
-
             # start ant loop and data read
             threading.Thread(target=node.start, name="ant.easy").start()
 
@@ -190,8 +187,8 @@ def main():
             read_data_hr_thread   = Thread(target=read_data, args=hr)
             read_data_pm_thread   = Thread(target=read_data, args=pm)
             
-            fifo_to_video_thread  = Thread(target=fifo, args=pipe_to_video)
-            fifo_to_video_thread  = Thread(target=fifo, args=pipe_to_video)
+            fifo_to_video_thread  = Thread(target=fifo, args=FIFO_TO_VIDEO)
+            fifo_to_can_thread  = Thread(target=fifo, args=FIFO_TO_CAN)
 
             while True:
                 if not read_data_hall_thread.is_alive():
@@ -207,7 +204,7 @@ def main():
                     fifo_to_video_thread.start()
 
                 if not fifo_to_video_thread.is_alive():
-                    fifo_to_video_thread.start()
+                    fifo_to_can_thread.start()
                 
                 time.sleep(1)
 
