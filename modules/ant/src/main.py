@@ -3,7 +3,8 @@ from threading import Thread
 
 import logging
 import os, sys
-from time import strftime, time
+
+from time import strftime, time, sleep
 from collections import deque
 
 from core import log, Database
@@ -72,7 +73,10 @@ data = {
 curr_data = {}
 
 
-def read_data(sensor):
+def read_data(sensor, sensor_type):
+    # create database object to interact with the tables
+    data[sensor_type]["database_instance"] = Database(table=sensor_type, path=db_path, max_pending=0)
+
     while True:
         if(sensor.is_data_ready()):
             read = sensor.read_data()
@@ -90,7 +94,7 @@ def read_data(sensor):
 
 # TODO: make it a thread with threading
 def fifo(pipe_name: str):
-    pipe_to_video = Pipe(f'{home_path}/bob/{pipe_name}', 'w')
+    pipe = Pipe(f'{home_path}/bob/{pipe_name}', 'w')
 
     while True:
         try:
@@ -102,7 +106,7 @@ def fifo(pipe_name: str):
         except Exception as e:
             log.err(e)
             logging.error(f"PIPE EXCEPTION: {e}")
-        finally:
+        #finally:
             # TODO: consider adding a sleep
 
 
@@ -154,11 +158,6 @@ def main():
     with open(data["heartrate"]["csv_dump"], "w") as csv_file:
         csv_file.write(f'{",".join(data["heartrate"]["payload"].keys())}\n')
 
-    # create database object to interact with the tables
-    data["powermeter"]["database_instance"] = Database(table="powermeter", path=db_path, max_pending=0)
-    data["hall"]["database_instance"] = Database(table="hall", path=db_path, max_pending=0)
-    data["heartrate"]["database_instance"] = Database(table="heartrate", path=db_path, max_pending=0)
-
     config = Database(path=db_path).config("ant")
 
     bike = config.get("name") # retrieves the informations related to the bike   
@@ -183,12 +182,12 @@ def main():
             # start ant loop and data read
             threading.Thread(target=node.start, name="ant.easy").start()
 
-            read_data_hall_thread = Thread(target=read_data, args=hall)
-            read_data_hr_thread   = Thread(target=read_data, args=hr)
-            read_data_pm_thread   = Thread(target=read_data, args=pm)
+            read_data_hall_thread = Thread(target=read_data, args=(hall, "hall",))
+            read_data_hr_thread   = Thread(target=read_data, args=(hr, "heartrate",))
+            read_data_pm_thread   = Thread(target=read_data, args=(pm, "powermeter",))
             
-            fifo_to_video_thread  = Thread(target=fifo, args=FIFO_TO_VIDEO)
-            fifo_to_can_thread  = Thread(target=fifo, args=FIFO_TO_CAN)
+            fifo_to_video_thread  = Thread(target=fifo, args=(FIFO_TO_VIDEO,))
+            fifo_to_can_thread    = Thread(target=fifo, args=(FIFO_TO_CAN,))
 
             while True:
                 if not read_data_hall_thread.is_alive():
@@ -206,7 +205,7 @@ def main():
                 if not fifo_to_video_thread.is_alive():
                     fifo_to_can_thread.start()
                 
-                time.sleep(1)
+                sleep(1)
 
     except DriverNotFound:
         log.err("USB not connected")
