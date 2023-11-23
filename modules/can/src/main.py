@@ -12,7 +12,6 @@ import can
 import cantools
 
 from core import Database, log
-from core.mqtt import Message
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', '..', 'lib')))
 from pipe import Pipe
@@ -55,87 +54,80 @@ topic_to_dbc = {
 dbc_to_topic = {
     "GretaError": {         # Meassage sent via CAN
         "TimeOutError": {   # Signal
-            "mqtt": None,   # Topic where it is published (None -> not published
+            "pipe": None,   # Topic where it is published (None -> not published
         }
     },
     "GbError": {
-
         "GbErrCode": {
-            "mqtt": None
+            "pipe": None
         },
         "GbGear": {
-            "mqtt": None
+            "pipe": None
         }
     },
     "GretaData":{
         "TelekBattery": {
-            "mqtt": None
+            "pipe": None
         },
         "RxShifting": {
-            "mqtt": None
+            "pipe": None
         },
     },
     "GbData": {
-
         "database_instance": None, # table where to publish data
         "csv_dump": "",            # file where it saves information
 
         "GbGear": {
-            "mqtt": "gb/gear"
+            "pipe": "gb/gear"
         }
     },
     "MiriamGpsData": {
-
         "database_instance": None, # table where to publish data
         "csv_dump": "",            # file where it saves information
 
         "GpsSpeed": {
-            "mqtt": None
+            "pipe": None
         },
         "GpsDisplacement": {
-            "mqtt": None
+            "pipe": None
         }
     },
     "MiriamGpsCoords": {
-
         "database_instance": None, # table where to publish data
         "csv_dump": "",            # file where it saves information
 
         "GpsLatitude": {
-            "mqtt": None
+            "pipe": None
         },
         "GpsLongitude": {
-            "mqtt": None
+            "pipe": None
         }
     },
     "MiriamAirQuality": {
-
         "database_instance": None, # table where to publish data
         "csv_dump": "",            # file where it saves information
 
         "CO2Level": {
-            "mqtt": None
+            "pipe": None
         },
         "TVOC": {
-            "mqtt": None
+            "pipe": None
         }
     },
     "MiriamTemp": {
-
         "database_instance": None, # table where to publish data
         "csv_dump": "",            # file where it saves information
 
         "Temperature": {
-            "mqtt": None
+            "pipe": None
         }
     },
     "MiriamGpsOther": {
-
         "database_instance": None, # table where to publish data
         "csv_dump": "",            # file where it saves information
 
         "Altitude": {
-            "mqtt": None
+            "pipe": None
         }
     }
 }
@@ -200,13 +192,12 @@ def can_reader(pipe):
                 row["timestamp"] = time.time()
 
                 for signal in decoded_msg:
-                    if dbc_to_topic[msg_name][signal]["mqtt"] != None:
-                        if msg_name=="GbData" and signal=="GbGear":
-                            pipe.write(f"{dbc_to_topic[msg_name][signal]['mqtt']}:{decoded_msg[signal]}")
-                            row[signal] = decoded_msg[signal]
+                    if dbc_to_topic[msg_name][signal]["pipe"] != None:
+                        pipe.write(f"{dbc_to_topic[msg_name][signal]['pipe']}:{decoded_msg[signal]}")
+                        row[signal] = decoded_msg[signal]
                         
                 if("database_instance" in dbc_to_topic[msg_name]):
-                        write_db(dbc_to_topic[msg_name]["database_instance"], dbc_to_topic[msg_name]["csv_dump"], row)
+                    write_db(dbc_to_topic[msg_name]["database_instance"], dbc_to_topic[msg_name]["csv_dump"], row)
                         
         except Exception as e:
             log.err(f"FIFO: {e}")
