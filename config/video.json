@@ -1,11 +1,9 @@
 {
-    "video": { 
-        "grid": false, 
-        "zoom": 0,
-        "track_len": 8000,
-        "recording": false,
-        "recording_path": "/home/pi/bob/onboard_video",
-        "video_rotation": 0,
-        "overlay_rotation": 180
-    }
+    "grid": false, 
+    "zoom": 0,
+    "track_len": 8000,
+    "recording": false,
+    "recording_path": "/home/pi/bob/onboard_video",
+    "video_rotation": 0,
+    "overlay_rotation": 180
 }
