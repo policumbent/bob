@@ -1,6 +1,8 @@
 import threading
 from threading import Thread
 
+import json
+
 import logging
 import os, sys
 
@@ -158,13 +160,37 @@ def main():
     with open(data["heartrate"]["csv_dump"], "w") as csv_file:
         csv_file.write(f'{",".join(data["heartrate"]["payload"].keys())}\n')
 
-    config = Database(path=db_path).config("ant")
+    try:
+        with open(f"{home_path}/bob/config/bikename.json") as file_bikename
+            try:
+                dict_bikename = json.load(file_bikename)
+            except Exception as json_e:
+                print(f"ANT: JSON error: {e}")
+    except OSError as os_e:
+        print(f"ANT: File opening error: {e}")
 
-    bike = config.get("name") # retrieves the informations related to the bike   
-    hall_id = config.get(bike).get("hall_id")
-    hall_type = config.get(bike).get("hall_type")
-    hr_id = config.get(bike).get("hr_id")
-    pm_id = config.get(bike).get("pm_id")
+    try:
+        with open(f"{home_path}/bob/config/ant.json") as file_config_ant
+            try:
+                dict_config_ant = json.load(file_config_ant)
+            except Exception as json_e:
+                print(f"ANT: JSON error: {e}")
+    except OSError as os_e:
+        print(f"ANT: File opening error: {e}")
+
+    bike      = dict_bikename["name"]
+    hall_id   = dict_config_ant[bike]["hall_id"]
+    hall_type = dict_config_ant[bike]["hall_type"]
+    hr_id     = dict_config_ant[bike]["hr_id"]
+    pm_id     = dict_config_ant[bike]["pm_id"]
+
+    #config = Database(path=db_path).config("ant")  ->  use db to retreive data: deprecated
+
+    #bike = config.get("name") # retrieves the informations related to the bike   
+    #hall_id = config.get(bike).get("hall_id")
+    #hall_type = config.get(bike).get("hall_type")
+    #hr_id = config.get(bike).get("hr_id")
+    #pm_id = config.get(bike).get("pm_id")
 
     logging.debug("Configuration successfully retrieved")
 

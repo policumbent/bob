@@ -1,4 +1,5 @@
 from time import time
+from datetime import datetime
 
 from .device import AntDevice, DeviceTypeID, Node
 
@@ -130,7 +131,7 @@ class Hall(AntDevice):
 
         self._data_collected()
         return {
-            "timestamp": str(self._last_data_read),
+            "timestamp": datetime.utcfromtimestamp(self._last_data_read).isoformat(),
             "hall_cadence": float(self._cadence),
             "speed": float(self._speed),
             "distance": float(self._overall_distance),

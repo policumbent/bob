@@ -39,15 +39,15 @@ async def video(config):
     # main loop of the camera logic
     while True:
         try:
-            video = config.get("video_rotation") or 0
-            overlay = config.get("overlay_rotation") or video
+            video = config["video_rotation"] or 0
+            overlay = config["overlay_rotation"] or video
 
-            grid = config.get("grid") or False
-            zoom = config.get("zoom") or 0
+            grid = config.["grid"] or False
+            zoom = config.["zoom"] or 0
 
-            recording = config.get("recording") or False
+            recording = config["recording"] or False
             recording_path = (
-                config.get("recording_path") or "/home/pi/bob/onboard_video"
+                config["recording_path"] or "/home/pi/bob/onboard_video"
             )
 
 
@@ -128,12 +128,19 @@ def thread_manager():
 
 
 async def main():
-    config = Database(path=db_path).config("video")
+    try:
+        with open(f"{home_path}/bob/config/video.json") as file_config_video
+            try:
+                dict_config_video = json.load(file_config_video)
+            except Exception as json_e:
+                print(f"Video: JSON error: {e}")
+    except OSError as os_e:
+        print(f"Video: File opening error: {e}")
 
     thread_manager_thread = Thread(target=thread_manager)
     thread_manager_thread.start()
 
-    await asyncio.gather(video(config))
+    await asyncio.gather(video(dict_config_video))
 
 
 def entry_point():

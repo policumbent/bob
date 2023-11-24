@@ -3,6 +3,8 @@ from collections import deque
 from math import pi
 from typing import List
 
+from datetime import datetime
+
 from .device import AntDevice, DeviceTypeID
 
 
@@ -184,7 +186,7 @@ class Powermeter(AntDevice):
         # the data has been collected --> will be restored by next callback
         self._data_collected()
         return {
-            "timestamp": str(self._last_data_read),
+            "timestamp": datetime.utcfromtimestamp(self._last_data_read).isoformat(),
             "power": float(self._power),
             "instant_power": float(self._instant_power),
             "cadence": float(self._cadence)

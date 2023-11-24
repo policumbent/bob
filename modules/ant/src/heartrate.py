@@ -1,5 +1,5 @@
 from .device import AntDevice, DeviceTypeID, Node
-
+from datetime import datetime
 from time import time
 
 
@@ -59,7 +59,7 @@ class HeartRate(AntDevice):
         self._heartrate = self._get_heartrate() if self._is_active() else 0
         self._data_collected()
         return {
-            "timestamp": str(self._last_data_read),
+            "timestamp": datetime.utcfromtimestamp(self._last_data_read).isoformat(),
             "heartrate": float(self._heartrate)
         }
 
