@@ -160,8 +160,11 @@ def main():
     with open(data["heartrate"]["csv_dump"], "w") as csv_file:
         csv_file.write(f'{",".join(data["heartrate"]["payload"].keys())}\n')
 
+    dict_bikename   = None
+    dict_config_ant = None
+
     try:
-        with open(f"{home_path}/bob/config/bikename.json") as file_bikename
+        with open(f"{home_path}/bob/config/bikename.json") as file_bikename:
             try:
                 dict_bikename = json.load(file_bikename)
             except Exception as json_e:
@@ -170,7 +173,7 @@ def main():
         print(f"ANT: File opening error: {e}")
 
     try:
-        with open(f"{home_path}/bob/config/ant.json") as file_config_ant
+        with open(f"{home_path}/bob/config/ant.json") as file_config_ant:
             try:
                 dict_config_ant = json.load(file_config_ant)
             except Exception as json_e:

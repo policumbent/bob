@@ -2,7 +2,7 @@ import sqlite3
 
 
 def main():
-    db = sqlite3.connect("../database.db")
+    db = sqlite3.connect("database.db")
 
     db.execute('''
             CREATE TABLE IF NOT EXISTS "powermeter"
@@ -21,10 +21,6 @@ def main():
 
     db.execute('''
             CREATE TABLE IF NOT EXISTS "accelerometer" ( "timestamp" DATETIME, "acc_x" REAL, "acc_y" REAL, "acc_z" REAL, "gyr_x" REAL, "gyr_y" REAL, "gyr_z" REAL )
-            ''')
-    
-    db.execute('''
-             CREATE TABLE IF NOT EXISTS "configuration" ( "module" TEXT, "value" BLOB )
             ''')
 
     db.commit()

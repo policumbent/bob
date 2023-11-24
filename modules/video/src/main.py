@@ -1,5 +1,7 @@
 import threading
 from threading import Thread
+from time import sleep
+import json
 
 import asyncio
 import os, sys
@@ -42,8 +44,8 @@ async def video(config):
             video = config["video_rotation"] or 0
             overlay = config["overlay_rotation"] or video
 
-            grid = config.["grid"] or False
-            zoom = config.["zoom"] or 0
+            grid = config["grid"] or False
+            zoom = config["zoom"] or 0
 
             recording = config["recording"] or False
             recording_path = (
@@ -98,7 +100,7 @@ async def video(config):
         except Exception as e:
             log.err(e)
         finally:
-            await sleep(1)
+            await asyncio.sleep(1)
 
 
 def fifo():
@@ -124,18 +126,18 @@ def thread_manager():
         if not fifo_thread.is_alive():
             fifo_thread.start()
         
-        time.sleep(0.2)
-
+        sleep(0.2)
 
 async def main():
+    dict_config_video = None
     try:
-        with open(f"{home_path}/bob/config/video.json") as file_config_video
+        with open(f"{home_path}/bob/config/video.json") as file_config_video:
             try:
                 dict_config_video = json.load(file_config_video)
             except Exception as json_e:
-                print(f"Video: JSON error: {e}")
+                print(f"Video: JSON error: {json_e}")
     except OSError as os_e:
-        print(f"Video: File opening error: {e}")
+        print(f"Video: File opening error: {os_e}")
 
     thread_manager_thread = Thread(target=thread_manager)
     thread_manager_thread.start()
