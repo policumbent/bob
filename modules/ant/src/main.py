@@ -77,7 +77,7 @@ curr_data = {}
 
 def read_data(sensor, sensor_type):
     # create database object to interact with the tables
-    data[sensor_type]["database_instance"] = Database(table=sensor_type, path=db_path, max_pending=0)
+    data[sensor_type]["database_instance"] = Database(table=sensor_type, path=db_path, max_pending=1)
 
     while True:
         if(sensor.is_data_ready()):
