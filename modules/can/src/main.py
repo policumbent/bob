@@ -255,7 +255,7 @@ def main():
         if not can_reader_thread.is_alive():
             can_reader_thread.start()
         
-        if not fifo_rx_thread.is_alive()
+        if not fifo_rx_thread.is_alive():
             fifo_rx_thread.start()
 
         time.sleep(1)
