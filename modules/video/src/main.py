@@ -10,7 +10,9 @@ from asyncio import sleep
 from .camera import Camera, OverlayElement, CameraError
 from .colors import Colors
 
-from core import log, Database, time
+import log
+import Database
+import bobtime
 
 #import lib path
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', '..', 'lib')))

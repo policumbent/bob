@@ -9,7 +9,9 @@ import os, sys
 from time import strftime, time, sleep
 from collections import deque
 
-from core import log, Database
+import log
+from database import Database
+
 from .ant.base.driver import DriverNotFound
 from .device import AntDevice, DeviceTypeID, Node
 
@@ -94,7 +96,6 @@ def read_data(sensor, sensor_type):
         # TODO: consider adding a sleep
 
 
-# TODO: make it a thread with threading
 def fifo(pipe_name: str):
     pipe = Pipe(f'{home_path}/bob/{pipe_name}', 'w')
 

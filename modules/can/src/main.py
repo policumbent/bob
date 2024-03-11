@@ -11,7 +11,8 @@ import time
 import can
 import cantools
 
-from core import Database, log
+import Database
+import log
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', '..', 'lib')))
 from pipe import Pipe
