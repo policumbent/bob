@@ -1,5 +1,6 @@
 from .database import *
 from .exceptions import *
+from .log import *
 from .time import *
 from .utils import *
 
