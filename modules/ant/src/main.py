@@ -18,7 +18,7 @@ from .powermeter import Powermeter
 
 #import lib path
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', '..', 'lib')))
-import log
+from log import log
 from database import Database
 from pipe import Pipe
 

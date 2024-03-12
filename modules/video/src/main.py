@@ -13,7 +13,7 @@ from .colors import Colors
 #import lib path
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', '..', 'lib')))
 from pipe import Pipe
-import log
+from log import log
 from database import Database
 import bobtime
 

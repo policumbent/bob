@@ -15,7 +15,7 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '.
 from pipe import Pipe
 
 from database import Database
-import log
+from log import log
 
 home_path = os.getenv("HOME")
 db_path = os.getenv("DATABASE_PATH") or f"{home_path}/bob/database.db"
