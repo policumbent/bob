@@ -3,7 +3,7 @@ import time as pytime
 from datetime import datetime as dt, timezone as tz
 
 
-class time:
+class bobtime:
     """General representation of time for congruence of data"""
 
     @classmethod
