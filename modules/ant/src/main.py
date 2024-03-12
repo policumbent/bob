@@ -9,9 +9,6 @@ import os, sys
 from time import strftime, time, sleep
 from collections import deque
 
-import log
-from database import Database
-
 from .ant.base.driver import DriverNotFound
 from .device import AntDevice, DeviceTypeID, Node
 
@@ -21,6 +18,8 @@ from .powermeter import Powermeter
 
 #import lib path
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', '..', 'lib')))
+import log
+from database import Database
 from pipe import Pipe
 
 # disable all logging for the ant library

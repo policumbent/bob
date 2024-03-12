@@ -10,13 +10,12 @@ from asyncio import sleep
 from .camera import Camera, OverlayElement, CameraError
 from .colors import Colors
 
-import log
-import Database
-import bobtime
-
 #import lib path
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', '..', 'lib')))
 from pipe import Pipe
+import log
+import Database
+import bobtime
 
 FIFO_TO_VIDEO = "fifo_to_video"
 
