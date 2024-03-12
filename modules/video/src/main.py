@@ -15,7 +15,7 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '.
 from pipe import Pipe
 from log import log
 from database import Database
-from bobtime import time
+from bobtime import bobtime
 
 FIFO_TO_VIDEO = "fifo_to_video"
 
