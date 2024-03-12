@@ -61,7 +61,7 @@ async def video(config):
                 vcam.with_recording(
                     recording,
                     path=recording_path,
-                    filename=time.human_timestamp()[:-4],
+                    filename=bobtime.human_timestamp()[:-4],
                 )
 
                 # data overlay
