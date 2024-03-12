@@ -1,6 +1,6 @@
 import sqlite3
 
-from . import exceptions
+import exceptions
 
 
 class SqliteType:
