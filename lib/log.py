@@ -1,17 +1,12 @@
-from colorama import Fore, init
-
-init(autoreset=True)
-
-
 class log:
     @staticmethod
     def err(msg):
-        print(Fore.RED + f"[ERR] {msg}")
+        print(f"\033[1;32 [ERR] {msg}")
 
     @staticmethod
     def warn(msg):
-        print(Fore.YELLOW + f"[WARN] {msg}")
+        print(f"\033[1;33 [WARN] {msg}")
 
     @staticmethod
     def info(msg):
-        print(Fore.WHITE + f"[INFO] {msg}")
+        print(f"[INFO] {msg}")
