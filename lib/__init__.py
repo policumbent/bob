@@ -1,3 +1,5 @@
+from colorama import Fore, init
+
 from .database import *
 from .exceptions import *
 from .log import *
