@@ -10,11 +10,12 @@ from asyncio import sleep
 from .camera import Camera, OverlayElement, CameraError
 from .colors import Colors
 
-from core import log, Database, time
-
 #import lib path
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', '..', 'lib')))
 from pipe import Pipe
+from log import log
+from database import Database
+from bobtime import bobtime
 
 FIFO_TO_VIDEO = "fifo_to_video"
 
@@ -60,7 +61,7 @@ async def video(config):
                 vcam.with_recording(
                     recording,
                     path=recording_path,
-                    filename=time.human_timestamp()[:-4],
+                    filename=bobtime.human_timestamp()[:-4],
                 )
 
                 # data overlay

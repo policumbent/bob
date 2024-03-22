@@ -2,7 +2,7 @@ import os
 import stat
 
 from select import select
-from core import log
+from log import log
 
 class Pipe():
     _path = None
