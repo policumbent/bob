@@ -74,6 +74,7 @@ data = {
 
 
 curr_data = {}
+curr_data_mutex = 0
 
 
 def read_data(sensors):
@@ -85,7 +86,12 @@ def read_data(sensors):
         for sensor in sensors:
             if(sensor[0].is_data_ready()):
                 read = sensor[0].read_data()
-                curr_data.update(read)
+
+                if !curr_data:
+                    curr_data_mutex = 1
+                    curr_data.update(read)
+                    curr_data_mutex = 0
+
                 data[sensor[0].get_sensor_type()]["payload"].update(read)
                 data[sensor[0].get_sensor_type()]["valid"] = True
                 logging.debug(f"Data read with payload {data}")
@@ -102,10 +108,16 @@ def fifo(pipe_name: str):
     while True:
         try:
             while True:
-                for key, value in curr_data.items():
-                    if key != "timestamp":
-                        pipe.write(f"{key}:{value}")
-                # TODO: consider adding a sleep
+                if !curr_data:
+                    curr_data_mutex = 1
+
+                    for key, value in curr_data.items():
+                        if key != "timestamp":
+                            pipe.write(f"{key}:{value}")
+                    # TODO: consider adding a sleep
+                    
+                    curr_data_mutex = 0
+                
         except Exception as e:
             log.err(e)
             logging.error(f"PIPE EXCEPTION: {e}")
