@@ -87,7 +87,7 @@ def read_data(sensors):
             if(sensor[0].is_data_ready()):
                 read = sensor[0].read_data()
 
-                if not curr_data:
+                if not curr_data_mutex:
                     curr_data_mutex = 1
                     curr_data.update(read)
                     curr_data_mutex = 0
@@ -108,7 +108,7 @@ def fifo(pipe_name: str):
     while True:
         try:
             while True:
-                if not curr_data:
+                if not curr_data_mutex:
                     curr_data_mutex = 1
 
                     for key, value in curr_data.items():
