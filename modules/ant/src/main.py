@@ -74,6 +74,7 @@ data = {
 
 
 curr_data = {}
+event = threading.Event()
 
 
 def read_data(sensor, sensor_type):
@@ -93,7 +94,7 @@ def read_data(sensor, sensor_type):
         else:
             data[sensor.get_sensor_type()]["valid"] = False
         
-        sleep(0.1)
+        event.wait(0.1)
 
 
 def fifo(pipe_name: str):
@@ -217,7 +218,7 @@ def main():
             read_data_pm_thread   = Thread(target=read_data, args=(pm, "powermeter",))
             
             fifo_to_video_thread  = Thread(target=fifo, args=(FIFO_TO_VIDEO,))
-            fifo_to_can_thread    = Thread(target=fifo, args=(FIFO_TO_CAN,))
+            #fifo_to_can_thread    = Thread(target=fifo, args=(FIFO_TO_CAN,))
 
             while True:
                 if not read_data_hall_thread.is_alive():
@@ -232,8 +233,8 @@ def main():
                 if not fifo_to_video_thread.is_alive():
                     fifo_to_video_thread.start()
 
-                if not fifo_to_video_thread.is_alive():
-                    fifo_to_can_thread.start()
+                #if not fifo_to_video_thread.is_alive():
+                #    fifo_to_can_thread.start()
                 
                 sleep(1)
 
