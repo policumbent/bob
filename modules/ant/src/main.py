@@ -93,7 +93,7 @@ def read_data(sensor, sensor_type):
         else:
             data[sensor.get_sensor_type()]["valid"] = False
         
-        time.sleep(0.1)
+        sleep(0.1)
 
 
 def fifo(pipe_name: str):
