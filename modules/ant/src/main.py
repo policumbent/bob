@@ -219,14 +219,8 @@ def main():
             #fifo_to_can_thread    = Thread(target=fifo, args=(FIFO_TO_CAN,))
 
             while True:
-                if not read_data_hall_thread.is_alive():
-                    read_data_hall_thread.start()
-
-                if not read_data_hr_thread.is_alive():
-                    read_data_hr_thread.start()
-
-                if not read_data_pm_thread.is_alive():
-                    read_data_pm_thread.start()
+                if not read_data_thread.is_alive():
+                    read_data_thread.start()
 
                 if not fifo_to_video_thread.is_alive():
                     fifo_to_video_thread.start()
