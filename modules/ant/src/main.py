@@ -74,27 +74,26 @@ data = {
 
 
 curr_data = {}
-event = threading.Event()
 
 
-def read_data(sensor, sensor_type):
+def read_data(sensors):
     # create database object to interact with the tables
-    data[sensor_type]["database_instance"] = Database(table=sensor_type, path=db_path)
+    for sensor in sensors:
+        data[sensor[1]]["database_instance"] = Database(table=sensor[1], path=db_path)
 
     while True:
-        if(sensor.is_data_ready()):
-            read = sensor.read_data()
-            curr_data.update(read)
-            data[sensor.get_sensor_type()]["payload"].update(read)
-            data[sensor.get_sensor_type()]["valid"] = True
-            logging.debug(f"Data read with payload {data}")
+        for sensor in sensors:
+            if(sensor[0].is_data_ready()):
+                read = sensor[0].read_data()
+                curr_data.update(read)
+                data[sensor[0].get_sensor_type()]["payload"].update(read)
+                data[sensor[0].get_sensor_type()]["valid"] = True
+                logging.debug(f"Data read with payload {data}")
 
-            write_db(data[sensor.get_sensor_type()]["database_instance"], data[sensor.get_sensor_type()]["csv_dump"], sensor.get_sensor_type())
+                write_db(data[sensor[0].get_sensor_type()]["database_instance"], data[sensor[0].get_sensor_type()]["csv_dump"], sensor[0].get_sensor_type())
 
-        else:
-            data[sensor.get_sensor_type()]["valid"] = False
-        
-        event.wait(0.1)
+            else:
+                data[sensor[0].get_sensor_type()]["valid"] = False
 
 
 def fifo(pipe_name: str):
@@ -213,9 +212,8 @@ def main():
             # start ant loop and data read
             threading.Thread(target=node.start, name="ant.easy").start()
 
-            read_data_hall_thread = Thread(target=read_data, args=(hall, "hall",))
-            read_data_hr_thread   = Thread(target=read_data, args=(hr, "heartrate",))
-            read_data_pm_thread   = Thread(target=read_data, args=(pm, "powermeter",))
+            sensors = [(hall, "hall"), (hr, "heartrate"), (pm, "powermeter")]
+            read_data_thread = Thread(target=read_data, args=(sensors,))
             
             fifo_to_video_thread  = Thread(target=fifo, args=(FIFO_TO_VIDEO,))
             #fifo_to_can_thread    = Thread(target=fifo, args=(FIFO_TO_CAN,))
