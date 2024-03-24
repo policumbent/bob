@@ -78,6 +78,8 @@ curr_data_mutex = 0
 
 
 def read_data(sensors):
+    global curr_data_mutex
+
     # create database object to interact with the tables
     for sensor in sensors:
         data[sensor[1]]["database_instance"] = Database(table=sensor[1], path=db_path)
@@ -87,7 +89,7 @@ def read_data(sensors):
             if(sensor[0].is_data_ready()):
                 read = sensor[0].read_data()
 
-                if not curr_data:
+                if not curr_data_mutex:
                     curr_data_mutex = 1
                     curr_data.update(read)
                     curr_data_mutex = 0
@@ -103,12 +105,13 @@ def read_data(sensors):
 
 
 def fifo(pipe_name: str):
+    global curr_data_mutex
     pipe = Pipe(f'{home_path}/bob/{pipe_name}', 'w')
 
     while True:
         try:
             while True:
-                if not curr_data:
+                if not curr_data_mutex:
                     curr_data_mutex = 1
 
                     for key, value in curr_data.items():
