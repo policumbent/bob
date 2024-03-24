@@ -78,7 +78,7 @@ curr_data_mutex = 0
 
 
 def read_data(sensors):
-    pipe = Pipe(f'{home_path}/bob/{pipe_name}', 'w')
+    pipe = Pipe(f'{home_path}/bob/{FIFO_TO_VIDEO}', 'w')
 
     # create database object to interact with the tables
     for sensor in sensors:
