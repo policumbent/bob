@@ -78,7 +78,7 @@ curr_data_mutex = 0
 
 
 def read_data(sensors):
-    global curr_data_mutex
+    pipe = Pipe(f'{home_path}/bob/{pipe_name}', 'w')
 
     # create database object to interact with the tables
     for sensor in sensors:
