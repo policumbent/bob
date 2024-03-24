@@ -124,7 +124,7 @@ class Powermeter(AntDevice):
         elif self._received_data and self._last_message_type is MessageType.power_only:
             self._cadence = self._get_instant_cadence()
             self._instant_power = self._get_instant_power()
-            if(self._instant_power is not None and self._instant_power != 0.0):
+            if(self._instant_power is not None):
                 self._power_buffer.append(self._instant_power)
 
             if(len(self._power_buffer) >0):
@@ -157,7 +157,7 @@ class Powermeter(AntDevice):
 
             # calculate the average power
             self._instant_power = self._calculate_power()
-            if self._instant_power is not None and self._instant_power != 0.0:
+            if self._instant_power is not None:
                 self._power_buffer.append(self._instant_power)
             
             if(len(self._power_buffer) >0):
