@@ -74,11 +74,11 @@ data = {
 
 
 curr_data = {}
-curr_data_mutex = 0
 
 
 def read_data(sensors):
-    pipe = Pipe(f'{home_path}/bob/{FIFO_TO_VIDEO}', 'w')
+    pipe_to_video = Pipe(f'{home_path}/bob/{FIFO_TO_VIDEO}', 'w')
+    #pipe_to_can = Pipe(f'{home_path}/bob/{FIFO_TO_CAN}', 'w')
 
     # create database object to interact with the tables
     for sensor in sensors:
@@ -91,13 +91,8 @@ def read_data(sensors):
 
                 curr_data.update(read)
 
-                try:
-                    for key, value in curr_data.items():
-                        if key != "timestamp":
-                            pipe.write(f"{key}:{value}")
-                except Exception as e:
-                    log.err(e)
-                    logging.error(f"PIPE EXCEPTION: {e}")
+                pipe_send(pipe_to_video, curr_data)
+                #pipe_send(pipe_to_can, curr_data)
 
                 data[sensor[0].get_sensor_type()]["payload"].update(read)
                 data[sensor[0].get_sensor_type()]["valid"] = True
@@ -109,22 +104,14 @@ def read_data(sensors):
                 data[sensor[0].get_sensor_type()]["valid"] = False
 
 
-def fifo(pipe_name: str):
-    global curr_data_mutex
-    pipe = Pipe(f'{home_path}/bob/{pipe_name}', 'w')
-
-    while True:
-        try:
-            while True:
-                for key, value in curr_data.items():
-                    if key != "timestamp":
-                        pipe.write(f"{key}:{value}")
-                # TODO: consider adding a sleep
-        except Exception as e:
-            log.err(e)
-            logging.error(f"PIPE EXCEPTION: {e}")
-        #finally:
-            # TODO: consider adding a sleep
+def pipe_send(pipe, curr_data):
+    try:
+        for key, value in curr_data.items():
+            if key != "timestamp":
+                pipe.write(f"{key}:{value}")
+    except Exception as e:
+        log.err(e)
+        logging.error(f"PIPE EXCEPTION: {e}")
 
 
 def write_csv(row, name_file):
@@ -228,19 +215,10 @@ def main():
 
             sensors = [(hall, "hall"), (hr, "heartrate"), (pm, "powermeter")]
             read_data_thread = Thread(target=read_data, args=(sensors,))
-            
-            #fifo_to_video_thread  = Thread(target=fifo, args=(FIFO_TO_VIDEO,))
-            #fifo_to_can_thread    = Thread(target=fifo, args=(FIFO_TO_CAN,))
 
             while True:
                 if not read_data_thread.is_alive():
                     read_data_thread.start()
-
-                #if not fifo_to_video_thread.is_alive():
-                #    fifo_to_video_thread.start()
-
-                #if not fifo_to_video_thread.is_alive():
-                #    fifo_to_can_thread.start()
                 
                 sleep(1)
 
