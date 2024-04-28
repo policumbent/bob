@@ -38,8 +38,6 @@ FIFO_TO_CAN   = "fifo_to_can"
 data = {
     "powermeter": {
         "valid": False,
-        "database_instance": None, # table where to publish data
-        "database_buffer": list(), # a list of rows that must be published in the database
         "csv_dump": "",            # file where it saves information
         "payload": {
             "timestamp": 0,
@@ -50,8 +48,6 @@ data = {
     },
     "hall": {
         "valid": False,
-        "database_instance": None,
-        "database_buffer": list(),
         "csv_dump": "",
         "payload": {
             "timestamp": 0,
@@ -62,8 +58,6 @@ data = {
     },
     "heartrate": {
         "valid": False,
-        "database_instance": None,
-        "database_buffer": list(),
         "csv_dump": "",
         "payload":{
             "timestamp": 0,
@@ -80,10 +74,6 @@ def read_data(sensors):
     pipe_to_video = Pipe(f'{home_path}/bob/{FIFO_TO_VIDEO}', 'w')
     #pipe_to_can = Pipe(f'{home_path}/bob/{FIFO_TO_CAN}', 'w')
 
-    # create database object to interact with the tables
-    for sensor in sensors:
-        data[sensor[1]]["database_instance"] = Database(table=sensor[1], path=db_path)
-
     while True:
         for sensor in sensors:
             if(sensor[0].is_data_ready()):
@@ -98,7 +88,7 @@ def read_data(sensors):
                 data[sensor[0].get_sensor_type()]["valid"] = True
                 logging.debug(f"Data read with payload {data}")
 
-                write_db(data[sensor[0].get_sensor_type()]["database_instance"], data[sensor[0].get_sensor_type()]["csv_dump"], sensor[0].get_sensor_type())
+                write_csv(data[sensor[0].get_sensor_type()]["csv_dump"], sensor[0].get_sensor_type())
 
             else:
                 data[sensor[0].get_sensor_type()]["valid"] = False
@@ -114,36 +104,22 @@ def pipe_send(pipe, curr_data):
         logging.error(f"PIPE EXCEPTION: {e}")
 
 
-def write_csv(row, name_file):
-    with open(name_file, "a") as csv_file:
-        values = ''
-        for value in row.values():
-            values += f'{value},'
-        values = f"{values.rstrip(',')}\n"
-        csv_file.write(values)
-
-
-def write_db(db, name_file: str, sensor_type: str):
-    logging.debug("attempting to write on dB")
+def write_csv(name_file: str, sensor_type: str):
+    logging.debug("attempting to write on csv")
     if(data[sensor_type]["valid"] == True):
-
         row = data[sensor_type]["payload"].copy()
-        data[sensor_type]["database_buffer"].append(row)
         logging.debug(f"attempt succeeded with {row}")
 
         try:
-            write_csv(row, name_file)
+            with open(name_file, "a") as csv_file:
+                values = ''
+                for value in row.values():
+                    values += f'{value},'
+                values = f"{values.rstrip(',')}\n"
+                csv_file.write(values)
         except Exception as e:
             log.err(e)
             logging.error(f"CSV EXCEPTION: {e}")
-        try:
-            for r in data[sensor_type]["database_buffer"].copy(): 
-                db.insert_data(r)
-                data[sensor_type]["database_buffer"].remove(r)
-        except Exception as e:
-            log.err(e)
-            logging.error(f"DATABASE EXCEPTION: {e} --> {data[sensor_type]['database_buffer']}")
-    
     else:
         logging.debug(f"attempt failed --> {data[sensor_type]}")
 
@@ -188,14 +164,6 @@ def main():
     hall_type = dict_config_ant[bike]["hall_type"]
     hr_id     = dict_config_ant[bike]["hr_id"]
     pm_id     = dict_config_ant[bike]["pm_id"]
-
-    #config = Database(path=db_path).config("ant")  ->  use db to retreive data: deprecated
-
-    #bike = config.get("name") # retrieves the informations related to the bike   
-    #hall_id = config.get(bike).get("hall_id")
-    #hall_type = config.get(bike).get("hall_type")
-    #hr_id = config.get(bike).get("hr_id")
-    #pm_id = config.get(bike).get("pm_id")
 
     logging.debug("Configuration successfully retrieved")
 

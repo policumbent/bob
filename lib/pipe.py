@@ -4,6 +4,8 @@ import stat
 from select import select
 from log import log
 
+import socket, errno
+
 class Pipe():
     _path = None
     _data = None
@@ -35,8 +37,10 @@ class Pipe():
                 if stat.S_ISFIFO(os.stat(self._path).st_mode):
                     with open(self._path, 'w') as fifo:
                         fifo.write(f"{datas}-")
+        except socket.error as e:
+            log.err(f"PIPE - WRITE (socker.error): {e}")
         except Exception as e:
-            print(e)
+            log.err(f"PIPE - WRITE: {e}")
 
     def read(self):
         try:
@@ -47,8 +51,10 @@ class Pipe():
                     return False
                 else:
                     return True
+        except socket.error as e:
+            log.err(f"PIPE - WRITE (socker.error): {e}")
         except Exception as e:
-            print(e)
+            log.err(f"PIPE - READ: {e}")
         
     def cleanup(self):
         os.unlink(self._path)
