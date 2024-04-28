@@ -36,7 +36,7 @@ class Pipe():
                     with open(self._path, 'w') as fifo:
                         fifo.write(f"{datas}-")
         except Exception as e:
-            print(e)
+            log.err(f"PIPE - WRITE: {e}")
 
     def read(self):
         try:
@@ -48,7 +48,7 @@ class Pipe():
                 else:
                     return True
         except Exception as e:
-            print(e)
+            log.err(f"PIPE - READ: {e}")
         
     def cleanup(self):
         os.unlink(self._path)
