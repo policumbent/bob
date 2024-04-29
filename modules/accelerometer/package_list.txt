@@ -1,2 +1,0 @@
-i2c-tools
-python3-smbus

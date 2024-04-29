@@ -1,0 +1,20 @@
+{
+    "phoenix": {
+        "hall_id": 4941,
+        "hall_type": 123,
+        "hr_id": 0,
+        "pm_id": 51321
+    },
+    "phoenix_deprecated": {
+        "hall_id": 24363,
+        "hall_type": 123,
+        "hr_id": 0,
+        "pm_id": 30636
+    },
+    "cerberus": {
+        "hall_id": 24363,
+        "hall_type": 123,
+        "hr_id": 34006,
+        "pm_id": 42941
+    }
+}

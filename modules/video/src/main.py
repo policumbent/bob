@@ -1,13 +1,27 @@
+import threading
+from threading import Thread
+from time import sleep
+import json
+
 import asyncio
-import os
+import os, sys
 
 from asyncio import sleep
 from .camera import Camera, OverlayElement, CameraError
 from .colors import Colors
 
-from core import log, Mqtt, Database, time
-from core.mqtt import Message
+#import lib path
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', '..', 'lib')))
+from pipe import Pipe
+from log import log
+from database import Database
+from bobtime import bobtime
 
+FIFO_TO_VIDEO = "fifo_to_video"
+
+# retrive configurations from db
+home_path = os.getenv("HOME")
+db_path = os.getenv("DATABASE_PATH") or f"{home_path}/bob/database.db"
 
 # global data storage
 data = dict()
@@ -27,18 +41,15 @@ async def video(config):
     # main loop of the camera logic
     while True:
         try:
+            video = config["video_rotation"] or 0
+            overlay = config["overlay_rotation"] or video
 
-            # configuration params
-            
-            video = config.get("video_rotation") or 0
-            overlay = config.get("overlay_rotation") or video
+            grid = config["grid"] or False
+            zoom = config["zoom"] or 0
 
-            grid = config.get("grid") or False
-            zoom = config.get("zoom") or 0
-
-            recording = config.get("recording") or False
+            recording = config["recording"] or False
             recording_path = (
-                config.get("recording_path") or "/home/pi/bob/onboard_video"
+                config["recording_path"] or "/home/pi/bob/onboard_video"
             )
 
 
@@ -50,7 +61,7 @@ async def video(config):
                 vcam.with_recording(
                     recording,
                     path=recording_path,
-                    filename=time.human_timestamp()[:-4],
+                    filename=bobtime.human_timestamp()[:-4],
                 )
 
                 # data overlay
@@ -89,35 +100,49 @@ async def video(config):
         except Exception as e:
             log.err(e)
         finally:
-            await sleep(1)
+            await asyncio.sleep(1)
 
 
-async def mqtt(_):
+def fifo():
+    pipe = Pipe(f'{home_path}/bob/{FIFO_TO_VIDEO}', 'r')
+
     while True:
         try:
-            # will connect to the mosquitto server broker on the local docker
-            async with Mqtt() as client:
-                message_loop = await client.sensor_subscribe(sensors)
-                async with message_loop as messages:
-                    async for msg in messages:
-                        msg = Message(msg)
-
-                        data.update({msg.sensor: round(msg.value)})
+            if pipe.read():
+                for rd in pipe.get_data().rstrip().split("-"):
+                    if rd != "":
+                        sensor, value = rd.split(":")
+                        data.update({f"ant/{sensor}": round(float(value))})
         except Exception as e:
-            log.err(f"MQTT: {e}")
-        finally:
-            await sleep(1)
+            log.err(f"FIFO: {e}")
+        #finally:
+            # TODO: consider adding a sleep
 
+
+def thread_manager():
+    fifo_thread  = Thread(target=fifo)
+
+    while True:
+        if not fifo_thread.is_alive():
+            fifo_thread.start()
+        
+        sleep(0.2)
 
 async def main():
-    # retrive configurations from db
-    home_path = os.getenv("HOME")
-    db_path = os.getenv("DATABASE_PATH") or f"{home_path}/bob/database.db"
+    dict_config_video = None
+    try:
+        with open(f"{home_path}/bob/config/video.json") as file_config_video:
+            try:
+                dict_config_video = json.load(file_config_video)
+            except Exception as json_e:
+                print(f"Video: JSON error: {json_e}")
+    except OSError as os_e:
+        print(f"Video: File opening error: {os_e}")
 
-    config = Database(path=db_path).config("video")
+    thread_manager_thread = Thread(target=thread_manager)
+    thread_manager_thread.start()
 
-    # release async tasks
-    await asyncio.gather(video(config), mqtt(config))
+    await asyncio.gather(video(dict_config_video))
 
 
 def entry_point():
