@@ -4,7 +4,7 @@ from threading import Thread
 import json
 
 import logging
-import os, sys
+import os, sys, stat
 
 from time import strftime, time, sleep
 from collections import deque
@@ -32,6 +32,15 @@ db_path = os.getenv("DATABASE_PATH") or f"{home_path}/bob/database.db"
 
 FIFO_TO_VIDEO = "fifo_to_video"
 FIFO_TO_CAN   = "fifo_to_can"
+
+FIFO_VID = f"{home_path}/bob/{FIFO_TO_VIDEO}"
+
+if os.path.exists(FIFO_VID):
+    if not stat.S_ISFIFO(os.stat(FIFO_VID).st_mode):
+        os.remove(FIFO_VID)
+        os.mkfifo(FIFO_VID)
+else:
+    os.mkfifo(FIFO_VID)
 
 # global data storage
 
@@ -77,7 +86,8 @@ curr_data = {}
 
 
 def read_data(sensors):
-    pipe_to_video = Pipe(f'{home_path}/bob/{FIFO_TO_VIDEO}', 'w')
+    fifo_vid = open(FIFO_VID, 'wb', 0)
+    #pipe_to_video = Pipe(f'{home_path}/bob/{FIFO_TO_VIDEO}', 'w')
     #pipe_to_can = Pipe(f'{home_path}/bob/{FIFO_TO_CAN}', 'w')
 
     # create database object to interact with the tables
@@ -91,7 +101,15 @@ def read_data(sensors):
 
                 curr_data.update(read)
 
-                pipe_send(pipe_to_video, curr_data)
+                try:
+                    for key, value in curr_data.items():
+                        if key != "timestamp":
+                            pipe.write(f"{key}:{value}\n".encode())
+                except Exception as e:
+                    log.err(e)
+                    logging.error(f"PIPE EXCEPTION: {e}")
+
+                #pipe_send(pipe_to_video, curr_data)
                 #pipe_send(pipe_to_can, curr_data)
 
                 data[sensor[0].get_sensor_type()]["payload"].update(read)
@@ -102,6 +120,8 @@ def read_data(sensors):
 
             else:
                 data[sensor[0].get_sensor_type()]["valid"] = False
+
+    fifo_vid.close()
 
 
 def pipe_send(pipe, curr_data):
