@@ -104,7 +104,7 @@ def read_data(sensors):
                 try:
                     for key, value in curr_data.items():
                         if key != "timestamp":
-                            pipe.write(f"{key}:{value}\n".encode())
+                            fifo_vid.write(f"{key}:{value}\n".encode())
                 except Exception as e:
                     log.err(e)
                     logging.error(f"PIPE EXCEPTION: {e}")
