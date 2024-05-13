@@ -33,14 +33,23 @@ db_path = os.getenv("DATABASE_PATH") or f"{home_path}/bob/database.db"
 FIFO_TO_VIDEO = "fifo_to_video"
 FIFO_TO_CAN   = "fifo_to_can"
 
-FIFO_VID = f"{home_path}/bob/{FIFO_TO_VIDEO}"
 
+FIFO_VID = f"{home_path}/bob/{FIFO_TO_VIDEO}"
 if os.path.exists(FIFO_VID):
     if not stat.S_ISFIFO(os.stat(FIFO_VID).st_mode):
         os.remove(FIFO_VID)
         os.mkfifo(FIFO_VID)
 else:
     os.mkfifo(FIFO_VID)
+
+
+FIFO_CAN = f"{home_path}/bob/{FIFO_TO_CAN}"
+if os.path.exists(FIFO_CAN):
+    if not stat.S_ISFIFO(os.stat(FIFO_CAN).st_mode):
+        os.remove(FIFO_CAN)
+        os.mkfifo(FIFO_CAN)
+else:
+    os.mkfifo(FIFO_CAN)
 
 # global data storage
 
@@ -87,8 +96,7 @@ curr_data = {}
 
 def read_data(sensors):
     fifo_vid = open(FIFO_VID, 'wb', 0)
-    #pipe_to_video = Pipe(f'{home_path}/bob/{FIFO_TO_VIDEO}', 'w')
-    #pipe_to_can = Pipe(f'{home_path}/bob/{FIFO_TO_CAN}', 'w')
+    # fifo_can = open(FIFO_CAN, 'wb', 0)
 
     # create database object to interact with the tables
     for sensor in sensors:
@@ -105,12 +113,10 @@ def read_data(sensors):
                     for key, value in curr_data.items():
                         if key != "timestamp":
                             fifo_vid.write(f"{key}:{value}\n".encode())
+                            # fifo_can.write(f"{key}:{value}\n".encode())
                 except Exception as e:
                     log.err(e)
                     logging.error(f"PIPE EXCEPTION: {e}")
-
-                #pipe_send(pipe_to_video, curr_data)
-                #pipe_send(pipe_to_can, curr_data)
 
                 data[sensor[0].get_sensor_type()]["payload"].update(read)
                 data[sensor[0].get_sensor_type()]["valid"] = True
@@ -122,16 +128,7 @@ def read_data(sensors):
                 data[sensor[0].get_sensor_type()]["valid"] = False
 
     fifo_vid.close()
-
-
-def pipe_send(pipe, curr_data):
-    try:
-        for key, value in curr_data.items():
-            if key != "timestamp":
-                pipe.write(f"{key}:{value}")
-    except Exception as e:
-        log.err(e)
-        logging.error(f"PIPE EXCEPTION: {e}")
+    # fifo_can.close()
 
 
 def write_csv(row, name_file):
