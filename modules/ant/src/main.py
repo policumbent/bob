@@ -33,8 +33,9 @@ db_path = os.getenv("DATABASE_PATH") or f"{home_path}/bob/database.db"
 FIFO_TO_VIDEO = "fifo_to_video"
 FIFO_TO_CAN   = "fifo_to_can"
 
-
 FIFO_VID = f"{home_path}/bob/{FIFO_TO_VIDEO}"
+FIFO_CAN = f"{home_path}/bob/{FIFO_TO_CAN}"
+
 if os.path.exists(FIFO_VID):
     if not stat.S_ISFIFO(os.stat(FIFO_VID).st_mode):
         os.remove(FIFO_VID)
@@ -43,7 +44,6 @@ else:
     os.mkfifo(FIFO_VID)
 
 
-FIFO_CAN = f"{home_path}/bob/{FIFO_TO_CAN}"
 if os.path.exists(FIFO_CAN):
     if not stat.S_ISFIFO(os.stat(FIFO_CAN).st_mode):
         os.remove(FIFO_CAN)
@@ -51,11 +51,14 @@ if os.path.exists(FIFO_CAN):
 else:
     os.mkfifo(FIFO_CAN)
 
+
 # global data storage
 
 data = {
     "powermeter": {
         "valid": False,
+        "database_instance": None, # table where to publish data
+        "database_buffer": list(), # a list of rows that must be published in the database
         "csv_dump": "",            # file where it saves information
         "payload": {
             "timestamp": 0,
@@ -66,6 +69,8 @@ data = {
     },
     "hall": {
         "valid": False,
+        "database_instance": None,
+        "database_buffer": list(),
         "csv_dump": "",
         "payload": {
             "timestamp": 0,
@@ -76,6 +81,8 @@ data = {
     },
     "heartrate": {
         "valid": False,
+        "database_instance": None,
+        "database_buffer": list(),
         "csv_dump": "",
         "payload":{
             "timestamp": 0,
@@ -90,7 +97,13 @@ curr_data = {}
 
 def read_data(sensors):
     fifo_vid = open(FIFO_VID, 'wb', 0)
-    # fifo_can = open(FIFO_CAN, 'wb', 0)
+    fifo_can = open(FIFO_CAN, 'wb', 0)
+    #pipe_to_video = Pipe(f'{home_path}/bob/{FIFO_TO_VIDEO}', 'w')
+    #pipe_to_can = Pipe(f'{home_path}/bob/{FIFO_TO_CAN}', 'w')
+
+    # create database object to interact with the tables
+    for sensor in sensors:
+        data[sensor[1]]["database_instance"] = Database(table=sensor[1], path=db_path)
 
     while True:
         for sensor in sensors:
@@ -103,40 +116,73 @@ def read_data(sensors):
                     for key, value in curr_data.items():
                         if key != "timestamp":
                             fifo_vid.write(f"{key}:{value}\n".encode())
-                            # fifo_can.write(f"{key}:{value}\n".encode())
                 except Exception as e:
                     log.err(e)
                     logging.error(f"PIPE EXCEPTION: {e}")
+
+                try:
+                    for key, value in curr_data.items():
+                        if key != "timestamp":
+                            fifo_can.write(f"{key}:{value}\n".encode())
+                except Exception as e:
+                    log.err(e)
+                    logging.error(f"PIPE EXCEPTION: {e}")
+
+                #pipe_send(pipe_to_video, curr_data)
+                #pipe_send(pipe_to_can, curr_data)
 
                 data[sensor[0].get_sensor_type()]["payload"].update(read)
                 data[sensor[0].get_sensor_type()]["valid"] = True
                 logging.debug(f"Data read with payload {data}")
 
-                write_csv(data[sensor[0].get_sensor_type()]["csv_dump"], sensor[0].get_sensor_type())
+                write_db(data[sensor[0].get_sensor_type()]["database_instance"], data[sensor[0].get_sensor_type()]["csv_dump"], sensor[0].get_sensor_type())
 
             else:
                 data[sensor[0].get_sensor_type()]["valid"] = False
 
     fifo_vid.close()
-    # fifo_can.close()
 
 
-def write_csv(name_file: str, sensor_type: str):
-    logging.debug("attempting to write on csv")
+def pipe_send(pipe, curr_data):
+    try:
+        for key, value in curr_data.items():
+            if key != "timestamp":
+                pipe.write(f"{key}:{value}")
+    except Exception as e:
+        log.err(e)
+        logging.error(f"PIPE EXCEPTION: {e}")
+
+
+def write_csv(row, name_file):
+    with open(name_file, "a") as csv_file:
+        values = ''
+        for value in row.values():
+            values += f'{value},'
+        values = f"{values.rstrip(',')}\n"
+        csv_file.write(values)
+
+
+def write_db(db, name_file: str, sensor_type: str):
+    logging.debug("attempting to write on dB")
     if(data[sensor_type]["valid"] == True):
+
         row = data[sensor_type]["payload"].copy()
+        data[sensor_type]["database_buffer"].append(row)
         logging.debug(f"attempt succeeded with {row}")
 
         try:
-            with open(name_file, "a") as csv_file:
-                values = ''
-                for value in row.values():
-                    values += f'{value},'
-                values = f"{values.rstrip(',')}\n"
-                csv_file.write(values)
+            write_csv(row, name_file)
         except Exception as e:
             log.err(e)
             logging.error(f"CSV EXCEPTION: {e}")
+        try:
+            for r in data[sensor_type]["database_buffer"].copy(): 
+                db.insert_data(r)
+                data[sensor_type]["database_buffer"].remove(r)
+        except Exception as e:
+            log.err(e)
+            logging.error(f"DATABASE EXCEPTION: {e} --> {data[sensor_type]['database_buffer']}")
+    
     else:
         logging.debug(f"attempt failed --> {data[sensor_type]}")
 
@@ -182,6 +228,14 @@ def main():
     hr_id     = dict_config_ant[bike]["hr_id"]
     pm_id     = dict_config_ant[bike]["pm_id"]
 
+    #config = Database(path=db_path).config("ant")  ->  use db to retreive data: deprecated
+
+    #bike = config.get("name") # retrieves the informations related to the bike   
+    #hall_id = config.get(bike).get("hall_id")
+    #hall_type = config.get(bike).get("hall_type")
+    #hr_id = config.get(bike).get("hr_id")
+    #pm_id = config.get(bike).get("pm_id")
+
     logging.debug("Configuration successfully retrieved")
 
     try:
@@ -190,7 +244,7 @@ def main():
                 node,
                 sensor_id=hall_id,
                 device_type=DeviceTypeID(hall_type),
-                circumference = 377 if (bike == "cerberus") else 1450 # cerberus hall is not mounted on the wheel because of rpm limit
+                circumference = 1450 # cerberus hall is not mounted on the wheel because of rpm limit
             )
             hr = HeartRate(node, sensor_id=hr_id)
             pm = Powermeter(node, sensor_id=pm_id)
