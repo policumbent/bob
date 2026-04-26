@@ -28,20 +28,29 @@ logging.basicConfig(filename='error_messages.log', filemode="w", level=logging.D
 
 # retrive configurations from db
 home_path = os.getenv("HOME")
+ffs_path = f"{home_path}/ffs"
+config_path = f"{ffs_path}/config"
 db_path = os.getenv("DATABASE_PATH") or f"{home_path}/bob/database.db"
 
-FIFO_TO_VIDEO = "fifo_to_video"
-FIFO_TO_CAN   = "fifo_to_can"
 
-FIFO_VID = f"{home_path}/bob/{FIFO_TO_VIDEO}"
+mode_conf = json_to_dict(f"{config_path}/mode.json")
+MODE = mode_conf["mode"]
+
+
+FIFO_TO_CAN   = "fifo_to_can"
 FIFO_CAN = f"{home_path}/bob/{FIFO_TO_CAN}"
 
-if os.path.exists(FIFO_VID):
-    if not stat.S_ISFIFO(os.stat(FIFO_VID).st_mode):
-        os.remove(FIFO_VID)
+
+if MODE != "NOSCREEN_MODE":
+    FIFO_TO_VIDEO = "fifo_to_video"
+    FIFO_VID = f"{home_path}/bob/{FIFO_TO_VIDEO}"
+
+    if os.path.exists(FIFO_VID):
+        if not stat.S_ISFIFO(os.stat(FIFO_VID).st_mode):
+            os.remove(FIFO_VID)
+            os.mkfifo(FIFO_VID)
+    else:
         os.mkfifo(FIFO_VID)
-else:
-    os.mkfifo(FIFO_VID)
 
 
 if os.path.exists(FIFO_CAN):
@@ -92,12 +101,29 @@ data = {
 }
 
 
+def json_to_dict(path: str):
+    res = dict()
+    try: 
+        with open(path) as file:
+            try:
+                res = json.load(file)
+            except Exception as json_err:
+                log.err(f"CAN (json_to_dict) - JSON: {json_err}")
+
+    except Exception as file_err:
+        log.err(f"CAN (json_to_dict) - FILE: {file_err}")
+
+    return res
+
+
 curr_data = {}
 
 
 def read_data(sensors):
-    fifo_vid = open(FIFO_VID, 'wb', 0)
     fifo_can = open(FIFO_CAN, 'wb', 0)
+
+    if MODE != "NOSCREEN_MODE":
+        fifo_vid = open(FIFO_VID, 'wb', 0)
     #pipe_to_video = Pipe(f'{home_path}/bob/{FIFO_TO_VIDEO}', 'w')
     #pipe_to_can = Pipe(f'{home_path}/bob/{FIFO_TO_CAN}', 'w')
 
@@ -115,18 +141,19 @@ def read_data(sensors):
                 try:
                     for key, value in curr_data.items():
                         if key != "timestamp":
-                            fifo_vid.write(f"{key}:{value}\n".encode())
-                except Exception as e:
-                    log.err(e)
-                    logging.error(f"PIPE EXCEPTION: {e}")
-
-                try:
-                    for key, value in curr_data.items():
-                        if key != "timestamp":
                             fifo_can.write(f"{key}:{value}\n".encode())
                 except Exception as e:
                     log.err(e)
                     logging.error(f"PIPE EXCEPTION: {e}")
+
+                if MODE != "NOSCREEN_MODE":
+                    try:
+                        for key, value in curr_data.items():
+                            if key != "timestamp":
+                                fifo_vid.write(f"{key}:{value}\n".encode())
+                    except Exception as e:
+                        log.err(e)
+                        logging.error(f"PIPE EXCEPTION: {e}")
 
                 #pipe_send(pipe_to_video, curr_data)
                 #pipe_send(pipe_to_can, curr_data)
