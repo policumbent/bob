@@ -52,10 +52,6 @@ mode_conf = json_to_dict(f"{config_path}/mode.json")
 MODE = mode_conf["mode"]
 
 
-FIFO_TO_CAN   = "fifo_to_can"
-FIFO_CAN = f"{home_path}/bob/{FIFO_TO_CAN}"
-
-
 if MODE != "NOSCREEN_MODE":
     FIFO_TO_VIDEO = "fifo_to_video"
     FIFO_VID = f"{home_path}/bob/{FIFO_TO_VIDEO}"
@@ -67,6 +63,9 @@ if MODE != "NOSCREEN_MODE":
     else:
         os.mkfifo(FIFO_VID)
 
+
+FIFO_TO_CAN   = "fifo_to_can"
+FIFO_CAN = f"{home_path}/bob/{FIFO_TO_CAN}"
 
 if os.path.exists(FIFO_CAN):
     if not stat.S_ISFIFO(os.stat(FIFO_CAN).st_mode):
