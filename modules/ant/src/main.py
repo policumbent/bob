@@ -33,6 +33,21 @@ config_path = f"{ffs_path}/config"
 db_path = os.getenv("DATABASE_PATH") or f"{home_path}/bob/database.db"
 
 
+def json_to_dict(path: str):
+    res = dict()
+    try: 
+        with open(path) as file:
+            try:
+                res = json.load(file)
+            except Exception as json_err:
+                log.err(f"CAN (json_to_dict) - JSON: {json_err}")
+
+    except Exception as file_err:
+        log.err(f"CAN (json_to_dict) - FILE: {file_err}")
+
+    return res
+
+
 mode_conf = json_to_dict(f"{config_path}/mode.json")
 MODE = mode_conf["mode"]
 
@@ -99,21 +114,6 @@ data = {
         }
     }
 }
-
-
-def json_to_dict(path: str):
-    res = dict()
-    try: 
-        with open(path) as file:
-            try:
-                res = json.load(file)
-            except Exception as json_err:
-                log.err(f"CAN (json_to_dict) - JSON: {json_err}")
-
-    except Exception as file_err:
-        log.err(f"CAN (json_to_dict) - FILE: {file_err}")
-
-    return res
 
 
 curr_data = {}
